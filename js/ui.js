@@ -10,6 +10,8 @@ class GameUI {
         this.finalRoundMessageShown = false; // Track if final round message was shown
         this.gameHistory = []; // Store game states for undo functionality
         this.maxHistorySize = 10; // Limit history size
+        this.aiPlayers = []; // Store AI player instances
+        this.isAITurn = false; // Track if it's currently an AI turn
         this.initializeEventListeners();
     }
 
@@ -58,7 +60,16 @@ class GameUI {
         // Setup modal
         document.getElementById('start-game').addEventListener('click', () => {
             const playerCount = parseInt(document.getElementById('player-count').value);
-            this.startGame(playerCount);
+            const aiCount = parseInt(document.getElementById('ai-players').value);
+            const aiDifficulty = document.getElementById('ai-difficulty').value;
+            
+            // Validate AI count doesn't exceed total players
+            if (aiCount >= playerCount) {
+                alert('AI players must be less than total players');
+                return;
+            }
+            
+            this.startGame(playerCount, aiCount, aiDifficulty);
         });
 
         // Cancel button for action modal
@@ -175,11 +186,13 @@ class GameUI {
         modal.classList.remove('hidden');
     }
 
-    startGame(playerCount) {
+    startGame(playerCount, aiCount = 0, aiDifficulty = 'medium') {
         try {
-            console.log('Starting game with', playerCount, 'players');
+            console.log('Starting game with', playerCount, 'players,', aiCount, 'AI players');
             this.game.setupGame(playerCount);
-            console.log('Game setup completed');
+            
+            // Initialize AI players
+            this.initializeAIPlayers(aiCount, aiDifficulty);
             
             // Initialize game statistics
             this.initializeGameStats();
@@ -194,10 +207,114 @@ class GameUI {
             this.storeTurnStartState();
             this.saveGameState();
             
+            // Check if first player is AI
+            this.checkForAITurn();
+            
         } catch (error) {
             console.error('Error starting game:', error);
             this.showError('Error starting game: ' + error.message);
         }
+    }
+    
+    initializeAIPlayers(aiCount, difficulty) {
+        this.aiPlayers = [];
+        
+        // Create AI players for the last N players
+        for (let i = 0; i < aiCount; i++) {
+            const playerIndex = this.game.players.length - 1 - i;
+            if (playerIndex >= 0) {
+                const aiPlayer = new AIPlayer(difficulty);
+                this.aiPlayers[playerIndex] = aiPlayer;
+                
+                // Update player name to indicate AI
+                this.game.players[playerIndex].name = `AI ${i + 1} (${difficulty})`;
+                this.game.players[playerIndex].isAI = true;
+            }
+        }
+        
+        console.log('AI players initialized:', this.aiPlayers);
+    }
+    
+    async checkForAITurn() {
+        const currentPlayer = this.game.getCurrentPlayer();
+        const currentPlayerIndex = this.game.currentPlayerIndex;
+        
+        if (this.aiPlayers[currentPlayerIndex] && !this.game.gameEnded) {
+            this.isAITurn = true;
+            await this.executeAITurn(currentPlayerIndex);
+        } else {
+            this.isAITurn = false;
+        }
+    }
+    
+    async executeAITurn(playerIndex) {
+        const aiPlayer = this.aiPlayers[playerIndex];
+        const player = this.game.players[playerIndex];
+        
+        try {
+            // Show AI thinking message
+            this.showInfo(`${player.name} is thinking...`);
+            
+            // Get AI decision
+            const decision = await aiPlayer.makeDecision(this.game, player);
+            
+            // Save game state before AI action
+            this.saveGameState();
+            
+            // Execute the decision
+            const result = await aiPlayer.executeAction(decision, this.game, player, this);
+            
+            if (result.success) {
+                console.log(`${player.name} completed action:`, decision.action);
+                
+                // Handle spice overflow if needed
+                if (player.needsToDiscardSpices()) {
+                    this.handleAISpiceOverflow(player);
+                }
+                
+                // Check for game end conditions
+                if (this.game.finalRoundTriggered && !this.finalRoundMessageShown) {
+                    this.showInfo(`${this.game.finalRoundTriggerPlayer.name} has triggered the final round! Each remaining player gets one more turn.`);
+                    this.finalRoundMessageShown = true;
+                }
+                
+                if (this.game.gameEnded) {
+                    this.showGameEnd();
+                } else {
+                    // Continue to next turn
+                    setTimeout(() => {
+                        this.nextTurn();
+                    }, 1000); // Small delay to show the action
+                }
+            } else {
+                this.showError(`${player.name} action failed: ${result.message}`);
+                // Try again with a different action
+                setTimeout(() => {
+                    this.executeAITurn(playerIndex);
+                }, 1000);
+            }
+        } catch (error) {
+            console.error('AI turn error:', error);
+            this.showError(`${player.name} encountered an error`);
+            this.nextTurn(); // Skip this turn
+        }
+    }
+    
+    handleAISpiceOverflow(player) {
+        // AI automatically discards lowest value spices
+        const excessCount = player.getExcessSpiceCount();
+        const spiceTypes = ['yellow', 'red', 'green', 'brown'];
+        let discarded = 0;
+        
+        for (const spiceType of spiceTypes) {
+            while (player.spices[spiceType] > 0 && discarded < excessCount) {
+                player.removeSpices(spiceType, 1);
+                discarded++;
+            }
+            if (discarded >= excessCount) break;
+        }
+        
+        console.log(`${player.name} discarded ${discarded} excess spices`);
     }
     
     initializeGameStats() {
@@ -358,7 +475,11 @@ class GameUI {
 
     createPlayerElement(player, index) {
         const playerDiv = document.createElement('div');
-        playerDiv.className = `player-board ${index === this.game.currentPlayerIndex ? 'active' : ''}`;
+        const isAI = this.aiPlayers[index] ? true : false;
+        const aiClass = isAI ? ' ai-player' : '';
+        const activeClass = index === this.game.currentPlayerIndex ? ' active' : '';
+        
+        playerDiv.className = `player-board${activeClass}${aiClass}`;
 
         playerDiv.innerHTML = `
             <div class="player-info">
@@ -397,24 +518,26 @@ class GameUI {
                 </div>
             </div>
             
-            ${index === this.game.currentPlayerIndex ? this.renderActionButtons() : ''}
+            ${index === this.game.currentPlayerIndex && !isAI ? this.renderActionButtons() : ''}
         `;
 
         // Add event listeners for hand cards for ALL players (not just current player)
         const handCards = playerDiv.querySelectorAll('.hand-cards .card');
         handCards.forEach((cardElement, cardIndex) => {
             cardElement.addEventListener('click', () => {
-                // Only allow selection if this is the current player
-                if (index === this.game.currentPlayerIndex) {
+                // Only allow selection if this is the current player and not AI
+                if (index === this.game.currentPlayerIndex && !isAI) {
                     this.selectHandCard(cardIndex);
+                } else if (isAI) {
+                    this.showError('Cannot control AI player');
                 } else {
                     this.showError('Cannot select other player\'s cards');
                 }
             });
         });
 
-        // Add action buttons and their event listeners only for current player
-        if (index === this.game.currentPlayerIndex) {
+        // Add action buttons and their event listeners only for current human player
+        if (index === this.game.currentPlayerIndex && !isAI) {
             // Add event listeners for action buttons
             const playCardBtn = playerDiv.querySelector('#play-card-btn');
             const acquireCardBtn = playerDiv.querySelector('#acquire-card-btn');
@@ -1453,6 +1576,9 @@ class GameUI {
         this.storeTurnStartState();
         
         this.renderGame();
+        
+        // Check if it's an AI turn
+        this.checkForAITurn();
     }
     
     storeTurnStartState() {

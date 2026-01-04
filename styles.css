@@ -1497,3 +1497,110 @@ section h2 {
         transition-duration: 0.01ms !important;
     }
 }
+/* Enhanced setup modal */
+.setup-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.setup-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setup-section label {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.setup-section select {
+    padding: 8px 12px;
+    border: 2px solid #8B4513;
+    border-radius: 4px;
+    background: white;
+    font-size: 14px;
+}
+
+.setup-section select:focus {
+    outline: none;
+    border-color: #FFD700;
+    box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* AI player indicators */
+.player-board.ai-player {
+    border: 2px solid #4CAF50;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
+}
+
+.player-board.ai-player .player-name::after {
+    content: " 🤖";
+    font-size: 0.8em;
+}
+
+.player-board.ai-player.active {
+    animation: aiPulse 2s infinite;
+}
+
+@keyframes aiPulse {
+    0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+/* AI thinking indicator */
+.ai-thinking {
+    position: relative;
+}
+
+.ai-thinking::after {
+    content: "Thinking...";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(76, 175, 80, 0.9);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    animation: thinking 1.5s infinite;
+}
+
+@keyframes thinking {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Disable interactions during AI turn */
+.ai-turn .card:not(.ai-selected) {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.ai-turn .action-btn:not(.ai-action) {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+/* AI action highlighting */
+.ai-selected {
+    border: 3px solid #4CAF50 !important;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.8) !important;
+}
+
+.ai-action {
+    background: #4CAF50 !important;
+    color: white !important;
+    animation: aiActionPulse 0.5s ease-in-out;
+}
+
+@keyframes aiActionPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
