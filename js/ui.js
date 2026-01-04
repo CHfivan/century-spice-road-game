@@ -751,10 +751,10 @@ class GameUI {
         const undoDisabled = !this.canUndo() ? 'disabled' : '';
         return `
             <div class="action-buttons">
-                <button class="action-btn" id="play-card-btn" data-shortcut="1" title="Play Card (Press 1)">Play Card</button>
-                <button class="action-btn" id="acquire-card-btn" data-shortcut="2" title="Acquire Card (Press 2)">Acquire Card</button>
-                <button class="action-btn" id="claim-victory-btn" data-shortcut="3" title="Claim Victory (Press 3)">Claim Victory</button>
-                <button class="action-btn" id="rest-btn" data-shortcut="4" title="Rest (Press 4)">Rest</button>
+                <button class="action-btn" id="play-card-btn" title="Play Card (Press 1)">Play Card</button>
+                <button class="action-btn" id="acquire-card-btn" title="Acquire Card (Press 2)">Acquire Card</button>
+                <button class="action-btn" id="claim-victory-btn" title="Claim Victory (Press 3)">Claim Victory</button>
+                <button class="action-btn" id="rest-btn" title="Rest (Press 4)">Rest</button>
                 <button class="action-btn secondary ${undoDisabled}" id="undo-btn" ${undoDisabled} title="Undo (Ctrl+U)">Undo</button>
             </div>
         `;
