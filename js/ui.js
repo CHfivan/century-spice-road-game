@@ -68,22 +68,48 @@ class GameUI {
     }
     
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Setup modal
         const startGameBtn = document.getElementById('start-game');
+        console.log('Start game button:', startGameBtn);
+        
         if (startGameBtn) {
             startGameBtn.addEventListener('click', () => {
+                console.log('Start game clicked');
+                
                 const playerCountEl = document.getElementById('player-count');
                 const aiCountEl = document.getElementById('ai-players');
                 const aiDifficultyEl = document.getElementById('ai-difficulty');
                 
+                console.log('Elements found:', {
+                    playerCount: playerCountEl,
+                    aiCount: aiCountEl,
+                    aiDifficulty: aiDifficultyEl
+                });
+                
                 if (!playerCountEl || !aiCountEl || !aiDifficultyEl) {
                     console.error('Setup elements not found');
-                    return;
+                    console.log('DOM state:', document.readyState);
+                    console.log('All elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
+                    
+                    // Fallback: start with just human players if AI elements are missing
+                    if (playerCountEl) {
+                        const playerCount = parseInt(playerCountEl.value);
+                        console.log('Falling back to human-only game with', playerCount, 'players');
+                        this.startGame(playerCount, 0, 'medium');
+                        return;
+                    } else {
+                        console.error('Even player-count element not found!');
+                        return;
+                    }
                 }
                 
                 const playerCount = parseInt(playerCountEl.value);
                 const aiCount = parseInt(aiCountEl.value);
                 const aiDifficulty = aiDifficultyEl.value;
+                
+                console.log('Game settings:', { playerCount, aiCount, aiDifficulty });
                 
                 // Validate AI count doesn't exceed total players
                 if (aiCount >= playerCount) {
@@ -93,6 +119,8 @@ class GameUI {
                 
                 this.startGame(playerCount, aiCount, aiDifficulty);
             });
+        } else {
+            console.error('Start game button not found');
         }
         // Cancel button for action modal
         const cancelBtn = document.getElementById('cancel-action');
