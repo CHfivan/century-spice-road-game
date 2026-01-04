@@ -8,6 +8,8 @@ class GameUI {
         this.selectedAction = null;
         this.pendingCardPlay = null; // Stores card info until effect is chosen
         this.finalRoundMessageShown = false; // Track if final round message was shown
+        this.gameHistory = []; // Store game states for undo functionality
+        this.maxHistorySize = 10; // Limit history size
         this.initializeEventListeners();
     }
 
@@ -69,8 +71,108 @@ class GameUI {
             this.confirmAction();
         });
 
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (event) => {
+            this.handleKeyboardShortcuts(event);
+        });
+
+        // Help button
+        const helpBtn = document.getElementById('help-btn');
+        if (helpBtn) {
+            helpBtn.addEventListener('click', () => {
+                this.showHelpModal();
+            });
+        }
+
         // Note: Action button event listeners are now added dynamically in renderPlayers()
         // when the current player's board is rendered
+    }
+    
+    handleKeyboardShortcuts(event) {
+        // Only handle shortcuts if no modal is open and game is running
+        if (document.querySelector('.modal:not(.hidden)') || this.game.gameEnded) {
+            return;
+        }
+        
+        const currentPlayer = this.game.getCurrentPlayer();
+        if (!currentPlayer) return;
+        
+        switch (event.key.toLowerCase()) {
+            case '1':
+                event.preventDefault();
+                this.showPlayCardAction();
+                break;
+            case '2':
+                event.preventDefault();
+                this.showAcquireCardAction();
+                break;
+            case '3':
+                event.preventDefault();
+                this.showClaimVictoryAction();
+                break;
+            case '4':
+                event.preventDefault();
+                this.showRestAction();
+                break;
+            case 'u':
+                if (event.ctrlKey) {
+                    event.preventDefault();
+                    this.undoLastAction();
+                }
+                break;
+            case 'h':
+                event.preventDefault();
+                this.showHelpModal();
+                break;
+            case 'escape':
+                event.preventDefault();
+                this.clearSelection();
+                break;
+        }
+    }
+    
+    showHelpModal() {
+        const modal = document.getElementById('action-modal');
+        const title = document.getElementById('action-title');
+        const content = document.getElementById('action-content');
+        
+        title.textContent = 'Game Help & Shortcuts';
+        
+        content.innerHTML = `
+            <div class="help-content">
+                <h4>How to Play</h4>
+                <p>Choose one action per turn:</p>
+                <ul>
+                    <li><strong>Play Card (1)</strong> - Use a card from your hand</li>
+                    <li><strong>Acquire Card (2)</strong> - Buy a merchant card from the market</li>
+                    <li><strong>Claim Victory (3)</strong> - Purchase a victory point card</li>
+                    <li><strong>Rest (4)</strong> - Return all played cards to your hand</li>
+                </ul>
+                
+                <h4>Keyboard Shortcuts</h4>
+                <ul>
+                    <li><strong>1-4</strong> - Quick action selection</li>
+                    <li><strong>Ctrl+U</strong> - Undo last action</li>
+                    <li><strong>H</strong> - Show this help</li>
+                    <li><strong>Escape</strong> - Clear selection</li>
+                </ul>
+                
+                <h4>Spice System</h4>
+                <p>Yellow → Red → Green → Brown (increasing value)</p>
+                <p>Maximum 10 spices per player</p>
+                
+                <h4>Winning</h4>
+                <p>First to get ${this.game.victoryCardsNeeded} victory cards triggers final round</p>
+                <p>Highest total score wins (victory points + coins + spices)</p>
+            </div>
+        `;
+        
+        // Hide default buttons and show close button
+        document.getElementById('confirm-action').style.display = 'none';
+        document.getElementById('cancel-action').textContent = 'Close';
+        document.getElementById('cancel-action').style.display = 'block';
+        
+        modal.classList.remove('hidden');
     }
 
     startGame(playerCount) {
@@ -79,18 +181,65 @@ class GameUI {
             this.game.setupGame(playerCount);
             console.log('Game setup completed');
             
+            // Initialize game statistics
+            this.initializeGameStats();
+            
             document.getElementById('setup-modal').classList.add('hidden');
             console.log('Modal hidden');
             
             this.renderGame();
             console.log('Game rendered');
             
-            // Store initial turn state
+            // Store initial turn state and save initial game state
             this.storeTurnStartState();
+            this.saveGameState();
             
         } catch (error) {
             console.error('Error starting game:', error);
             this.showError('Error starting game: ' + error.message);
+        }
+    }
+    
+    initializeGameStats() {
+        this.gameStats = {
+            startTime: Date.now(),
+            turnCount: 0,
+            playerActions: this.game.players.map(player => ({
+                name: player.name,
+                cardsPlayed: 0,
+                cardsAcquired: 0,
+                victoryCardsClaimed: 0,
+                restsUsed: 0,
+                spicesGained: 0,
+                spicesUpgraded: 0
+            }))
+        };
+    }
+    
+    updatePlayerStats(playerIndex, action, data = {}) {
+        if (!this.gameStats || !this.gameStats.playerActions[playerIndex]) return;
+        
+        const stats = this.gameStats.playerActions[playerIndex];
+        
+        switch (action) {
+            case 'cardPlayed':
+                stats.cardsPlayed++;
+                break;
+            case 'cardAcquired':
+                stats.cardsAcquired++;
+                break;
+            case 'victoryCardClaimed':
+                stats.victoryCardsClaimed++;
+                break;
+            case 'rest':
+                stats.restsUsed++;
+                break;
+            case 'spicesGained':
+                stats.spicesGained += data.amount || 0;
+                break;
+            case 'spicesUpgraded':
+                stats.spicesUpgraded += data.amount || 0;
+                break;
         }
     }
 
@@ -177,7 +326,7 @@ class GameUI {
     }
     createMerchantCardElement(card, index) {
         const cardDiv = document.createElement('div');
-        cardDiv.className = 'card merchant-card';
+        cardDiv.className = 'card merchant-card tooltip';
         cardDiv.dataset.index = index;
 
         // Add bonus spices if present
@@ -188,12 +337,16 @@ class GameUI {
             ).join('')}</div>`;
         }
 
+        // Add tooltip with card description
+        const tooltipText = this.getCardTooltip(card);
+
         // Only show the card effect, no name or description
         cardDiv.innerHTML = `
             <div class="card-effect">
                 ${this.renderCardEffect(card)}
             </div>
             ${bonusSpicesHtml}
+            <span class="tooltiptext">${tooltipText}</span>
         `;
 
         cardDiv.addEventListener('click', () => {
@@ -267,19 +420,55 @@ class GameUI {
             const acquireCardBtn = playerDiv.querySelector('#acquire-card-btn');
             const claimVictoryBtn = playerDiv.querySelector('#claim-victory-btn');
             const restBtn = playerDiv.querySelector('#rest-btn');
+            const undoBtn = playerDiv.querySelector('#undo-btn');
             
             if (playCardBtn) playCardBtn.addEventListener('click', () => this.showPlayCardAction());
             if (acquireCardBtn) acquireCardBtn.addEventListener('click', () => this.showAcquireCardAction());
             if (claimVictoryBtn) claimVictoryBtn.addEventListener('click', () => this.showClaimVictoryAction());
             if (restBtn) restBtn.addEventListener('click', () => this.showRestAction());
+            if (undoBtn && !undoBtn.disabled) {
+                undoBtn.addEventListener('click', () => this.undoLastAction());
+            }
         }
 
         return playerDiv;
     }
 
+    getCardTooltip(card) {
+        switch (card.type) {
+            case 'gain':
+                const spiceList = Object.entries(card.effect)
+                    .map(([type, count]) => `${count} ${type}`)
+                    .join(', ');
+                return `Gain ${spiceList}`;
+            case 'upgrade':
+                return `Upgrade up to ${card.effect.amount} spice levels (e.g., yellow → red → green → brown)`;
+            case 'trade':
+                const inputList = Object.entries(card.effect.input)
+                    .map(([type, count]) => `${count} ${type}`)
+                    .join(', ');
+                const outputList = Object.entries(card.effect.output)
+                    .map(([type, count]) => `${count} ${type}`)
+                    .join(', ');
+                return `Trade ${inputList} for ${outputList}. You can trade multiple times if you have enough spices.`;
+            case 'gain-upgrade':
+                const gainList = Object.entries(card.effect.gain)
+                    .map(([type, count]) => `${count} ${type}`)
+                    .join(', ');
+                return `Gain ${gainList}, then upgrade up to ${card.effect.upgrade} spice levels`;
+            default:
+                return card.description || 'Unknown card type';
+        }
+    }
+
     renderSpiceStorage(player) {
         let html = '';
         let spiceIndex = 0;
+        const totalSpices = player.getTotalSpices();
+        const isOverflow = totalSpices > 10;
+        
+        // Add overflow class if needed
+        const overflowClass = isOverflow ? ' overflow' : '';
         
         // Render spices in order: yellow, red, green, brown
         for (const [spiceType, count] of Object.entries(player.spices)) {
@@ -296,15 +485,90 @@ class GameUI {
             html += `<div class="spice-slot"></div>`;
         }
         
-        return html;
+        return `<div class="spice-storage-container${overflowClass}">${html}</div>`;
     }
+    saveGameState() {
+        // Create a deep copy of the current game state
+        const gameState = {
+            players: this.game.players.map(player => ({
+                name: player.name,
+                id: player.id,
+                spices: { ...player.spices },
+                hand: [...player.hand],
+                discardPile: [...player.discardPile],
+                victoryCards: [...player.victoryCards],
+                coins: [...player.coins]
+            })),
+            currentPlayerIndex: this.game.currentPlayerIndex,
+            turn: this.game.turn,
+            victoryCards: [...this.game.victoryCards],
+            merchantCards: [...this.game.merchantCards],
+            finalRoundTriggered: this.game.finalRoundTriggered,
+            finalRoundTriggerPlayer: this.game.finalRoundTriggerPlayer ? {
+                name: this.game.finalRoundTriggerPlayer.name,
+                id: this.game.finalRoundTriggerPlayer.id
+            } : null
+        };
+        
+        this.gameHistory.push(gameState);
+        
+        // Limit history size
+        if (this.gameHistory.length > this.maxHistorySize) {
+            this.gameHistory.shift();
+        }
+        
+        console.log('Game state saved, history size:', this.gameHistory.length);
+    }
+    
+    canUndo() {
+        return this.gameHistory.length > 0 && !this.game.gameEnded;
+    }
+    
+    undoLastAction() {
+        if (!this.canUndo()) {
+            this.showError('Cannot undo - no previous actions available');
+            return;
+        }
+        
+        const previousState = this.gameHistory.pop();
+        
+        // Restore game state
+        this.game.currentPlayerIndex = previousState.currentPlayerIndex;
+        this.game.turn = previousState.turn;
+        this.game.victoryCards = [...previousState.victoryCards];
+        this.game.merchantCards = [...previousState.merchantCards];
+        this.game.finalRoundTriggered = previousState.finalRoundTriggered;
+        this.game.finalRoundTriggerPlayer = previousState.finalRoundTriggerPlayer ? 
+            this.game.players.find(p => p.id === previousState.finalRoundTriggerPlayer.id) : null;
+        
+        // Restore player states
+        for (let i = 0; i < this.game.players.length; i++) {
+            const player = this.game.players[i];
+            const savedPlayer = previousState.players[i];
+            
+            player.spices = { ...savedPlayer.spices };
+            player.hand = [...savedPlayer.hand];
+            player.discardPile = [...savedPlayer.discardPile];
+            player.victoryCards = [...savedPlayer.victoryCards];
+            player.coins = [...savedPlayer.coins];
+        }
+        
+        this.clearSelection();
+        this.renderGame();
+        this.showInfo('Action undone');
+        
+        console.log('Game state restored, history size:', this.gameHistory.length);
+    }
+
     renderActionButtons() {
+        const undoDisabled = !this.canUndo() ? 'disabled' : '';
         return `
             <div class="action-buttons">
-                <button class="action-btn" id="play-card-btn">Play Card</button>
-                <button class="action-btn" id="acquire-card-btn">Acquire Card</button>
-                <button class="action-btn" id="claim-victory-btn">Claim Victory</button>
-                <button class="action-btn" id="rest-btn">Rest</button>
+                <button class="action-btn" id="play-card-btn" data-shortcut="1" title="Play Card (Press 1)">Play Card</button>
+                <button class="action-btn" id="acquire-card-btn" data-shortcut="2" title="Acquire Card (Press 2)">Acquire Card</button>
+                <button class="action-btn" id="claim-victory-btn" data-shortcut="3" title="Claim Victory (Press 3)">Claim Victory</button>
+                <button class="action-btn" id="rest-btn" data-shortcut="4" title="Rest (Press 4)">Rest</button>
+                <button class="action-btn secondary ${undoDisabled}" id="undo-btn" ${undoDisabled} title="Undo (Ctrl+U)">Undo</button>
             </div>
         `;
     }
@@ -422,6 +686,9 @@ class GameUI {
             return;
         }
         
+        // Save game state before action
+        this.saveGameState();
+        
         // Check if player is buying a non-first card and show warning
         if (this.selectedCard > 0) {
             this.showMerchantCardWarning(this.selectedCard);
@@ -487,6 +754,9 @@ class GameUI {
             return;
         }
         
+        // Save game state before action
+        this.saveGameState();
+        
         // Execute the action immediately
         const currentPlayer = this.game.getCurrentPlayer();
         const result = this.game.claimVictoryCard(currentPlayer, this.selectedCard);
@@ -523,6 +793,9 @@ class GameUI {
             this.showError('No cards to recover!');
             return;
         }
+        
+        // Save game state before action
+        this.saveGameState();
         
         const result = this.game.rest(currentPlayer);
         if (result.success) {

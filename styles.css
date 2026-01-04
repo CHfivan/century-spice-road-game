@@ -828,7 +828,77 @@ section h2 {
     }
 }
 
-/* Game End Modal Styles */
+/* Card hover and selection animations */
+.card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.card.selected {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    border: 3px solid #FFD700;
+}
+
+/* Smooth transitions for spice cubes */
+.spice-cube {
+    transition: all 0.2s ease;
+}
+
+.spice-cube:hover {
+    transform: scale(1.1);
+}
+
+/* Action button improvements */
+.action-btn {
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn:active {
+    transform: translateY(0);
+}
+
+/* Player board active state animation */
+.player-board.active {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(139, 69, 19, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(139, 69, 19, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 69, 19, 0); }
+}
+
+/* Modal entrance animation */
+.modal {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-content {
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
 .game-end-container {
     text-align: center;
     padding: 20px;
@@ -940,4 +1010,490 @@ section h2 {
 
 .game-end-btn:active {
     transform: translateY(0);
+}
+/* Game End Modal Styles */
+.game-end-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.winner-announcement {
+    font-size: 2em;
+    font-weight: bold;
+    color: #8B4513;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    animation: celebration 1s ease-in-out;
+}
+
+@keyframes celebration {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.final-scores h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+    font-size: 1.5em;
+}
+
+.scores-table {
+    background: rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.score-row {
+    display: grid;
+    grid-template-columns: 50px 1fr 80px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+.score-row:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.score-row.winner-row {
+    background: rgba(255,215,0,0.3);
+    border-radius: 4px;
+    padding: 10px 8px;
+    animation: winnerGlow 2s infinite alternate;
+}
+
+@keyframes winnerGlow {
+    from { background: rgba(255,215,0,0.3); }
+    to { background: rgba(255,215,0,0.5); }
+}
+
+.score-row:last-of-type {
+    border-bottom: none;
+}
+
+.player-rank {
+    font-size: 1.2em;
+}
+
+.player-name {
+    text-align: left;
+    font-size: 1.1em;
+}
+
+.player-total {
+    text-align: right;
+    font-size: 1.2em;
+    color: #8B4513;
+}
+
+.score-breakdown {
+    font-size: 0.9em;
+    color: #666;
+    margin: 5px 0 15px 50px;
+    text-align: left;
+}
+
+.breakdown-item {
+    margin: 2px 0;
+}
+
+.game-end-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.game-end-btn {
+    padding: 12px 24px;
+    font-size: 1.1em;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.game-end-btn.primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.game-end-btn.primary:hover {
+    background: #45a049;
+    transform: translateY(-2px);
+}
+
+.game-end-btn.secondary {
+    background: #f44336;
+    color: white;
+}
+
+.game-end-btn.secondary:hover {
+    background: #da190b;
+    transform: translateY(-2px);
+}
+
+.game-end-btn:active {
+    transform: translateY(0);
+}
+
+/* Tooltip system */
+.tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: rgba(0, 0, 0, 0.9);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.tooltip .tooltiptext::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Enhanced card descriptions */
+.card-description {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+/* Turn indicator improvements */
+.player-board.active .player-name {
+    color: #FFD700;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Spice overflow warning */
+.spice-storage.overflow {
+    border: 2px solid #ff6b6b;
+    animation: warning 1s infinite alternate;
+}
+
+@keyframes warning {
+    from { background-color: rgba(255, 107, 107, 0.1); }
+    to { background-color: rgba(255, 107, 107, 0.3); }
+}
+/* Undo button styling */
+.action-btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.action-btn.secondary:hover:not(:disabled) {
+    background: #5a6268;
+}
+
+.action-btn:disabled {
+    background: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.action-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Enhanced spice storage */
+.spice-storage-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.spice-storage-container.overflow {
+    border: 2px solid #ff6b6b;
+    animation: warning 1s infinite alternate;
+}
+
+/* Card effect improvements */
+.trade-effect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.trade-arrow {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.upgrade-effect {
+    background: linear-gradient(45deg, #FFD700, #FFA500);
+    color: #8B4513;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.combo-effect {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Victory card enhancements */
+.victory-card {
+    position: relative;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+}
+
+.victory-card .coin {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.coin-gold {
+    background: radial-gradient(circle, #FFD700, #B8860B);
+    color: #8B4513;
+}
+
+.coin-silver {
+    background: radial-gradient(circle, #C0C0C0, #808080);
+    color: #333;
+}
+
+/* Turn counter enhancements */
+#turn-counter {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+#turn-counter:contains("FINAL ROUND") {
+    background: rgba(255, 0, 0, 0.3);
+    animation: finalRoundBlink 1s infinite alternate;
+}
+
+@keyframes finalRoundBlink {
+    from { background: rgba(255, 0, 0, 0.3); }
+    to { background: rgba(255, 0, 0, 0.6); }
+}
+
+/* Loading and transition states */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        width: 100%;
+        padding: 12px;
+    }
+    
+    .spice-storage-container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 3px;
+    }
+    
+    .card {
+        min-width: 80px;
+        font-size: 0.8em;
+    }
+}
+/* Help button styling */
+.help-button {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    color: #8B4513;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-button:hover {
+    background: rgba(255, 255, 255, 0.4);
+    transform: scale(1.1);
+}
+
+/* Help content styling */
+.help-content {
+    text-align: left;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.help-content h4 {
+    color: #8B4513;
+    margin: 15px 0 8px 0;
+    font-size: 1.1em;
+}
+
+.help-content h4:first-child {
+    margin-top: 0;
+}
+
+.help-content ul {
+    margin: 8px 0 8px 20px;
+    padding: 0;
+}
+
+.help-content li {
+    margin: 4px 0;
+    line-height: 1.4;
+}
+
+.help-content p {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+/* Game info layout improvements */
+#game-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    gap: 20px;
+}
+
+/* Action button number indicators */
+.action-btn::before {
+    content: attr(data-shortcut);
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #FFD700;
+    color: #8B4513;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+}
+
+/* Enhanced card selection feedback */
+.card.selected::after {
+    content: "SELECTED";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 215, 0, 0.9);
+    color: #8B4513;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+/* Performance optimizations */
+.card, .spice-cube, .action-btn {
+    will-change: transform;
+}
+
+/* Accessibility improvements */
+.card:focus, .action-btn:focus {
+    outline: 3px solid #FFD700;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .spice-cube {
+        border: 1px solid #000;
+    }
+    
+    .action-btn {
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
