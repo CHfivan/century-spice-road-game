@@ -57,30 +57,58 @@ class GameUI {
     }
 
     initializeEventListeners() {
+        // Wait for DOM to be ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupEventListeners();
+            });
+        } else {
+            this.setupEventListeners();
+        }
+    }
+    
+    setupEventListeners() {
         // Setup modal
-        document.getElementById('start-game').addEventListener('click', () => {
-            const playerCount = parseInt(document.getElementById('player-count').value);
-            const aiCount = parseInt(document.getElementById('ai-players').value);
-            const aiDifficulty = document.getElementById('ai-difficulty').value;
-            
-            // Validate AI count doesn't exceed total players
-            if (aiCount >= playerCount) {
-                alert('AI players must be less than total players');
-                return;
-            }
-            
-            this.startGame(playerCount, aiCount, aiDifficulty);
-        });
-
+        const startGameBtn = document.getElementById('start-game');
+        if (startGameBtn) {
+            startGameBtn.addEventListener('click', () => {
+                const playerCountEl = document.getElementById('player-count');
+                const aiCountEl = document.getElementById('ai-players');
+                const aiDifficultyEl = document.getElementById('ai-difficulty');
+                
+                if (!playerCountEl || !aiCountEl || !aiDifficultyEl) {
+                    console.error('Setup elements not found');
+                    return;
+                }
+                
+                const playerCount = parseInt(playerCountEl.value);
+                const aiCount = parseInt(aiCountEl.value);
+                const aiDifficulty = aiDifficultyEl.value;
+                
+                // Validate AI count doesn't exceed total players
+                if (aiCount >= playerCount) {
+                    alert('AI players must be less than total players');
+                    return;
+                }
+                
+                this.startGame(playerCount, aiCount, aiDifficulty);
+            });
+        }
         // Cancel button for action modal
-        document.getElementById('cancel-action').addEventListener('click', () => {
-            this.cancelAction();
-        });
+        const cancelBtn = document.getElementById('cancel-action');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                this.cancelAction();
+            });
+        }
 
         // Confirm button for action modal
-        document.getElementById('confirm-action').addEventListener('click', () => {
-            this.confirmAction();
-        });
+        const confirmBtn = document.getElementById('confirm-action');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                this.confirmAction();
+            });
+        }
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (event) => {
