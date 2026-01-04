@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game End Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Game End Modal Test</h1>
+        </header>
+
+        <main>
+            <button onclick="testGameEnd()" style="padding: 10px 20px; font-size: 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                Test Game End Modal
+            </button>
+        </main>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testGameEnd() {
+            // Mock game end data
+            const winner = { name: 'Player 1' };
+            const finalScores = [
+                {
+                    name: 'Player 1',
+                    score: 45,
+                    breakdown: {
+                        victoryPoints: 30,
+                        goldCoins: 2,
+                        silverCoins: 1,
+                        goldPoints: 10,
+                        silverPoints: 3,
+                        spicePoints: 2
+                    }
+                },
+                {
+                    name: 'Player 2',
+                    score: 38,
+                    breakdown: {
+                        victoryPoints: 25,
+                        goldCoins: 1,
+                        silverCoins: 2,
+                        goldPoints: 5,
+                        silverPoints: 6,
+                        spicePoints: 2
+                    }
+                }
+            ];
+
+            showGameEndModal(winner, finalScores);
+        }
+
+        function showGameEndModal(winner, finalScores) {
+            const modal = document.getElementById('action-modal');
+            const title = document.getElementById('action-title');
+            const content = document.getElementById('action-content');
+            
+            title.textContent = '🎉 GAME OVER! 🎉';
+            
+            let html = '<div class="game-end-container">';
+            html += `<div class="winner-announcement">${winner.name} WINS!</div>`;
+            html += '<div class="final-scores">';
+            html += '<h3>📊 FINAL SCORES</h3>';
+            html += '<div class="scores-table">';
+            
+            finalScores.forEach((player, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '  ';
+                html += `<div class="score-row ${index === 0 ? 'winner-row' : ''}">`;
+                html += `<div class="player-rank">${medal} ${index + 1}.</div>`;
+                html += `<div class="player-name">${player.name}</div>`;
+                html += `<div class="player-total">${player.score} pts</div>`;
+                html += '</div>';
+                
+                // Score breakdown
+                html += '<div class="score-breakdown">';
+                html += `<div class="breakdown-item">Victory Cards: ${player.breakdown.victoryPoints} pts</div>`;
+                if (player.breakdown.goldCoins > 0) {
+                    html += `<div class="breakdown-item">Gold Coins: ${player.breakdown.goldCoins} × 5 = ${player.breakdown.goldPoints} pts</div>`;
+                }
+                if (player.breakdown.silverCoins > 0) {
+                    html += `<div class="breakdown-item">Silver Coins: ${player.breakdown.silverCoins} × 3 = ${player.breakdown.silverPoints} pts</div>`;
+                }
+                if (player.breakdown.spicePoints > 0) {
+                    html += `<div class="breakdown-item">Spices (R/G/B): ${player.breakdown.spicePoints} pts</div>`;
+                }
+                html += '</div>';
+            });
+            
+            html += '</div></div>';
+            html += '<div class="game-end-buttons">';
+            html += '<button id="play-again-btn" class="game-end-btn primary">Play Again</button>';
+            html += '<button id="close-game-btn" class="game-end-btn secondary">Close</button>';
+            html += '</div>';
+            html += '</div>';
+            
+            content.innerHTML = html;
+            
+            // Add event listeners for the buttons
+            document.getElementById('play-again-btn').addEventListener('click', () => {
+                location.reload();
+            });
+            
+            document.getElementById('close-game-btn').addEventListener('click', () => {
+                window.close();
+                setTimeout(() => {
+                    alert('Please close this tab manually.');
+                }, 100);
+            });
+            
+            // Hide the default modal buttons
+            document.getElementById('confirm-action').style.display = 'none';
+            document.getElementById('cancel-action').style.display = 'none';
+            
+            modal.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

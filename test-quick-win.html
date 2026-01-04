@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Century: Spice Road - Quick Win Test</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road - Quick Win Test</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+            </div>
+            <!-- In-game message display -->
+            <div id="game-message" class="game-message hidden"></div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Merchant Cards Market Row -->
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row">
+                        <!-- Merchant cards will be populated here -->
+                    </div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Players Area -->
+            <section id="players-area">
+                <!-- Player boards will be populated here -->
+            </section>
+        </main>
+
+        <!-- Game Setup Modal -->
+        <div id="setup-modal" class="modal">
+            <div class="modal-content">
+                <h2>Game Setup - Quick Win Test</h2>
+                <p><strong>Test Mode: Only 1 victory card needed to win!</strong></p>
+                <label for="player-count">Number of Players:</label>
+                <select id="player-count">
+                    <option value="2">2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                    <option value="5">5 Players</option>
+                </select>
+                <button id="start-game">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cards.js"></script>
+    <script src="js/test-game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

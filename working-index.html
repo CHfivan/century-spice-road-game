@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Century: Spice Road - Working Version</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+            </div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Merchant Cards Market Row -->
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row">
+                        <!-- Merchant cards will be populated here -->
+                    </div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Players Area -->
+            <section id="players-area">
+                <!-- Player boards will be populated here -->
+            </section>
+        </main>
+
+        <!-- Game Setup Modal -->
+        <div id="setup-modal" class="modal">
+            <div class="modal-content">
+                <h2>Game Setup</h2>
+                <label for="player-count">Number of Players:</label>
+                <select id="player-count">
+                    <option value="2">2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                    <option value="5">5 Players</option>
+                </select>
+                <button onclick="startGameNow()">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cards.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    
+    <script>
+        let game;
+        let gameUI;
+
+        // Global function to start the game
+        function startGameNow() {
+            try {
+                console.log('Start game button clicked');
+                
+                const playerCount = parseInt(document.getElementById('player-count').value);
+                console.log('Player count:', playerCount);
+                
+                if (!game) {
+                    console.log('Creating new game...');
+                    game = new Game();
+                }
+                
+                if (!gameUI) {
+                    console.log('Creating new GameUI...');
+                    gameUI = new GameUI(game);
+                }
+                
+                console.log('Setting up game...');
+                game.setupGame(playerCount);
+                
+                console.log('Hiding modal...');
+                document.getElementById('setup-modal').classList.add('hidden');
+                
+                console.log('Rendering game...');
+                gameUI.renderGame();
+                
+                console.log('✅ Game started successfully!');
+                
+            } catch (error) {
+                console.error('❌ Error starting game:', error);
+                alert('Error starting game: ' + error.message + '\n\nCheck the browser console for more details.');
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('Page loaded, initializing...');
+                
+                // Create game instance
+                game = new Game();
+                console.log('Game created');
+                
+                // Create UI manager  
+                gameUI = new GameUI(game);
+                console.log('GameUI created');
+                
+                // Show setup modal
+                document.getElementById('setup-modal').classList.remove('hidden');
+                console.log('Setup modal shown');
+                
+                console.log('✅ Initialization complete');
+                
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                alert('Initialization error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

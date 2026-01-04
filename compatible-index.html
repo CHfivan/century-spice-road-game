@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Century: Spice Road - Compatible Version</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+            </div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Merchant Cards Market Row -->
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row">
+                        <!-- Merchant cards will be populated here -->
+                    </div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Players Area -->
+            <section id="players-area">
+                <!-- Player boards will be populated here -->
+            </section>
+        </main>
+
+        <!-- Game Setup Modal -->
+        <div id="setup-modal" class="modal">
+            <div class="modal-content">
+                <h2>Game Setup</h2>
+                <label for="player-count">Number of Players:</label>
+                <select id="player-count">
+                    <option value="2">2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                    <option value="5">5 Players</option>
+                </select>
+                <button onclick="startGameNow()">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check browser compatibility
+        function checkCompatibility() {
+            try {
+                // Test for basic ES5 features
+                if (!Array.prototype.forEach) {
+                    throw new Error('Browser too old - missing forEach');
+                }
+                if (!Object.keys) {
+                    throw new Error('Browser too old - missing Object.keys');
+                }
+                return true;
+            } catch (e) {
+                alert('Your browser is too old to run this game. Please use a modern browser.');
+                return false;
+            }
+        }
+        
+        if (!checkCompatibility()) {
+            document.body.innerHTML = '<h1>Browser Not Supported</h1><p>Please use a modern browser like Chrome, Firefox, Safari, or Edge.</p>';
+        }
+    </script>
+
+    <script src="js/cards.js"></script>
+    <script>
+        console.log('Cards loaded:', typeof MERCHANT_CARDS !== 'undefined' ? MERCHANT_CARDS.length : 'undefined');
+    </script>
+    
+    <script src="js/game.js"></script>
+    <script>
+        console.log('Game loaded:', typeof Game !== 'undefined' ? 'yes' : 'no');
+    </script>
+    
+    <script>
+        // Simplified Game UI for compatibility
+        function SimpleGameUI(game) {
+            this.game = game;
+            
+            this.renderGame = function() {
+                this.renderHeader();
+                this.renderVictoryCards();
+                this.renderMerchantCards();
+                this.renderPlayers();
+            };
+            
+            this.renderHeader = function() {
+                var currentPlayer = this.game.getCurrentPlayer();
+                document.getElementById('current-player').textContent = currentPlayer.name + "'s Turn";
+                document.getElementById('turn-counter').textContent = 'Turn ' + this.game.turn;
+            };
+            
+            this.renderVictoryCards = function() {
+                var container = document.getElementById('victory-cards-row');
+                container.innerHTML = '';
+                
+                for (var i = 0; i < this.game.victoryCards.length; i++) {
+                    var card = this.game.victoryCards[i];
+                    var cardDiv = document.createElement('div');
+                    cardDiv.className = 'card victory-card';
+                    cardDiv.innerHTML = '<div><strong>' + card.points + ' VP</strong></div><div>' + card.description + '</div>';
+                    container.appendChild(cardDiv);
+                }
+            };
+            
+            this.renderMerchantCards = function() {
+                var container = document.getElementById('merchant-cards-row');
+                container.innerHTML = '';
+                
+                for (var i = 0; i < this.game.merchantCards.length; i++) {
+                    var card = this.game.merchantCards[i];
+                    var cardDiv = document.createElement('div');
+                    cardDiv.className = 'card merchant-card';
+                    cardDiv.innerHTML = '<div><strong>' + card.name + '</strong></div><div>' + card.description + '</div>';
+                    container.appendChild(cardDiv);
+                }
+            };
+            
+            this.renderPlayers = function() {
+                var container = document.getElementById('players-area');
+                container.innerHTML = '';
+                
+                for (var i = 0; i < this.game.players.length; i++) {
+                    var player = this.game.players[i];
+                    var playerDiv = document.createElement('div');
+                    playerDiv.className = 'player-board';
+                    if (i === this.game.currentPlayerIndex) {
+                        playerDiv.className += ' active';
+                    }
+                    
+                    var spiceInfo = 'Y:' + player.spices.yellow + ' R:' + player.spices.red + ' G:' + player.spices.green + ' B:' + player.spices.brown;
+                    
+                    playerDiv.innerHTML = '<h3>' + player.name + '</h3>' +
+                        '<div>Spices: ' + spiceInfo + '</div>' +
+                        '<div>Hand: ' + player.hand.length + ' cards</div>' +
+                        '<div>Victory Cards: ' + player.victoryCards.length + '</div>';
+                    
+                    container.appendChild(playerDiv);
+                }
+            };
+        }
+        
+        var game;
+        var gameUI;
+
+        // Global function to start the game
+        function startGameNow() {
+            try {
+                console.log('Start game button clicked');
+                
+                var playerCount = parseInt(document.getElementById('player-count').value);
+                console.log('Player count:', playerCount);
+                
+                if (!game) {
+                    console.log('Creating new game...');
+                    game = new Game();
+                }
+                
+                if (!gameUI) {
+                    console.log('Creating new GameUI...');
+                    gameUI = new SimpleGameUI(game);
+                }
+                
+                console.log('Setting up game...');
+                game.setupGame(playerCount);
+                
+                console.log('Hiding modal...');
+                document.getElementById('setup-modal').classList.add('hidden');
+                
+                console.log('Rendering game...');
+                gameUI.renderGame();
+                
+                console.log('✅ Game started successfully!');
+                
+            } catch (error) {
+                console.error('❌ Error starting game:', error);
+                alert('Error starting game: ' + error.message + '\n\nCheck the browser console for more details.');
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                console.log('Page loaded, initializing...');
+                
+                // Show setup modal
+                document.getElementById('setup-modal').classList.remove('hidden');
+                console.log('Setup modal shown');
+                
+                console.log('✅ Initialization complete');
+                
+            } catch (error) {
+                console.error('❌ Initialization error:', error);
+                alert('Initialization error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

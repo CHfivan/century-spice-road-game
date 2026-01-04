@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Start Game</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .modal { background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 20px; border-radius: 10px; }
+        .hidden { display: none; }
+        button { padding: 10px; margin: 5px; }
+        select { padding: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Test Start Game Functionality</h1>
+    <div id="status">Loading...</div>
+    
+    <!-- Setup Modal -->
+    <div id="setup-modal" class="modal">
+        <div class="modal-content">
+            <h2>Game Setup</h2>
+            <label for="player-count">Number of Players:</label>
+            <select id="player-count">
+                <option value="2">2 Players</option>
+                <option value="3">3 Players</option>
+                <option value="4">4 Players</option>
+                <option value="5">5 Players</option>
+            </select>
+            <button id="start-game">Start Game</button>
+        </div>
+    </div>
+    
+    <!-- Game UI Elements -->
+    <div id="current-player">Player 1's Turn</div>
+    <div id="turn-counter">Turn 1</div>
+    <div id="victory-cards-row"></div>
+    <div id="merchant-cards-row"></div>
+    <div id="players-area"></div>
+    
+    <script src="js/cards.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                document.getElementById('status').textContent = 'Initializing...';
+                
+                // Create game instance
+                const game = new Game();
+                document.getElementById('status').textContent = 'Game created...';
+                
+                // Create UI manager
+                const gameUI = new GameUI(game);
+                document.getElementById('status').textContent = 'UI created...';
+                
+                // Show setup modal
+                document.getElementById('setup-modal').classList.remove('hidden');
+                document.getElementById('status').textContent = 'Ready! Click Start Game.';
+                
+                console.log('Test initialization complete');
+                
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+                console.error('Initialization error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

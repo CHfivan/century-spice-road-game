@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Round Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        button { padding: 10px 15px; margin: 5px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>Final Round Logic Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Scenario</h2>
+        <p><strong>2-Player Game:</strong> Player 1 gets 5 victory cards (triggers final round), then Player 2 gets one final turn, then game ends immediately.</p>
+        <p><strong>Expected:</strong> Player 1 should NOT get another turn after Player 2's final turn.</p>
+        <button onclick="runTest()">Run Final Round Test</button>
+        <div id="test-log" class="log"></div>
+    </div>
+
+    <script src="js/cards.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('test-log');
+            logDiv.innerHTML += message + '<br>';
+        }
+
+        function runTest() {
+            document.getElementById('test-log').innerHTML = '';
+            
+            // Create a test game
+            const game = new Game();
+            game.setupGame(2); // 2 players for this specific test
+            
+            log('=== FINAL ROUND TEST (2 PLAYERS) ===');
+            log(`Game started with ${game.players.length} players`);
+            log(`Victory cards needed: ${game.victoryCardsNeeded}`);
+            log(`Current player: ${game.getCurrentPlayer().name} (Player ${game.currentPlayerIndex + 1})`);
+            log('');
+            
+            // Simulate Player 1 getting 5 victory cards and triggering final round
+            const player1 = game.players[0];
+            log('Simulating Player 1 getting 5 victory cards and triggering final round...');
+            
+            // Add mock victory cards
+            for (let i = 0; i < 5; i++) {
+                player1.victoryCards.push({
+                    id: `test-victory-${i}`,
+                    points: 10,
+                    cost: { yellow: 1 }
+                });
+            }
+            
+            // Manually trigger the final round logic (simulating what happens when claiming victory card)
+            if (player1.victoryCards.length >= game.victoryCardsNeeded && !game.finalRoundTriggered) {
+                game.finalRoundTriggered = true;
+                game.finalRoundTriggerPlayer = player1;
+                log(`✓ Final round triggered by ${player1.name}!`);
+            }
+            
+            log(`Player 1 now has ${player1.victoryCards.length} victory cards`);
+            log(`Final round triggered: ${game.finalRoundTriggered}`);
+            log(`Trigger player: ${game.finalRoundTriggerPlayer.name} (index ${game.finalRoundTriggerPlayer.id})`);
+            log(`Current player index: ${game.currentPlayerIndex}`);
+            log('');
+            
+            // Player 1's turn ends, now it's Player 2's final turn
+            log('Player 1 ends turn, moving to Player 2\'s final turn...');
+            game.nextTurn();
+            log(`Current player: ${game.getCurrentPlayer().name} (index ${game.currentPlayerIndex})`);
+            log(`Game ended after moving to Player 2: ${game.gameEnded}`);
+            log('');
+            
+            // Player 2 finishes their turn - game should end here
+            log('Player 2 finishes their final turn...');
+            game.nextTurn();
+            log(`Game ended after Player 2's turn: ${game.gameEnded}`);
+            
+            if (game.gameEnded) {
+                log(`✓ Winner: ${game.winner.name}`);
+                log(`✓ Game correctly ended after Player 2's final turn!`);
+                log(`✓ Player 1 did NOT get an extra turn - correct behavior!`);
+            } else {
+                log('✗ Game should have ended but didn\'t');
+                log(`Current player would be: ${game.getCurrentPlayer().name}`);
+            }
+            
+            log('');
+            log('=== TEST COMPLETE ===');
+        }
+    </script>
+</body>
+</html>

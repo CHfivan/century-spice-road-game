@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Working Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .player { border: 1px solid #ccc; margin: 10px; padding: 10px; }
+        .spice { display: inline-block; width: 20px; height: 20px; margin: 2px; border: 1px solid black; }
+        .yellow { background: gold; }
+        .red { background: red; }
+        .green { background: green; }
+        .brown { background: brown; }
+        button { margin: 5px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Century: Spice Road - Working Test</h1>
+    <div id="game-state"></div>
+    <div id="actions"></div>
+    
+    <script>
+        // Simplified card data for testing
+        const MERCHANT_CARDS = [
+            { id: 'gain-3y', name: 'Gain 3 Yellow', type: 'gain', effect: { yellow: 3 } },
+            { id: 'upgrade-2', name: 'Upgrade 2', type: 'upgrade', effect: { amount: 2 } },
+            { id: 'trade-2y-1r', name: 'Trade 2Y→1R', type: 'trade', effect: { input: { yellow: 2 }, output: { red: 1 } } }
+        ];
+        
+        const VICTORY_CARDS = [
+            { id: 'v1', points: 8, cost: { red: 3 } },
+            { id: 'v2', points: 10, cost: { green: 2 } }
+        ];
+        
+        // Simplified Player class
+        class Player {
+            constructor(name) {
+                this.name = name;
+                this.spices = { yellow: 0, red: 0, green: 0, brown: 0 };
+                this.hand = [
+                    { id: 'upgrade-2', name: 'Upgrade 2', type: 'upgrade', effect: { amount: 2 } },
+                    { id: 'trade-basic', name: 'Basic Trade', type: 'trade', effect: { input: { yellow: 2 }, output: { red: 1 } } }
+                ];
+                this.discardPile = [];
+                this.victoryCards = [];
+            }
+            
+            addSpices(type, amount) {
+                const total = Object.values(this.spices).reduce((a, b) => a + b, 0);
+                const canAdd = Math.min(amount, 10 - total);
+                this.spices[type] += canAdd;
+                return canAdd;
+            }
+            
+            removeSpices(type, amount) {
+                const canRemove = Math.min(amount, this.spices[type]);
+                this.spices[type] -= canRemove;
+                return canRemove;
+            }
+        }
+        
+        // Simplified Game class
+        class Game {
+            constructor() {
+                this.players = [new Player('Player 1'), new Player('Player 2')];
+                this.currentPlayerIndex = 0;
+                this.victoryCards = [...VICTORY_CARDS];
+                this.merchantCards = [...MERCHANT_CARDS];
+                
+                // Give starting spices
+                this.players[0].addSpices('yellow', 3);
+                this.players[1].addSpices('yellow', 4);
+            }
+            
+            getCurrentPlayer() {
+                return this.players[this.currentPlayerIndex];
+            }
+            
+            playCard(cardIndex) {
+                const player = this.getCurrentPlayer();
+                if (cardIndex >= player.hand.length) return false;
+                
+                const card = player.hand[cardIndex];
+                
+                // Execute card effect
+                if (card.type === 'gain') {
+                    for (const [type, amount] of Object.entries(card.effect)) {
+                        player.addSpices(type, amount);
+                    }
+                } else if (card.type === 'trade') {
+                    // Check if can trade
+                    let canTrade = true;
+                    for (const [type, amount] of Object.entries(card.effect.input)) {
+                        if (player.spices[type] < amount) {
+                            canTrade = false;
+                            break;
+                        }
+                    }
+                    
+                    if (canTrade) {
+                        // Remove input spices
+                        for (const [type, amount] of Object.entries(card.effect.input)) {
+                            player.removeSpices(type, amount);
+                        }
+                        // Add output spices
+                        for (const [type, amount] of Object.entries(card.effect.output)) {
+                            player.addSpices(type, amount);
+                        }
+                    } else {
+                        alert('Cannot trade - insufficient spices');
+                        return false;
+                    }
+                } else if (card.type === 'upgrade') {
+                    // Simple upgrade: yellow to red
+                    if (player.spices.yellow > 0) {
+                        player.removeSpices('yellow', 1);
+                        player.addSpices('red', 1);
+                    }
+                }
+                
+                // Move card to discard
+                player.discardPile.push(player.hand.splice(cardIndex, 1)[0]);
+                this.render();
+                return true;
+            }
+            
+            nextTurn() {
+                this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+                this.render();
+            }
+            
+            rest() {
+                const player = this.getCurrentPlayer();
+                player.hand.push(...player.discardPile);
+                player.discardPile = [];
+                this.render();
+            }
+            
+            render() {
+                const gameState = document.getElementById('game-state');
+                let html = '';
+                
+                this.players.forEach((player, index) => {
+                    const isActive = index === this.currentPlayerIndex;
+                    html += `
+                        <div class="player" style="${isActive ? 'background: #ffffcc;' : ''}">
+                            <h3>${player.name} ${isActive ? '(Current)' : ''}</h3>
+                            <div>Spices: 
+                                ${Object.entries(player.spices).map(([type, count]) => 
+                                    `${count} <span class="spice ${type}"></span>`
+                                ).join(' ')}
+                            </div>
+                            <div>Hand: ${player.hand.map(c => c.name).join(', ')}</div>
+                            <div>Discard: ${player.discardPile.map(c => c.name).join(', ')}</div>
+                        </div>
+                    `;
+                });
+                
+                gameState.innerHTML = html;
+                
+                // Render actions for current player
+                const actions = document.getElementById('actions');
+                const currentPlayer = this.getCurrentPlayer();
+                let actionsHtml = '<h3>Actions:</h3>';
+                
+                currentPlayer.hand.forEach((card, index) => {
+                    actionsHtml += `<button onclick="game.playCard(${index})">Play: ${card.name}</button>`;
+                });
+                
+                actionsHtml += `<button onclick="game.rest()">Rest</button>`;
+                actionsHtml += `<button onclick="game.nextTurn()">End Turn</button>`;
+                
+                actions.innerHTML = actionsHtml;
+            }
+        }
+        
+        // Create and start game
+        const game = new Game();
+        game.render();
+        
+        console.log('Game initialized successfully');
+    </script>
+</body>
+</html>

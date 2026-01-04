@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Century Game</title>
+</head>
+<body>
+    <h1>Testing Century Game</h1>
+    <div id="test-output"></div>
+    
+    <script src="js/cards.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        // Test script loading
+        console.log('Cards loaded:', MERCHANT_CARDS.length, 'merchant cards,', VICTORY_CARDS.length, 'victory cards');
+        
+        // Test game creation
+        const testGame = new Game();
+        console.log('Game created successfully');
+        
+        // Test game setup
+        testGame.setupGame(2);
+        console.log('Game setup completed');
+        console.log('Current player:', testGame.getCurrentPlayer().name);
+        console.log('Victory cards in market:', testGame.victoryCards.length);
+        console.log('Merchant cards in market:', testGame.merchantCards.length);
+        
+        // Test player spices
+        const player1 = testGame.players[0];
+        console.log('Player 1 spices:', player1.spices);
+        console.log('Player 1 hand size:', player1.hand.length);
+        
+        document.getElementById('test-output').innerHTML = `
+            <p>✅ Cards loaded: ${MERCHANT_CARDS.length} merchant, ${VICTORY_CARDS.length} victory</p>
+            <p>✅ Game created and setup completed</p>
+            <p>✅ Current player: ${testGame.getCurrentPlayer().name}</p>
+            <p>✅ Market: ${testGame.victoryCards.length} victory cards, ${testGame.merchantCards.length} merchant cards</p>
+            <p>✅ Player 1 spices: ${JSON.stringify(player1.spices)}</p>
+            <p>✅ Player 1 hand: ${player1.hand.length} cards</p>
+        `;
+    </script>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Century Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { color: green; }
+        .error { color: red; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Century: Spice Road - Simple Test</h1>
+    
+    <div class="test-section">
+        <h2>Game Initialization Test</h2>
+        <button onclick="testGameInit()">Test Game Init</button>
+        <div id="init-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Player Actions Test</h2>
+        <button onclick="testPlayerActions()">Test Actions</button>
+        <div id="actions-result"></div>
+    </div>
+    
+    <script src="js/cards.js"></script>
+    <script src="js/game.js"></script>
+    
+    <script>
+        function testGameInit() {
+            const resultDiv = document.getElementById('init-result');
+            try {
+                // Test cards loading
+                if (!MERCHANT_CARDS || !VICTORY_CARDS) {
+                    throw new Error('Cards not loaded');
+                }
+                
+                // Test game creation
+                const game = new Game();
+                game.setupGame(2);
+                
+                // Verify setup
+                if (game.players.length !== 2) {
+                    throw new Error('Wrong number of players');
+                }
+                
+                if (game.victoryCards.length !== 5) {
+                    throw new Error('Wrong number of victory cards in market');
+                }
+                
+                if (game.merchantCards.length !== 6) {
+                    throw new Error('Wrong number of merchant cards in market');
+                }
+                
+                // Check starting spices
+                const player1 = game.players[0];
+                const player2 = game.players[1];
+                
+                if (player1.spices.yellow !== 3) {
+                    throw new Error('Player 1 should start with 3 yellow spices');
+                }
+                
+                if (player2.spices.yellow !== 4) {
+                    throw new Error('Player 2 should start with 4 yellow spices');
+                }
+                
+                resultDiv.innerHTML = '<span class="success">✅ All initialization tests passed!</span>';
+                window.testGame = game; // Store for further testing
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Test failed: ${error.message}</span>`;
+                console.error(error);
+            }
+        }
+        
+        function testPlayerActions() {
+            const resultDiv = document.getElementById('actions-result');
+            try {
+                if (!window.testGame) {
+                    throw new Error('Run initialization test first');
+                }
+                
+                const game = window.testGame;
+                const player = game.getCurrentPlayer();
+                
+                // Test playing a card
+                const initialHandSize = player.hand.length;
+                const result = game.playMerchantCard(player, 0);
+                
+                if (!result.success) {
+                    throw new Error(`Failed to play card: ${result.message}`);
+                }
+                
+                if (player.hand.length !== initialHandSize - 1) {
+                    throw new Error('Card was not removed from hand');
+                }
+                
+                if (player.discardPile.length !== 1) {
+                    throw new Error('Card was not added to discard pile');
+                }
+                
+                // Test rest action
+                const restResult = game.rest(player);
+                if (!restResult.success) {
+                    throw new Error(`Failed to rest: ${restResult.message}`);
+                }
+                
+                if (player.hand.length !== initialHandSize) {
+                    throw new Error('Cards were not returned to hand after rest');
+                }
+                
+                if (player.discardPile.length !== 0) {
+                    throw new Error('Discard pile was not cleared after rest');
+                }
+                
+                resultDiv.innerHTML = '<span class="success">✅ All action tests passed!</span>';
+                
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">❌ Test failed: ${error.message}</span>`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
