@@ -1604,3 +1604,213 @@ section h2 {
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
+/* Header buttons layout */
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Statistics modal styling */
+.stats-content {
+    max-height: 500px;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.stats-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(139, 69, 19, 0.2);
+}
+
+.stats-section:last-child {
+    border-bottom: none;
+}
+
+.stats-section h4 {
+    color: #8B4513;
+    margin: 0 0 10px 0;
+    font-size: 1.1em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.stat-item {
+    background: rgba(139, 69, 19, 0.1);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.player-stats-table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.player-stat-row {
+    display: grid;
+    grid-template-columns: 40px 1fr 80px 60px;
+    align-items: center;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.player-rank {
+    font-weight: bold;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.player-winrate {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.player-avg {
+    color: #666;
+}
+
+.recent-games {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recent-game {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.game-info {
+    color: #666;
+}
+
+.game-winner {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.trends-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    font-size: 0.9em;
+}
+
+/* Achievements styling */
+.achievements-section {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 165, 0, 0.1));
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.achievements-section h4 {
+    color: #B8860B;
+    margin: 0 0 10px 0;
+    text-align: center;
+}
+
+.achievement {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    animation: achievementPop 0.5s ease-out;
+}
+
+.achievement:last-child {
+    margin-bottom: 0;
+}
+
+@keyframes achievementPop {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.achievement-icon {
+    font-size: 1.5em;
+    min-width: 30px;
+    text-align: center;
+}
+
+.achievement-text strong {
+    color: #B8860B;
+    display: block;
+    font-size: 1em;
+}
+
+.achievement-desc {
+    color: #666;
+    font-size: 0.85em;
+    margin-top: 2px;
+}
+
+/* Enhanced game end modal */
+.game-end-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.game-end-btn.secondary {
+    background: #6c757d;
+}
+
+.game-end-btn.secondary:hover {
+    background: #5a6268;
+}
+
+/* Responsive statistics */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .player-stat-row {
+        grid-template-columns: 30px 1fr 70px;
+        font-size: 0.8em;
+    }
+    
+    .player-avg {
+        display: none;
+    }
+    
+    .recent-game {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .game-end-buttons {
+        flex-direction: column;
+    }
+    
+    .achievement {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+}

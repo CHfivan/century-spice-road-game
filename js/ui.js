@@ -94,6 +94,14 @@ class GameUI {
                 this.showHelpModal();
             });
         }
+        
+        // Statistics button
+        const statsBtn = document.getElementById('stats-btn');
+        if (statsBtn) {
+            statsBtn.addEventListener('click', () => {
+                this.showStatsModal();
+            });
+        }
 
         // Note: Action button event listeners are now added dynamically in renderPlayers()
         // when the current player's board is rendered
@@ -1610,14 +1618,30 @@ class GameUI {
             };
         }).sort((a, b) => b.score - a.score);
 
+        // Record game in analytics
+        const gameData = {
+            playerCount: this.game.playerCount,
+            aiCount: this.aiPlayers.filter(ai => ai).length,
+            aiDifficulty: this.aiPlayers.find(ai => ai)?.difficulty || 'none',
+            duration: Date.now() - (this.gameStats?.startTime || Date.now()),
+            winner: winner,
+            finalScores: finalScores,
+            players: this.game.players,
+            playerActions: this.gameStats?.playerActions || [],
+            gameStats: this.gameStats || {}
+        };
+        
+        const gameRecord = gameAnalytics.recordGame(gameData);
+        const achievements = gameAnalytics.checkAchievements(gameRecord);
+
         // Show game end modal instead of message
-        this.showGameEndModal(winner, finalScores);
+        this.showGameEndModal(winner, finalScores, achievements);
         
         // Also log to console for reference
         console.log('Game ended - winner:', winner.name);
     }
     
-    showGameEndModal(winner, finalScores) {
+    showGameEndModal(winner, finalScores, achievements = []) {
         const modal = document.getElementById('action-modal');
         const title = document.getElementById('action-title');
         const content = document.getElementById('action-content');
@@ -1626,6 +1650,23 @@ class GameUI {
         
         let html = '<div class="game-end-container">';
         html += `<div class="winner-announcement">${winner.name} WINS!</div>`;
+        
+        // Show achievements if any
+        if (achievements.length > 0) {
+            html += '<div class="achievements-section">';
+            html += '<h4>🏆 Achievements Unlocked!</h4>';
+            achievements.forEach(achievement => {
+                html += `<div class="achievement">
+                    <span class="achievement-icon">${achievement.icon}</span>
+                    <div class="achievement-text">
+                        <strong>${achievement.name}</strong>
+                        <div class="achievement-desc">${achievement.description}</div>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+        }
+        
         html += '<div class="final-scores">';
         html += '<h3>📊 FINAL SCORES</h3>';
         html += '<div class="scores-table">';
@@ -1655,6 +1696,7 @@ class GameUI {
         
         html += '</div></div>';
         html += '<div class="game-end-buttons">';
+        html += '<button id="view-stats-btn" class="game-end-btn secondary">View Stats</button>';
         html += '<button id="play-again-btn" class="game-end-btn primary">Play Again</button>';
         html += '<button id="close-game-btn" class="game-end-btn secondary">Close</button>';
         html += '</div>';
@@ -1671,6 +1713,11 @@ class GameUI {
             this.closeGame();
         });
         
+        document.getElementById('view-stats-btn').addEventListener('click', () => {
+            modal.classList.add('hidden');
+            this.showStatsModal();
+        });
+        
         // Hide the default modal buttons
         document.getElementById('confirm-action').style.display = 'none';
         document.getElementById('cancel-action').style.display = 'none';
@@ -1678,9 +1725,94 @@ class GameUI {
         modal.classList.remove('hidden');
     }
     
-    playAgain() {
-        // Reset the game and show setup modal
-        location.reload(); // Simple way to reset everything
+    showStatsModal() {
+        const modal = document.getElementById('action-modal');
+        const title = document.getElementById('action-title');
+        const content = document.getElementById('action-content');
+        
+        title.textContent = '📊 Game Statistics';
+        
+        const overallStats = gameAnalytics.getOverallStats();
+        const playerStats = gameAnalytics.getPlayerStats();
+        const trends = gameAnalytics.getGameTrends();
+        
+        let html = '<div class="stats-content">';
+        
+        // Overall Statistics
+        html += '<div class="stats-section">';
+        html += '<h4>📈 Overall Statistics</h4>';
+        if (overallStats.totalGames > 0) {
+            html += `<div class="stats-grid">`;
+            html += `<div class="stat-item">Total Games: <strong>${overallStats.totalGames}</strong></div>`;
+            html += `<div class="stat-item">AI Games: <strong>${overallStats.aiGames}</strong></div>`;
+            html += `<div class="stat-item">Human Only: <strong>${overallStats.humanOnlyGames}</strong></div>`;
+            html += `<div class="stat-item">Avg Duration: <strong>${overallStats.averageDuration} min</strong></div>`;
+            html += `<div class="stat-item">Most Common: <strong>${overallStats.mostCommonPlayerCount} players</strong></div>`;
+            html += `</div>`;
+        } else {
+            html += '<p>No games played yet. Start playing to see statistics!</p>';
+        }
+        html += '</div>';
+        
+        // Player Statistics
+        if (playerStats.length > 0) {
+            html += '<div class="stats-section">';
+            html += '<h4>🏆 Player Rankings</h4>';
+            html += '<div class="player-stats-table">';
+            playerStats.slice(0, 5).forEach((player, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                html += `<div class="player-stat-row">`;
+                html += `<div class="player-rank">${medal} ${index + 1}.</div>`;
+                html += `<div class="player-name">${player.name} ${player.isAI ? '🤖' : ''}</div>`;
+                html += `<div class="player-winrate">${player.winRate}% (${player.wins}/${player.gamesPlayed})</div>`;
+                html += `<div class="player-avg">Avg: ${player.averageScore}</div>`;
+                html += `</div>`;
+            });
+            html += '</div>';
+            html += '</div>';
+        }
+        
+        // Recent Games
+        if (overallStats.recentGames && overallStats.recentGames.length > 0) {
+            html += '<div class="stats-section">';
+            html += '<h4>🕒 Recent Games</h4>';
+            html += '<div class="recent-games">';
+            overallStats.recentGames.forEach(game => {
+                const date = new Date(game.timestamp).toLocaleDateString();
+                const time = new Date(game.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                html += `<div class="recent-game">`;
+                html += `<div class="game-info">${date} ${time} - ${game.playerCount}P`;
+                if (game.aiCount > 0) html += ` (+${game.aiCount} AI)`;
+                html += `</div>`;
+                html += `<div class="game-winner">Winner: ${game.winner.name}</div>`;
+                html += `</div>`;
+            });
+            html += '</div>';
+            html += '</div>';
+        }
+        
+        // Trends
+        if (trends.averageRecentScore) {
+            html += '<div class="stats-section">';
+            html += '<h4>📊 Trends</h4>';
+            html += `<div class="trends-info">`;
+            html += `<div>Recent Average Score: <strong>${trends.averageRecentScore}</strong></div>`;
+            html += `<div>Score Trend: <strong>${trends.scoreTrend}</strong></div>`;
+            html += `<div>Recent High: <strong>${trends.recentHighScore}</strong></div>`;
+            html += `</div>`;
+            html += '</div>';
+        }
+        
+        html += '</div>';
+        
+        content.innerHTML = html;
+        
+        // Show close button
+        document.getElementById('confirm-action').style.display = 'none';
+        document.getElementById('cancel-action').textContent = 'Close';
+        document.getElementById('cancel-action').style.display = 'block';
+        
+        modal.classList.remove('hidden');
     }
     
     closeGame() {
@@ -1830,5 +1962,20 @@ class GameUI {
         
         // Continue with turn (no changes made, card not played)
         this.renderGame();
+    }
+    
+    playAgain() {
+        // Reset the game and show setup modal
+        location.reload(); // Simple way to reset everything
+    }
+    
+    closeGame() {
+        // Close the browser tab/window
+        window.close();
+        
+        // If window.close() doesn't work (some browsers block it), show a message
+        setTimeout(() => {
+            alert('Please close this tab manually.');
+        }, 100);
     }
 }
