@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VP Calculation Test</title>
+    <link rel="stylesheet" href="styles.css?v=7">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🏆 VP Calculation Test (Cards + Coins)</h1>
+        </header>
+
+        <main>
+            <section>
+                <h2>✅ VP Calculation: Cards + Coins</h2>
+                
+                <!-- Example 1: Cards (21) + Coins (6) = 27 VP -->
+                <div class="player-board active">
+                    <div class="player-info">
+                        <div class="player-name">Player 1</div>
+                        <div class="victory-points">3/5 Victory Cards</div>
+                        <div class="player-coins-display">
+                            <div class="coin-info">
+                                <div class="coin coin-gold"></div>
+                                <span class="coin-count">2</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (3) - 27 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">5 VP</div>
+                                </div>
+                            </div>
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">7 VP</div>
+                                </div>
+                            </div>
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">9 VP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Calculation: Cards (5+7+9=21) + Gold Coins (2×3=6) = <strong>27 VP</strong>
+                    </div>
+                </div>
+
+                <!-- Example 2: Cards (12) + Coins (4) = 16 VP -->
+                <div class="player-board">
+                    <div class="player-info">
+                        <div class="player-name">Player 2</div>
+                        <div class="victory-points">1/5 Victory Cards</div>
+                        <div class="player-coins-display">
+                            <div class="coin-info">
+                                <div class="coin coin-gold"></div>
+                                <span class="coin-count">1</span>
+                            </div>
+                            <div class="coin-info">
+                                <div class="coin coin-silver"></div>
+                                <span class="coin-count">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (1) - 16 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">12 VP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Calculation: Cards (12) + Gold (1×3=3) + Silver (1×1=1) = <strong>16 VP</strong>
+                    </div>
+                </div>
+
+                <!-- Example 3: Cards (14) + Coins (5) = 19 VP -->
+                <div class="player-board">
+                    <div class="player-info">
+                        <div class="player-name">Player 3</div>
+                        <div class="victory-points">2/5 Victory Cards</div>
+                        <div class="player-coins-display">
+                            <div class="coin-info">
+                                <div class="coin coin-silver"></div>
+                                <span class="coin-count">5</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (2) - 19 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">5 VP</div>
+                                </div>
+                            </div>
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">9 VP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Calculation: Cards (5+9=14) + Silver Coins (5×1=5) = <strong>19 VP</strong>
+                    </div>
+                </div>
+
+                <!-- Example 4: No coins -->
+                <div class="player-board">
+                    <div class="player-info">
+                        <div class="player-name">Player 4</div>
+                        <div class="victory-points">0/5 Victory Cards</div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (0) - 0 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="no-victory-cards">No victory cards claimed yet</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                        Calculation: Cards (0) + Coins (0) = <strong>0 VP</strong>
+                    </div>
+                </div>
+            </section>
+
+            <div style="margin: 40px 0; padding: 20px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+                <h3>🧮 VP Calculation Formula:</h3>
+                <div style="font-size: 1.1em; margin: 15px 0; text-align: center; background: rgba(255,255,255,0.3); padding: 15px; border-radius: 5px;">
+                    <strong>Total VP = Card Points + (Gold Coins × 3) + (Silver Coins × 1)</strong>
+                </div>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>🏆 <strong>Victory Cards:</strong> Each card shows its VP value (5, 7, 9, 12, etc.)</li>
+                    <li>🟡 <strong>Gold Coins:</strong> Each gold coin = 3 victory points</li>
+                    <li>⚪ <strong>Silver Coins:</strong> Each silver coin = 1 victory point</li>
+                    <li>🧹 <strong>Clean Display:</strong> Victory cards show NO icons, only VP values</li>
+                    <li>📊 <strong>Real-time:</strong> VP total updates automatically when coins are gained</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

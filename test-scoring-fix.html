@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scoring Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .test-case { border: 1px solid #ccc; padding: 15px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Scoring System Fix Test</h1>
+    <p>Testing the corrected scoring rules:</p>
+    <ul>
+        <li>Victory Point Cards: Face value</li>
+        <li>Gold Coins: 3 points each</li>
+        <li>Silver Coins: 1 point each</li>
+        <li>Non-yellow spices: 1 point each (red, green, brown)</li>
+    </ul>
+
+    <div id="test-results"></div>
+
+    <script src="js/cards.js?v=6"></script>
+    <script src="js/game.js?v=6"></script>
+    <script src="js/ai-player.js?v=6"></script>
+    <script src="js/analytics.js?v=6"></script>
+    <script src="js/ui.js?v=8"></script>
+
+    <script>
+        function runScoringTests() {
+            const results = document.getElementById('test-results');
+            
+            // Test Case 1: Basic scoring
+            const testCase1 = document.createElement('div');
+            testCase1.className = 'test-case';
+            testCase1.innerHTML = '<h3>Test Case 1: Basic Scoring</h3>';
+            
+            const game = new Game();
+            game.setupGame(2);
+            const ui = new GameUI(game);
+            const player = game.players[0];
+            
+            // Set up test scenario
+            player.victoryCards = [
+                { points: 8 },
+                { points: 6 }
+            ]; // Total: 14 VP
+            
+            player.coins = [
+                { type: 'gold', points: 3 },
+                { type: 'gold', points: 3 },
+                { type: 'silver', points: 1 }
+            ]; // 2 gold (6 pts) + 1 silver (1 pt) = 7 pts
+            
+            player.spices = {
+                yellow: 3, // Not counted
+                red: 2,    // 2 pts
+                green: 1,  // 1 pt
+                brown: 1   // 1 pt
+            }; // Total spice points: 4
+            
+            const expectedTotal = 14 + 6 + 1 + 4; // 25 points
+            const actualScore = ui.calculatePlayerCurrentPoints(player);
+            const finalScore = game.calculateFinalScore(player);
+            
+            testCase1.innerHTML += `
+                <p><strong>Setup:</strong></p>
+                <ul>
+                    <li>Victory Cards: 8 + 6 = 14 points</li>
+                    <li>Coins: 2 gold (6 pts) + 1 silver (1 pt) = 7 points</li>
+                    <li>Spices: 2 red + 1 green + 1 brown = 4 points</li>
+                    <li><strong>Expected Total: 25 points</strong></li>
+                </ul>
+                <p><strong>Results:</strong></p>
+                <ul>
+                    <li>UI Score: ${actualScore}</li>
+                    <li>Game Score: ${finalScore}</li>
+                </ul>
+            `;
+            
+            if (actualScore === expectedTotal && finalScore === expectedTotal) {
+                testCase1.innerHTML += '<div class="test-result pass">✅ PASS: Both scoring functions return correct result</div>';
+            } else {
+                testCase1.innerHTML += '<div class="test-result fail">❌ FAIL: Scoring mismatch</div>';
+            }
+            
+            results.appendChild(testCase1);
+            
+            // Test Case 2: Edge cases
+            const testCase2 = document.createElement('div');
+            testCase2.className = 'test-case';
+            testCase2.innerHTML = '<h3>Test Case 2: Edge Cases</h3>';
+            
+            const player2 = game.players[1];
+            
+            // No coins, no spices except yellow
+            player2.victoryCards = [{ points: 10 }];
+            player2.coins = [];
+            player2.spices = { yellow: 5, red: 0, green: 0, brown: 0 };
+            
+            const expected2 = 10; // Only victory points
+            const actual2 = ui.calculatePlayerCurrentPoints(player2);
+            const final2 = game.calculateFinalScore(player2);
+            
+            testCase2.innerHTML += `
+                <p><strong>Setup:</strong></p>
+                <ul>
+                    <li>Victory Cards: 10 points</li>
+                    <li>Coins: None</li>
+                    <li>Spices: 5 yellow (not counted)</li>
+                    <li><strong>Expected Total: 10 points</strong></li>
+                </ul>
+                <p><strong>Results:</strong></p>
+                <ul>
+                    <li>UI Score: ${actual2}</li>
+                    <li>Game Score: ${final2}</li>
+                </ul>
+            `;
+            
+            if (actual2 === expected2 && final2 === expected2) {
+                testCase2.innerHTML += '<div class="test-result pass">✅ PASS: Edge case handled correctly</div>';
+            } else {
+                testCase2.innerHTML += '<div class="test-result fail">❌ FAIL: Edge case failed</div>';
+            }
+            
+            results.appendChild(testCase2);
+            
+            // Test Case 3: Score breakdown
+            const testCase3 = document.createElement('div');
+            testCase3.className = 'test-case';
+            testCase3.innerHTML = '<h3>Test Case 3: Score Breakdown Function</h3>';
+            
+            const breakdown = ui.calculateScoreBreakdown(player);
+            
+            testCase3.innerHTML += `
+                <p><strong>Breakdown Results:</strong></p>
+                <ul>
+                    <li>Victory Points: ${breakdown.victoryPoints} (expected: 14)</li>
+                    <li>Gold Coins: ${breakdown.goldCoins} × 3 = ${breakdown.goldPoints} (expected: 2 × 3 = 6)</li>
+                    <li>Silver Coins: ${breakdown.silverCoins} × 1 = ${breakdown.silverPoints} (expected: 1 × 1 = 1)</li>
+                    <li>Spice Points: ${breakdown.spicePoints} (expected: 4)</li>
+                </ul>
+            `;
+            
+            const breakdownCorrect = (
+                breakdown.victoryPoints === 14 &&
+                breakdown.goldCoins === 2 &&
+                breakdown.silverCoins === 1 &&
+                breakdown.goldPoints === 6 &&
+                breakdown.silverPoints === 1 &&
+                breakdown.spicePoints === 4
+            );
+            
+            if (breakdownCorrect) {
+                testCase3.innerHTML += '<div class="test-result pass">✅ PASS: Score breakdown is correct</div>';
+            } else {
+                testCase3.innerHTML += '<div class="test-result fail">❌ FAIL: Score breakdown has errors</div>';
+            }
+            
+            results.appendChild(testCase3);
+        }
+        
+        // Run tests when page loads
+        window.addEventListener('load', function() {
+            setTimeout(runScoringTests, 100);
+        });
+    </script>
+</body>
+</html>

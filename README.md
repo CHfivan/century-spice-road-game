@@ -39,6 +39,21 @@ On your turn, choose ONE of these actions:
 
 ## ✨ Advanced Features
 
+### 🌐 Multiplayer Mode
+- **Cross-Device Play**: Play with friends on different devices
+- **Room System**: Create or join game rooms with 6-digit codes
+- **Real-Time Sync**: All players see actions in real-time
+- **Mixed AI Support**: Add AI players to multiplayer games
+- **WebRTC Technology**: Peer-to-peer connections for low latency
+
+**To play multiplayer:**
+1. Open `multiplayer-century.html`
+2. Create a room or join with a room code
+3. Configure players and AI settings
+4. Start the game when all players are ready
+
+See `MULTIPLAYER-GUIDE.md` for detailed instructions.
+
 ### 🤖 AI Players
 - **Three Difficulty Levels**: Easy, Medium, Hard
 - **Smart Decision Making**: AI evaluates all possible actions and chooses strategically

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+
 /* Century: Spice Road Styles */
 * {
     margin: 0;
@@ -291,7 +293,113 @@ section h2 {
     gap: 20px;
 }
 
-/* Cards */
+/* Coin tracking system */
+#coin-tracking {
+    position: absolute;
+    top: 50px; /* Position in upper area to align with title */
+    left: 0;
+    width: 100%;
+    height: 120px;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.coin-stack {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translateX(-50%); /* Center the stack on its position */
+    height: 100%; /* Take full height of coin-tracking area */
+    justify-content: flex-end; /* Align content to bottom */
+}
+
+/* Fixed positioning for coin stacks based on image layout */
+#gold-coin-stack {
+    left: 270px !important; /* Position above first victory card as shown in image */
+    top: -180px !important;
+}
+
+#silver-coin-stack {
+    left: 420px !important; /* Position above second victory card as shown in image */
+    top: -180px !important;
+}
+
+/* When gold coins are depleted, silver stack moves to this position */
+#silver-coin-stack.gold-depleted {
+    left: 270px !important;
+}
+
+.coin-stack-label {
+    font-size: 0.9em; /* Increased from 0.7em to 0.9em (added 0.2em) */
+    color: #8B4513;
+    font-weight: bold;
+    margin-bottom: 15px; /* Increased margin to create more space */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    position: relative;
+    top: 10px; /* Push labels down to ensure they stay below the title */
+}
+
+.coin-bars {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 1px; /* Reduced gap to make stacks more compact */
+}
+
+.coin-bar {
+    width: 30px;
+    height: 9px; /* Increased from 6px to 9px (added 3px) */
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+.gold-bar {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border: 1px solid #B8860B;
+}
+
+.silver-bar {
+    background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+    border: 1px solid #808080;
+}
+
+.coin-bar.taken {
+    opacity: 0.3;
+    transform: scale(0.8);
+}
+
+/* Silver bars container for side-by-side stacks */
+.silver-bars-container {
+    display: flex;
+    gap: 6px; /* Reduced gap */
+    align-items: flex-end;
+}
+
+#victory-cards-section h2 {
+    position: absolute;
+    top: 20px; /* Position in the upper area as shown in image */
+    left: 20px; /* Position on the left side as shown in image */
+    color: #8B4513;
+    font-size: 1.5em;
+    margin: 0;
+    z-index: 15;
+    transform: none; /* Remove centering transform */
+}
+#victory-cards-section {
+    position: relative;
+    padding-top: 150px; /* Reduced padding since title is now positioned differently */
+}
+
+.cards-container {
+    position: relative;
+}
+
+/* Ensure card row has proper positioning context */
+.card-row {
+    position: relative;
+}
 .card {
     width: 150px;
     height: 200px;
@@ -340,10 +448,13 @@ section h2 {
 
 .card-header {
     text-align: center;
-    font-weight: bold;
-    font-size: 1.1em;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 2.42em; /* Increased by 2.2x from 1.1em */
     margin-bottom: 10px;
     flex-shrink: 0;
+    color: #8B4513;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .card-effect {
@@ -405,9 +516,42 @@ section h2 {
 .spice-group {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     margin: 2px;
     flex-wrap: wrap;
+}
+
+.spice-group.single-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-wrap: nowrap;
+}
+
+.spice-group.stacked {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+}
+
+.spice-group.stacked .spice-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+}
+
+.spice-group.flexible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex-wrap: wrap;
+    max-width: 100px;
 }
 
 .spice-count {
@@ -479,6 +623,126 @@ section h2 {
     box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
 }
 
+/* Player Victory Cards Display */
+.player-victory-cards {
+    margin: 15px 0;
+    padding: 10px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.player-victory-cards h4 {
+    color: #8B4513;
+    margin-bottom: 10px;
+    font-size: 1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.total-points {
+    background: rgba(255, 215, 0, 0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.victory-cards-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.no-victory-cards {
+    color: #666;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+.player-victory-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.victory-card-mini {
+    width: 60px;
+    height: 80px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border: 2px solid #B8860B;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 0.8em;
+    padding: 4px;
+}
+
+.victory-card-mini .coin {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 18px; /* Increased proportionally */
+    height: 18px; /* Increased proportionally */
+    font-size: 12px; /* Increased proportionally */
+    border: 1px solid rgba(0,0,0,0.3);
+}
+
+.victory-points-display {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 1.98em; /* Increased by 2.2x from 0.9em */
+    color: #8B4513;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    margin-bottom: 2px;
+}
+
+.bonus-spices-mini {
+    display: flex;
+    gap: 1px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.bonus-spices-mini .spice-cube {
+    width: 8px;
+    height: 8px;
+    margin: 0;
+}
+
+.coins-summary {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    padding: 5px 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.coins-display {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.coin-group {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.coin-count {
+    font-weight: bold;
+    font-size: 0.9em;
+    color: #8B4513;
+}
+
 .player-info {
     display: flex;
     justify-content: space-between;
@@ -493,9 +757,40 @@ section h2 {
 }
 
 .victory-points {
-    font-size: 1.3em;
-    font-weight: bold;
+    font-family: 'Cinzel', serif;
+    font-size: 1.586em; /* Increased by 2.2x from 1.3em */
+    font-weight: 700;
     color: #FF6B35;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.player-coins-display {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.coin-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.coin-info .coin {
+    position: static;
+    width: 48px; /* Increased from 32px */
+    height: 48px; /* Increased from 32px */
+    margin: 0;
+    margin-right: 8px;
+}
+
+.coin-info .coin-count {
+    font-weight: bold;
+    font-size: 1em;
+    color: #8B4513;
 }
 
 .spice-storage {
@@ -565,8 +860,8 @@ section h2 {
 }
 
 .mini-card .spice-cube {
-    width: 16px;
-    height: 16px;
+    width: 13px;
+    height: 13px;
     margin: 1px;
 }
 
@@ -610,20 +905,74 @@ section h2 {
 
 /* Coins */
 .coin {
-    width: 25px;
-    height: 25px;
+    width: 48px; /* Increased from 32px to accommodate larger font */
+    height: 48px; /* Increased from 32px to accommodate larger font */
     border-radius: 50%;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin: 2px;
     border: 2px solid #333;
     position: absolute;
     top: 5px;
     right: 5px;
     z-index: 10;
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 42px; /* Increased by 3x from 14px */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
 }
 
-.coin-gold { background: #FFD700; }
-.coin-silver { background: #C0C0C0; }
+.coin-gold { 
+    background: radial-gradient(circle, #FFD700, #B8860B);
+    color: #8B4513;
+}
+
+.coin-silver { 
+    background: radial-gradient(circle, #C0C0C0, #808080);
+    color: #333;
+}
+
+/* Coins container for side-by-side positioning */
+.coins-container {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 3px;
+    z-index: 10;
+    flex-direction: row;
+    align-items: center;
+}
+
+.coins-container .coin {
+    position: static !important;
+    top: auto !important;
+    right: auto !important;
+    width: 48px; /* Increased from 32px */
+    height: 48px; /* Increased from 32px */
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Multiple coins stacking (fallback for old system) */
+.victory-card {
+    position: relative;
+    overflow: visible; /* Allow coins to show outside card bounds if needed */
+}
+
+.victory-card .coin:nth-child(2) {
+    top: 8px;
+    right: 8px;
+    z-index: 9;
+}
+
+.victory-card .coin:nth-child(3) {
+    top: 11px;
+    right: 11px;
+    z-index: 8;
+}
 
 /* Deck */
 .deck {
@@ -809,22 +1158,281 @@ section h2 {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .card-row {
-        flex-direction: column;
-        align-items: center;
+    #game-container { padding: 5px; }
+    header { padding: 15px 10px; margin-bottom: 15px; }
+    header h1 { font-size: 1.5em; }
+    #game-info { flex-direction: column; gap: 8px; text-align: center; }
+    
+    /* Mobile card layout - stretch to screen width */
+    .cards-container { 
+        flex-direction: column; 
+        padding: 0 5px; 
     }
     
-    .spice-storage {
-        grid-template-columns: repeat(5, 1fr);
+    .card-row { 
+        width: 100%; 
+        justify-content: stretch; 
+        gap: 5px; 
+        flex-direction: row;
+        align-items: stretch;
+    }
+    
+    .card { 
+        flex: 1; 
+        min-width: calc(50% - 2.5px); 
+        max-width: calc(50% - 2.5px); 
+        width: auto; 
+        height: 120px; 
+        font-size: 9px; 
+        padding: 5px; 
+    }
+    
+    .deck { 
+        width: 70px; 
+        height: 100px; 
+        font-size: 11px; 
+        align-self: center; 
+        margin-top: 10px; 
+    }
+    
+    /* Victory card costs for mobile */
+    .victory-card-cost-bottom { 
+        padding: 2px; 
+        min-height: 18px; 
+    }
+    
+    .victory-card-cost-bottom .spice-cube { 
+        width: 10px; 
+        height: 10px; 
+    }
+    
+    /* Card headers for mobile */
+    .card-header { 
+        font-size: 1.8em; 
+    }
+    
+    /* Spice cubes for mobile */
+    .spice-cube { 
+        width: 12px; 
+        height: 12px; 
+        min-width: 12px;
+        min-height: 12px;
+    }
+    
+    /* Mini card spice cubes for mobile - maintain proportion */
+    .mini-card .spice-cube {
+        width: 8px;
+        height: 8px;
+        min-width: 8px;
+        min-height: 8px;
+    }
+    
+    /* Coins for mobile */
+    .coin { 
+        width: 28px; 
+        height: 28px; 
+        font-size: 20px; 
+    }
+    
+    .coin-info .coin { 
+        width: 28px; 
+        height: 28px; 
+    }
+    
+    .coins-container .coin { 
+        width: 28px; 
+        height: 28px; 
+    }
+    
+    .victory-card-mini .coin { 
+        width: 14px; 
+        height: 14px; 
+        font-size: 8px; 
+    }
+    
+    .victory-card .coin { 
+        width: 28px; 
+        height: 28px; 
+        font-size: 20px; 
+    }
+    
+    /* Player boards for mobile */
+    .player-board { 
+        padding: 10px; 
+        margin: 10px 0; 
+    }
+    
+    .player-info { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 8px; 
+    }
+    
+    .player-stats { 
+        flex-wrap: wrap; 
+        gap: 8px; 
     }
     
     .player-cards {
         flex-direction: column;
     }
     
+    /* Action buttons for mobile */
+    .action-buttons { 
+        display: grid; 
+        grid-template-columns: 1fr 1fr; 
+        gap: 8px; 
+        flex-direction: row;
+    }
+    
+    .action-btn { 
+        padding: 10px 6px; 
+        font-size: 0.85em; 
+        width: auto;
+    }
+    
+    /* Spice storage for mobile */
+    .spice-storage { 
+        grid-template-columns: repeat(5, 1fr); 
+        gap: 2px; 
+    }
+    
+    .spice-storage-container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 3px;
+    }
+    
+    .spice-slot { 
+        min-height: 20px; 
+    }
+    
+    .spice-slot .spice-cube { 
+        width: 10px; 
+        height: 10px; 
+    }
+    
+    /* Modal adjustments for mobile */
+    .modal-content { 
+        padding: 15px; 
+        margin: 10px; 
+        max-width: 95%; 
+        width: 95%;
+    }
+    
+    .modal-buttons { 
+        flex-direction: column; 
+        gap: 8px; 
+    }
+    
+    .modal-buttons button { 
+        width: 100%; 
+    }
+    
+    /* Setup options */
+    .setup-options {
+        gap: 15px;
+    }
+    
+    .setup-section select {
+        padding: 12px;
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    /* Menu options for mobile */
+    .menu-option-btn { 
+        padding: 12px 15px; 
+        font-size: 14px; 
+    }
+    
+    /* Game message for mobile */
+    .game-message { 
+        top: 5px; 
+        max-width: 95%; 
+        font-size: 12px; 
+        padding: 8px 12px; 
+    }
+    
+    /* Better touch targets */
+    .card {
+        min-height: 44px;
+    }
+    
+    /* Header adjustments */
+    header h1 {
+        font-size: 1.8em;
+    }
+    
     #game-info {
-        flex-direction: column;
-        gap: 10px;
+        font-size: 1em;
+    }
+    
+    .header-buttons {
+        gap: 8px;
+    }
+    
+    .help-button {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+}
+
+/* Extra small screens (phones in portrait) */
+@media (max-width: 480px) {
+    #game-container {
+        padding: 10px;
+    }
+    
+    .card {
+        width: 100px;
+        height: 140px;
+        font-size: 0.8em;
+    }
+    
+    .mini-card {
+        width: 60px;
+        height: 90px;
+        font-size: 0.7em;
+    }
+    
+    .spice-cube {
+        width: 18px;
+        height: 18px;
+    }
+    
+    /* Mini card spice cubes for extra small screens */
+    .mini-card .spice-cube {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .victory-card-cost-bottom .spice-cube {
+        width: 12px;
+        height: 12px;
+    }
+    
+    header {
+        padding: 15px;
+    }
+    
+    header h1 {
+        font-size: 1.5em;
+        margin-bottom: 8px;
+    }
+    
+    section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .player-board {
+        padding: 15px;
+    }
+    
+    .game-message {
+        font-size: 0.9em;
+        padding: 10px 15px;
+        max-width: 90%;
     }
 }
 
@@ -1284,16 +1892,19 @@ section h2 {
     position: absolute;
     top: 5px;
     right: 5px;
-    width: 20px;
-    height: 20px;
+    width: 48px; /* Increased to match main coin size */
+    height: 48px; /* Increased to match main coin size */
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    font-weight: bold;
+    font-size: 42px; /* Increased to match main coin font size */
+    font-weight: 700;
+    font-family: 'Cinzel', serif;
     z-index: 10;
-    border: 1px solid rgba(0,0,0,0.2);
+    border: 2px solid #333;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .coin-gold {
@@ -1430,19 +2041,11 @@ section h2 {
 }
 
 /* Enhanced card selection feedback */
-.card.selected::after {
-    content: "SELECTED";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(255, 215, 0, 0.9);
-    color: #8B4513;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: bold;
-    pointer-events: none;
+.card.selected {
+    border-color: #FFD700;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    background-color: rgba(255, 255, 0, 0.2) !important;
+    background-blend-mode: overlay;
 }
 
 /* Performance optimizations */
@@ -1471,6 +2074,321 @@ section h2 {
     }
 }
 
+/* Multiplayer UI Styles */
+.screen {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.screen.hidden {
+    display: none;
+}
+
+.lobby-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    padding: 40px 20px;
+}
+
+.lobby-options {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.player-setup {
+    margin-bottom: 30px;
+}
+
+.player-setup h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+.player-setup input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #8B4513;
+    border-radius: 8px;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.room-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.action-btn.primary {
+    background: #4CAF50;
+    color: white;
+    padding: 15px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.action-btn.primary:hover {
+    background: #45a049;
+}
+
+.action-btn.secondary {
+    background: #2196F3;
+    color: white;
+    padding: 15px 30px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.action-btn.secondary:hover {
+    background: #1976D2;
+}
+
+.back-btn {
+    background: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.back-btn:hover {
+    background: #d32f2f;
+}
+
+.room-setup, .join-setup {
+    max-width: 500px;
+    margin: 40px auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.setup-section {
+    margin-bottom: 20px;
+}
+
+.setup-section label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.setup-section input,
+.setup-section select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #8B4513;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.join-help {
+    text-align: center;
+    margin-top: 30px;
+    color: #666;
+    font-style: italic;
+}
+
+.room-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.room-content {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 30px;
+    padding: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.players-list {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.players-list h3 {
+    color: #8B4513;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.room-player {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 8px;
+    border-left: 4px solid #8B4513;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-status {
+    font-size: 1.2em;
+}
+
+.player-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.host-badge {
+    background: #FFD700;
+    color: #8B4513;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.room-controls {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.game-settings h3 {
+    color: #8B4513;
+    margin-bottom: 15px;
+}
+
+.settings-grid {
+    display: grid;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.setting-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.setting-item label {
+    font-weight: bold;
+    color: #8B4513;
+}
+
+.setting-item select {
+    padding: 8px;
+    border: 2px solid #8B4513;
+    border-radius: 4px;
+}
+
+.room-status {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(139, 69, 19, 0.1);
+    border-radius: 8px;
+}
+
+#connection-status {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#connection-status.connected {
+    color: #4CAF50;
+}
+
+#connection-status.disconnected {
+    color: #f44336;
+}
+
+#connection-status.connection-error {
+    color: #FF9800;
+}
+
+#room-messages {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 0.9em;
+}
+
+.room-message {
+    margin-bottom: 5px;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.room-message.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #2E7D32;
+}
+
+.room-message.error {
+    background: rgba(244, 67, 54, 0.1);
+    color: #C62828;
+}
+
+.room-message.info {
+    background: rgba(33, 150, 243, 0.1);
+    color: #1565C0;
+}
+
+.network-status {
+    font-size: 0.8em;
+    color: #666;
+    margin-left: 10px;
+}
+
+/* Mobile responsive for multiplayer */
+@media (max-width: 768px) {
+    .room-content {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+    }
+    
+    .lobby-options {
+        padding: 30px 20px;
+    }
+    
+    .room-setup, .join-setup {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    .room-info {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .room-player {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
@@ -1481,35 +2399,55 @@ section h2 {
 }
 /* Enhanced setup modal */
 .setup-options {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 20px;
     margin: 20px 0;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .setup-section {
-    display: flex;
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
     gap: 8px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
 }
 
 .setup-section label {
     font-weight: bold;
     color: #8B4513;
+    display: block !important;
+    visibility: visible !important;
 }
 
 .setup-section select {
     padding: 8px 12px;
     border: 2px solid #8B4513;
     border-radius: 4px;
-    background: white;
+    background: white !important;
     font-size: 14px;
+    display: block !important;
+    width: 100% !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 .setup-section select:focus {
     outline: none;
     border-color: #FFD700;
     box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* Ensure AI setup elements are visible */
+#ai-players, #ai-difficulty {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1 !important;
 }
 
 /* AI player indicators */
@@ -1765,7 +2703,61 @@ section h2 {
     background: #5a6268;
 }
 
-/* Responsive statistics */
+/* Card back styling for hidden hands */
+.card-back {
+    background: linear-gradient(135deg, #8B4513, #A0522D) !important;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.card-back-design {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.hidden-hand {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.hidden-hand-info {
+    color: #666;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+    background: rgba(0,0,0,0.05);
+    border-radius: 4px;
+}
+
+/* Victory card cost positioning */
+.victory-card-cost-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+    z-index: 5;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 0 0 10px 10px;
+    padding: 4px;
+    border-top: 1px solid rgba(139, 69, 19, 0.3);
+    min-height: 26px;
+}
+
+.victory-card-cost-bottom .spice-cube {
+    width: 18px;
+    height: 18px;
+    margin: 0px;
+    flex-shrink: 0;
+}
 @media (max-width: 768px) {
     .stats-grid {
         grid-template-columns: 1fr;
@@ -1794,5 +2786,127 @@ section h2 {
         flex-direction: column;
         text-align: center;
         gap: 8px;
+    }
+}
+
+/* Game Menu Styles */
+.menu-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.menu-option-btn {
+    background: #8B4513;
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: left;
+    transition: background-color 0.2s ease;
+}
+
+.menu-option-btn:hover {
+    background: #A0522D;
+}
+
+/* Game Rules Modal Styles */
+.rules-content {
+    max-height: 400px;
+    overflow-y: auto;
+    text-align: left;
+    line-height: 1.6;
+}
+
+.rules-content h4 {
+    color: #8B4513;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.rules-content ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.rules-content li {
+    margin-bottom: 5px;
+}
+/* Restart Confirmation Modal Styles */
+.restart-content {
+    text-align: center;
+    margin: 20px 0;
+    line-height: 1.6;
+}
+
+.restart-content p {
+    margin-bottom: 10px;
+}
+
+.restart-content strong {
+    color: #dc3545;
+}
+/* Very small screens */
+@media (max-width: 360px) {
+    .card { 
+        min-width: 100%; 
+        max-width: 100%; 
+        height: 100px; 
+    }
+    
+    .card-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-buttons { 
+        grid-template-columns: 1fr; 
+    }
+    
+    header h1 { font-size: 1.3em; }
+    
+    .spice-storage { 
+        grid-template-columns: repeat(4, 1fr); 
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (orientation: landscape) and (max-height: 500px) {
+    header { 
+        padding: 8px; 
+        margin-bottom: 8px; 
+    }
+    
+    header h1 { 
+        font-size: 1.2em; 
+        margin-bottom: 5px; 
+    }
+    
+    section { 
+        margin: 8px 0; 
+    }
+    
+    .player-board { 
+        padding: 8px; 
+        margin: 8px 0; 
+    }
+    
+    .card { 
+        height: 90px; 
+    }
+}
+
+/* Large screens - ensure cards don't get too big */
+@media (min-width: 1200px) {
+    .card {
+        max-width: 140px;
+    }
+    
+    .card-row {
+        max-width: 1000px;
+        margin: 0 auto;
     }
 }

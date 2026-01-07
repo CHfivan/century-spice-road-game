@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Century: Spice Road - Sidebar Layout</title>
+    <link rel="stylesheet" href="styles.css?v=9">
+    <style>
+        /* Sidebar Layout Specific Styles */
+        
+        /* Main container layout */
+        #game-container {
+            display: flex;
+            max-width: none;
+            margin: 0;
+            padding: 20px;
+            gap: 20px;
+            min-height: 100vh;
+        }
+        
+        /* Left side - main game area */
+        .main-game-area {
+            flex: 1;
+            max-width: calc(100% - 590px);
+            margin-left: 40px; /* Left margin as requested */
+        }
+        
+        /* Right sidebar for other players */
+        .players-sidebar {
+            width: 560px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            position: sticky;
+            top: 20px;
+        }
+        
+        /* Container for relative positioning of tooltips */
+        #compact-players-area {
+            position: relative;
+        }
+        
+        .players-sidebar h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            text-align: center;
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 8px;
+        }
+        
+        /* Header adjustments */
+        header {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        /* Compact player board for sidebar */
+        .compact-player-board {
+            border: 2px solid #8B4513;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #FFF8DC;
+            position: relative;
+        }
+        
+        .compact-player-board.active {
+            border-color: #FF6B35;
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
+        }
+        
+        .compact-player-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .compact-player-name {
+            font-size: 1em;
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        .compact-victory-points {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #FF6B35;
+        }
+        
+        /* Compact spice storage */
+        .compact-spice-storage {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 2px;
+            margin: 8px 0;
+            padding: 6px;
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 4px;
+        }
+        
+        .compact-spice-slot {
+            width: 16px;
+            height: 16px;
+            border: 1px dashed #8B4513;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .compact-spice-slot.filled {
+            border-style: solid;
+        }
+        
+        .compact-spice-slot .spice-cube {
+            width: 12px;
+            height: 12px;
+            margin: 0;
+        }
+        
+        /* Card count indicators */
+        .card-indicators {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .card-indicator {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 6px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .card-indicator:hover {
+            background: rgba(255, 215, 0, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .card-indicator-icon {
+            font-size: 1.8em;
+        }
+        
+        .card-indicator-count {
+            font-weight: bold;
+            color: #8B4513;
+        }
+        
+        /* Coins display for compact boards */
+        .compact-coins-display {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-top: 6px;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        .compact-coin-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+        
+        .compact-coin {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: bold;
+            border: 1px solid #333;
+        }
+        
+        .compact-coin.gold {
+            background: radial-gradient(circle, #FFD700, #B8860B);
+            color: #8B4513;
+        }
+        
+        .compact-coin.silver {
+            background: radial-gradient(circle, #C0C0C0, #808080);
+            color: #333;
+        }
+        
+        .compact-coin-count {
+            font-weight: bold;
+            font-size: 0.8em;
+            color: #8B4513;
+        }
+        
+        /* Hover tooltip for cards */
+        .card-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            max-width: 300px;
+            z-index: 1000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-tooltip.visible {
+            opacity: 1;
+        }
+        
+        .tooltip-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        
+        .tooltip-card {
+            width: 80px;
+            height: 120px;
+            background: linear-gradient(135deg, #F0E68C, #DDD);
+            border: 1px solid #8B4513;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            padding: 6px;
+        }
+        
+        .tooltip-card.victory {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        
+        .tooltip-card .card-effect {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            height: 100%;
+            justify-content: center;
+        }
+        
+        .tooltip-card .spice-cube {
+            width: 13px;
+            height: 13px;
+            margin: 1px;
+        }
+        
+        .tooltip-card .trade-arrow {
+            font-size: 1.1em;
+            margin: 2px 0;
+        }
+        
+        .tooltip-card .upgrade-effect {
+            font-size: 1.3em;
+        }
+        
+        .tooltip-card .victory-points-display {
+            font-size: 1.98em;
+            font-weight: bold;
+        }
+        
+        /* Player 1 board stays in main area */
+        .main-player-board {
+            /* Keep existing styles from original */
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .players-sidebar {
+                width: 480px;
+            }
+            
+            .main-game-area {
+                max-width: calc(100% - 510px);
+                margin-left: 20px;
+            }
+        }
+        
+        @media (max-width: 1000px) {
+            #game-container {
+                flex-direction: column;
+                padding: 10px;
+            }
+            
+            .main-game-area {
+                max-width: 100%;
+                margin-left: 0;
+            }
+            
+            .players-sidebar {
+                width: 100%;
+                max-height: none;
+                position: static;
+                order: -1; /* Move to top on mobile */
+            }
+            
+            .compact-player-board {
+                display: inline-block;
+                width: calc(50% - 8px);
+                margin-right: 8px;
+                vertical-align: top;
+            }
+        }
+        
+        /* AI player indicators for compact boards */
+        .compact-player-board.ai-player {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
+        }
+        
+        .compact-player-board.ai-player .compact-player-name::after {
+            content: " 🤖";
+            font-size: 0.8em;
+        }
+        
+        /* Scrollbar styling for sidebar */
+        .players-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .players-sidebar::-webkit-scrollbar-track {
+            background: rgba(139, 69, 19, 0.1);
+            border-radius: 3px;
+        }
+        
+        .players-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(139, 69, 19, 0.3);
+            border-radius: 3px;
+        }
+        
+        .players-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(139, 69, 19, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main game area (left side) -->
+        <div class="main-game-area">
+            <header>
+                <h1>Century: Spice Road</h1>
+                <div id="game-info">
+                    <span id="current-player">Player 1's Turn</span>
+                    <span id="turn-counter">Turn 1</span>
+                    <div class="header-buttons">
+                        <button id="menu-btn" class="help-button" title="Game Menu">☰</button>
+                    </div>
+                </div>
+                <!-- In-game message display -->
+                <div id="game-message" class="game-message hidden"></div>
+            </header>
+
+            <main id="game-board">
+                <!-- Victory Point Cards Row -->
+                <section id="victory-cards-section">
+                    <h2>Victory Point Cards</h2>
+                    <div class="cards-container">
+                        <div id="victory-cards-row" class="card-row">
+                            <!-- Victory cards will be populated here -->
+                        </div>
+                        <!-- Coin tracking stacks positioned relative to cards -->
+                        <div id="coin-tracking">
+                            <div id="gold-coin-stack" class="coin-stack">
+                                <div class="coin-stack-label">Gold Coins</div>
+                                <div id="gold-bars" class="coin-bars">
+                                    <!-- Gold bars will be populated here -->
+                                </div>
+                            </div>
+                            <div id="silver-coin-stack" class="coin-stack">
+                                <div class="coin-stack-label">Silver Coins</div>
+                                <div class="silver-bars-container">
+                                    <div id="silver-bars-stack1" class="coin-bars">
+                                        <!-- First silver stack (5 bars) -->
+                                    </div>
+                                    <div id="silver-bars-stack2" class="coin-bars">
+                                        <!-- Second silver stack (5 bars) -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                    </div>
+                </section>
+
+                <!-- Merchant Cards Market Row -->
+                <section id="merchant-cards-section">
+                    <h2>Merchant Market</h2>
+                    <div class="cards-container">
+                        <div id="merchant-cards-row" class="card-row">
+                            <!-- Merchant cards will be populated here -->
+                        </div>
+                        <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                    </div>
+                </section>
+
+                <!-- Player 1 Board (stays in main area) -->
+                <section id="player1-area">
+                    <!-- Player 1 board will be populated here with full details -->
+                </section>
+            </main>
+        </div>
+
+        <!-- Right sidebar for other players -->
+        <div class="players-sidebar">
+            <h3>Other Players</h3>
+            <div id="compact-players-area">
+                <!-- Compact player boards will be populated here -->
+            </div>
+            
+            <!-- Tooltip for card details - positioned within sidebar -->
+            <div id="card-tooltip" class="card-tooltip">
+                <div id="tooltip-title"></div>
+                <div id="tooltip-cards" class="tooltip-cards"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All existing modals -->
+    <!-- Game Setup Modal -->
+    <div id="setup-modal" class="modal">
+        <div class="modal-content">
+            <h2>Game Setup</h2>
+            <div class="setup-options">
+                <div class="setup-section">
+                    <label for="player-count">Number of Players:</label>
+                    <select id="player-count">
+                        <option value="2">2 Players</option>
+                        <option value="3">3 Players</option>
+                        <option value="4">4 Players</option>
+                        <option value="5">5 Players</option>
+                    </select>
+                </div>
+                
+                <div class="setup-section">
+                    <label for="ai-players">AI Players:</label>
+                    <select id="ai-players">
+                        <option value="0">No AI (Human Only)</option>
+                        <option value="1">1 AI Player</option>
+                        <option value="2">2 AI Players</option>
+                        <option value="3">3 AI Players</option>
+                        <option value="4">4 AI Players</option>
+                    </select>
+                </div>
+                
+                <div class="setup-section">
+                    <label for="ai-difficulty">AI Difficulty:</label>
+                    <select id="ai-difficulty">
+                        <option value="easy">Easy</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+            <button id="start-game">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Action Modal -->
+    <div id="action-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 id="action-title">Choose Action</h3>
+            <div id="action-content">
+                <!-- Dynamic action content -->
+            </div>
+            <div class="modal-buttons">
+                <button id="confirm-action">Confirm</button>
+                <button id="cancel-action">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Menu Modal -->
+    <div id="game-menu-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Game Menu</h3>
+            <div class="menu-options">
+                <button class="menu-option-btn" id="game-rules-btn">📖 Game Rules</button>
+                <button class="menu-option-btn" id="statistics-btn">📊 Statistics</button>
+                <button class="menu-option-btn" id="restart-game-btn">🔄 Restart Game</button>
+                <button class="menu-option-btn" id="close-menu-btn">✖️ Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Rules Modal -->
+    <div id="game-rules-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Century: Spice Road - Game Rules</h3>
+            <div class="rules-content">
+                <h4>Objective</h4>
+                <p>Be the first player to claim 5 victory point cards (or 6 in a 4-5 player game) to trigger the final round.</p>
+                
+                <h4>Player Actions (Choose 1 per turn)</h4>
+                <ul>
+                    <li><strong>Play Card:</strong> Play a merchant card from your hand to gain spices, upgrade spices, or trade spices</li>
+                    <li><strong>Acquire Card:</strong> Take a merchant card from the market (costs yellow spices for non-first cards)</li>
+                    <li><strong>Claim Victory:</strong> Purchase a victory point card using the required spices</li>
+                    <li><strong>Rest:</strong> Take all played cards back into your hand</li>
+                </ul>
+                
+                <h4>Spice Types (from basic to valuable)</h4>
+                <ul>
+                    <li>🟡 Yellow (Turmeric)</li>
+                    <li>🔴 Red (Saffron)</li>
+                    <li>🟢 Green (Cardamom)</li>
+                    <li>🟤 Brown (Cinnamon)</li>
+                </ul>
+                
+                <h4>Victory Conditions</h4>
+                <p>Game ends when a player claims their 5th victory card (6th in 4-5 player games). All other players get one final turn. Player with most victory points wins!</p>
+                
+                <h4>Scoring</h4>
+                <ul>
+                    <li>Victory point cards: Face value</li>
+                    <li>Gold coins: 3 points each</li>
+                    <li>Silver coins: 1 point each</li>
+                </ul>
+            </div>
+            <div class="modal-buttons">
+                <button id="close-rules-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Restart Confirmation Modal -->
+    <div id="restart-confirm-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Restart Game</h3>
+            <div class="restart-content">
+                <p>Are you sure you want to restart the game?</p>
+                <p><strong>All progress will be lost!</strong></p>
+            </div>
+            <div class="modal-buttons">
+                <button id="confirm-restart-btn" style="background: #dc3545;">Yes, Restart</button>
+                <button id="cancel-restart-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cards.js?v=6"></script>
+    <script src="js/game.js?v=6"></script>
+    <script src="js/ai-player.js?v=6"></script>
+    <script src="js/analytics.js?v=6"></script>
+    <script src="js/ui.js?v=8"></script>
+    <script src="js/ui-sidebar.js?v=3"></script>
+    <script src="js/main-sidebar.js?v=3"></script>
+    
+    <!-- Sidebar Layout Specific JavaScript -->
+    <script>
+        // Sidebar layout enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎮 Sidebar layout loaded');
+            
+            // Tooltip functionality
+            const tooltip = document.getElementById('card-tooltip');
+            const tooltipTitle = document.getElementById('tooltip-title');
+            const tooltipCards = document.getElementById('tooltip-cards');
+            
+            // Show tooltip on hover
+            function showTooltip(event, title, cards) {
+                tooltipTitle.textContent = title;
+                tooltipCards.innerHTML = '';
+                
+                if (cards && cards.length > 0) {
+                    cards.forEach(card => {
+                        const cardDiv = document.createElement('div');
+                        cardDiv.className = `tooltip-card ${card.type === 'victory' ? 'victory' : ''}`;
+                        
+                        if (card.type === 'victory') {
+                            cardDiv.innerHTML = `
+                                <div class="victory-points-display">${card.points}</div>
+                            `;
+                        } else {
+                            // Render merchant card effect in miniature
+                            cardDiv.innerHTML = `<div class="card-effect">${renderMiniCardEffect(card)}</div>`;
+                        }
+                        
+                        tooltipCards.appendChild(cardDiv);
+                    });
+                } else {
+                    tooltipCards.innerHTML = '<div style="color: #999; font-style: italic;">No cards</div>';
+                }
+                
+                // Position tooltip relative to the compact players area
+                const compactArea = document.getElementById('compact-players-area');
+                const compactRect = compactArea.getBoundingClientRect();
+                const targetRect = event.target.getBoundingClientRect();
+                
+                // Calculate position relative to compact area
+                const relativeLeft = targetRect.right - compactRect.left + 10;
+                const relativeTop = targetRect.top - compactRect.top;
+                
+                tooltip.style.left = relativeLeft + 'px';
+                tooltip.style.top = relativeTop + 'px';
+                
+                // Adjust if tooltip goes outside compact area bounds
+                setTimeout(() => {
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    const areaWidth = compactArea.offsetWidth;
+                    const areaHeight = compactArea.offsetHeight;
+                    
+                    // If tooltip extends beyond right edge, position it to the left of the icon
+                    if (relativeLeft + tooltipRect.width > areaWidth) {
+                        const newLeft = targetRect.left - compactRect.left - tooltipRect.width - 10;
+                        tooltip.style.left = Math.max(10, newLeft) + 'px';
+                    }
+                    
+                    // If tooltip extends beyond bottom, move it up
+                    if (relativeTop + tooltipRect.height > areaHeight) {
+                        const newTop = relativeTop - tooltipRect.height - 10;
+                        tooltip.style.top = Math.max(10, newTop) + 'px';
+                    }
+                }, 10);
+                
+                tooltip.classList.add('visible');
+            }
+            
+            // Hide tooltip
+            function hideTooltip() {
+                tooltip.classList.remove('visible');
+            }
+            
+            // Render mini card effect for tooltip
+            function renderMiniCardEffect(card) {
+                switch (card.type) {
+                    case 'gain':
+                        return renderMiniSpices(card.effect);
+                    case 'upgrade':
+                        return `<div class="upgrade-effect">↑${card.effect.amount}</div>`;
+                    case 'trade':
+                        return `
+                            <div class="trade-input">${renderMiniSpices(card.effect.input)}</div>
+                            <div class="trade-arrow">↓</div>
+                            <div class="trade-output">${renderMiniSpices(card.effect.output)}</div>
+                        `;
+                    case 'gain-upgrade':
+                        return `
+                            ${renderMiniSpices(card.effect.gain)}
+                            <div class="upgrade-effect">↑${card.effect.upgrade}</div>
+                        `;
+                    default:
+                        return '';
+                }
+            }
+            
+            // Render mini spices for tooltip
+            function renderMiniSpices(spices) {
+                let html = '';
+                Object.entries(spices).forEach(([type, count]) => {
+                    for (let i = 0; i < count; i++) {
+                        html += `<div class="spice-cube spice-${type}"></div>`;
+                    }
+                });
+                return html;
+            }
+            
+            // Add event listeners for tooltips (will be attached when UI creates compact boards)
+            window.attachTooltipListeners = function(playerIndex, player) {
+                const handIndicator = document.querySelector(`[data-player="${playerIndex}"] .hand-indicator`);
+                const playedIndicator = document.querySelector(`[data-player="${playerIndex}"] .played-indicator`);
+                const victoryIndicator = document.querySelector(`[data-player="${playerIndex}"] .victory-indicator`);
+                
+                if (handIndicator) {
+                    handIndicator.addEventListener('mouseenter', (e) => {
+                        showTooltip(e, `${player.name}'s Hand Cards`, player.hand);
+                    });
+                    handIndicator.addEventListener('mouseleave', hideTooltip);
+                }
+                
+                if (playedIndicator) {
+                    playedIndicator.addEventListener('mouseenter', (e) => {
+                        showTooltip(e, `${player.name}'s Played Cards`, player.discardPile);
+                    });
+                    playedIndicator.addEventListener('mouseleave', hideTooltip);
+                }
+                
+                if (victoryIndicator) {
+                    victoryIndicator.addEventListener('mouseenter', (e) => {
+                        showTooltip(e, `${player.name}'s Victory Cards`, player.victoryCards);
+                    });
+                    victoryIndicator.addEventListener('mouseleave', hideTooltip);
+                }
+            };
+        });
+        
+        // Debug script for AI setup
+        window.addEventListener('load', function() {
+            console.log('🔍 Sidebar layout loaded, checking AI elements...');
+            
+            setTimeout(() => {
+                const aiPlayers = document.getElementById('ai-players');
+                const aiDifficulty = document.getElementById('ai-difficulty');
+                const setupModal = document.getElementById('setup-modal');
+                
+                console.log('=== SIDEBAR LAYOUT AI SETUP DEBUG ===');
+                console.log('Setup Modal:', setupModal);
+                console.log('AI Players element:', aiPlayers);
+                console.log('AI Difficulty element:', aiDifficulty);
+                
+                if (aiPlayers && aiDifficulty) {
+                    console.log('✅ Sidebar layout AI elements found!');
+                } else {
+                    console.error('❌ Sidebar layout AI elements missing!');
+                }
+                
+                console.log('=== END SIDEBAR DEBUG ===');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

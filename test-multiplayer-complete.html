@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Multiplayer Test</title>
+    <link rel="stylesheet" href="styles.css?v=9">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🌶️ Century: Spice Road - Multiplayer System Test</h1>
+        
+        <div class="test-section">
+            <h2>System Requirements</h2>
+            <div id="system-tests"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Game Assets</h2>
+            <div id="asset-tests"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Multiplayer Components</h2>
+            <div id="multiplayer-tests"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>Network Simulation</h2>
+            <div id="network-tests"></div>
+            <button class="test-button" onclick="testNetworkSimulation()">Test Network</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Game Integration</h2>
+            <div id="game-tests"></div>
+            <button class="test-button" onclick="testGameIntegration()">Test Game</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>Quick Test</h2>
+            <button class="test-button" onclick="window.open('multiplayer-century.html', '_blank')">Open Multiplayer Game</button>
+        </div>
+    </div>
+
+    <!-- Load game scripts for testing -->
+    <script src="js/cards.js?v=8"></script>
+    <script src="js/game.js?v=8"></script>
+    <script src="js/ai-player.js?v=8"></script>
+    <script src="js/analytics.js?v=8"></script>
+    <script src="js/ui.js?v=8"></script>
+    <script src="js/multiplayer.js?v=1"></script>
+    <script src="js/main-multiplayer.js?v=1"></script>
+
+    <script>
+        function addResult(container, message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            document.getElementById(container).appendChild(div);
+        }
+
+        // System Requirements Tests
+        function testSystemRequirements() {
+            addResult('system-tests', 'Testing system requirements...', 'info');
+            
+            // WebRTC Support
+            if (typeof RTCPeerConnection !== 'undefined') {
+                addResult('system-tests', '✓ WebRTC is supported', 'success');
+            } else {
+                addResult('system-tests', '✗ WebRTC is not supported', 'error');
+            }
+            
+            // localStorage Support
+            try {
+                localStorage.setItem('test', 'value');
+                localStorage.removeItem('test');
+                addResult('system-tests', '✓ localStorage is working', 'success');
+            } catch (e) {
+                addResult('system-tests', '✗ localStorage failed: ' + e.message, 'error');
+            }
+            
+            // Modern JavaScript features
+            try {
+                const testClass = class TestClass { constructor() { this.test = true; } };
+                const instance = new testClass();
+                if (instance.test) {
+                    addResult('system-tests', '✓ ES6 classes supported', 'success');
+                }
+            } catch (e) {
+                addResult('system-tests', '✗ ES6 classes not supported: ' + e.message, 'error');
+            }
+        }
+
+        // Game Assets Tests
+        function testGameAssets() {
+            addResult('asset-tests', 'Testing game assets...', 'info');
+            
+            // Cards data
+            if (typeof MERCHANT_CARDS !== 'undefined' && MERCHANT_CARDS.length > 0) {
+                addResult('asset-tests', `✓ Merchant cards loaded (${MERCHANT_CARDS.length} cards)`, 'success');
+            } else {
+                addResult('asset-tests', '✗ Merchant cards not loaded', 'error');
+            }
+            
+            if (typeof VICTORY_CARDS !== 'undefined' && VICTORY_CARDS.length > 0) {
+                addResult('asset-tests', `✓ Victory cards loaded (${VICTORY_CARDS.length} cards)`, 'success');
+            } else {
+                addResult('asset-tests', '✗ Victory cards not loaded', 'error');
+            }
+            
+            // Game classes
+            if (typeof Game !== 'undefined') {
+                addResult('asset-tests', '✓ Game class available', 'success');
+            } else {
+                addResult('asset-tests', '✗ Game class not available', 'error');
+            }
+            
+            if (typeof GameUI !== 'undefined') {
+                addResult('asset-tests', '✓ GameUI class available', 'success');
+            } else {
+                addResult('asset-tests', '✗ GameUI class not available', 'error');
+            }
+            
+            if (typeof AIPlayer !== 'undefined') {
+                addResult('asset-tests', '✓ AIPlayer class available', 'success');
+            } else {
+                addResult('asset-tests', '✗ AIPlayer class not available', 'error');
+            }
+        }
+
+        // Multiplayer Components Tests
+        function testMultiplayerComponents() {
+            addResult('multiplayer-tests', 'Testing multiplayer components...', 'info');
+            
+            // Multiplayer classes
+            if (typeof MultiplayerManager !== 'undefined') {
+                addResult('multiplayer-tests', '✓ MultiplayerManager class available', 'success');
+            } else {
+                addResult('multiplayer-tests', '✗ MultiplayerManager class not available', 'error');
+            }
+            
+            if (typeof MultiplayerGame !== 'undefined') {
+                addResult('multiplayer-tests', '✓ MultiplayerGame class available', 'success');
+            } else {
+                addResult('multiplayer-tests', '✗ MultiplayerGame class not available', 'error');
+            }
+            
+            if (typeof MultiplayerGameUI !== 'undefined') {
+                addResult('multiplayer-tests', '✓ MultiplayerGameUI class available', 'success');
+            } else {
+                addResult('multiplayer-tests', '✗ MultiplayerGameUI class not available', 'error');
+            }
+            
+            // Global instance
+            if (typeof window.multiplayerManager !== 'undefined') {
+                addResult('multiplayer-tests', '✓ Global multiplayerManager instance available', 'success');
+            } else {
+                addResult('multiplayer-tests', '✗ Global multiplayerManager instance not available', 'error');
+            }
+        }
+
+        // Network Simulation Test
+        function testNetworkSimulation() {
+            addResult('network-tests', 'Testing network simulation...', 'info');
+            
+            try {
+                // Generate room code
+                function generateRoomCode() {
+                    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                    let result = '';
+                    for (let i = 0; i < 6; i++) {
+                        result += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    return result;
+                }
+                
+                const roomCode = generateRoomCode();
+                addResult('network-tests', `✓ Room code generated: ${roomCode}`, 'success');
+                
+                // Test signaling
+                const testMessage = {
+                    type: 'test-join',
+                    roomCode: roomCode,
+                    playerName: 'TestPlayer',
+                    timestamp: Date.now()
+                };
+                
+                const signalId = `signal-${Date.now()}-${Math.random()}`;
+                localStorage.setItem(signalId, JSON.stringify(testMessage));
+                
+                const retrieved = JSON.parse(localStorage.getItem(signalId));
+                if (retrieved.type === 'test-join' && retrieved.roomCode === roomCode) {
+                    addResult('network-tests', '✓ Signaling simulation works', 'success');
+                } else {
+                    addResult('network-tests', '✗ Signaling simulation failed', 'error');
+                }
+                
+                localStorage.removeItem(signalId);
+                
+                // Test room data storage
+                const roomData = {
+                    code: roomCode,
+                    name: 'Test Room',
+                    host: 'TestHost',
+                    players: [{ id: 'host', name: 'TestHost', isHost: true, isAI: false, connected: true }],
+                    maxPlayers: 4,
+                    aiCount: 0,
+                    aiDifficulty: 'medium',
+                    timestamp: Date.now()
+                };
+                
+                localStorage.setItem(`room-${roomCode}`, JSON.stringify(roomData));
+                const retrievedRoom = JSON.parse(localStorage.getItem(`room-${roomCode}`));
+                
+                if (retrievedRoom.code === roomCode && retrievedRoom.host === 'TestHost') {
+                    addResult('network-tests', '✓ Room data storage works', 'success');
+                } else {
+                    addResult('network-tests', '✗ Room data storage failed', 'error');
+                }
+                
+                localStorage.removeItem(`room-${roomCode}`);
+                
+                addResult('network-tests', '✓ Network simulation test completed', 'success');
+                
+            } catch (e) {
+                addResult('network-tests', '✗ Network simulation failed: ' + e.message, 'error');
+            }
+        }
+
+        // Game Integration Test
+        function testGameIntegration() {
+            addResult('game-tests', 'Testing game integration...', 'info');
+            
+            try {
+                // Test game creation
+                const testGame = new MultiplayerGame();
+                addResult('game-tests', '✓ MultiplayerGame instance created', 'success');
+                
+                // Test network setup
+                const testPlayers = [
+                    { id: 'player1', name: 'Player 1', isHost: true, isAI: false, connected: true },
+                    { id: 'player2', name: 'Player 2', isHost: false, isAI: false, connected: true }
+                ];
+                
+                testGame.setupNetworkGame(testPlayers, 0, 'medium');
+                
+                if (testGame.isNetworkGame && testGame.players.length === 2) {
+                    addResult('game-tests', '✓ Network game setup successful', 'success');
+                } else {
+                    addResult('game-tests', '✗ Network game setup failed', 'error');
+                }
+                
+                // Test game state serialization
+                const gameState = testGame.getNetworkState();
+                if (gameState && gameState.players && gameState.currentPlayerIndex !== undefined) {
+                    addResult('game-tests', '✓ Game state serialization works', 'success');
+                } else {
+                    addResult('game-tests', '✗ Game state serialization failed', 'error');
+                }
+                
+                // Test UI creation
+                const testUI = new MultiplayerGameUI(testGame);
+                if (testUI && testUI.game === testGame) {
+                    addResult('game-tests', '✓ MultiplayerGameUI instance created', 'success');
+                } else {
+                    addResult('game-tests', '✗ MultiplayerGameUI creation failed', 'error');
+                }
+                
+                addResult('game-tests', '✓ Game integration test completed', 'success');
+                
+            } catch (e) {
+                addResult('game-tests', '✗ Game integration failed: ' + e.message, 'error');
+                console.error('Game integration error:', e);
+            }
+        }
+
+        // Run all tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                testSystemRequirements();
+                testGameAssets();
+                testMultiplayerComponents();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

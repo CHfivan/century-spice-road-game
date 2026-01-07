@@ -14,6 +14,10 @@ class Game {
         this.finalRoundTriggered = false;
         this.finalRoundTriggerPlayer = null;
         
+        // Coin tracking
+        this.goldCoinsRemaining = 5; // Changed from 4 to 5
+        this.silverCoinsRemaining = 10; // Changed from 9 to 10 (5+5)
+        
         // Game constants
         this.SPICE_TYPES = ['yellow', 'red', 'green', 'brown'];
         this.MAX_SPICES = 10;
@@ -67,9 +71,8 @@ class Game {
             }
         }
         
-        // Add coins to first two victory cards
-        if (this.victoryCards[0]) this.victoryCards[0].coin = 'gold';
-        if (this.victoryCards[1]) this.victoryCards[1].coin = 'silver';
+        // Add coins based on new rules
+        this.assignCoinsToVictoryCards();
         
         // Setup merchant cards market (6 cards)
         this.merchantCards = [];
@@ -78,6 +81,65 @@ class Game {
                 this.merchantCards.push(this.merchantDeck.pop());
             }
         }
+    }
+
+    assignCoinsToVictoryCards() {
+        // Clear existing coins from all cards
+        this.victoryCards.forEach(card => {
+            if (card) delete card.coin;
+        });
+        
+        // No coins are displayed on victory cards anymore
+        // Coins are only tracked in the coin stacks and given to players when cards are claimed
+    }
+
+    claimVictoryCard(cardIndex, player) {
+        if (cardIndex < 0 || cardIndex >= this.victoryCards.length) {
+            return false;
+        }
+        
+        const card = this.victoryCards[cardIndex];
+        if (!card) return false;
+        
+        // Check if player can afford the card
+        if (!this.canAffordCard(player, card)) {
+            return false;
+        }
+        
+        // Pay for the card
+        this.payForCard(player, card);
+        
+        // Handle coin rewards
+        if (card.coin === 'gold' && this.goldCoinsRemaining > 0) {
+            player.coins.push({ type: 'gold', points: 3 });
+            this.goldCoinsRemaining--;
+        } else if (card.coin === 'silver' && this.silverCoinsRemaining > 0) {
+            player.coins.push({ type: 'silver', points: 1 });
+            this.silverCoinsRemaining--;
+        }
+        
+        // Add card to player's collection
+        player.victoryCards.push(card);
+        
+        // Check for final round trigger
+        const victoryCardsNeeded = this.playerCount <= 3 ? 5 : 6;
+        if (player.victoryCards.length >= victoryCardsNeeded && !this.finalRoundTriggered) {
+            this.finalRoundTriggered = true;
+            this.finalRoundTriggerPlayer = player;
+        }
+        
+        // Remove card from market and shift remaining cards
+        this.victoryCards.splice(cardIndex, 1);
+        
+        // Add new card from deck if available
+        if (this.victoryDeck.length > 0) {
+            this.victoryCards.push(this.victoryDeck.pop());
+        }
+        
+        // Reassign coins based on new positions
+        this.assignCoinsToVictoryCards();
+        
+        return true;
     }
 
     distributeStartingSpices() {
@@ -94,6 +156,25 @@ class Game {
                 player.addSpices('yellow', 3);
                 player.addSpices('red', 1);
             }
+        }
+    }
+
+    canAffordCard(player, card) {
+        if (!card.cost) return true;
+        
+        for (const [spiceType, required] of Object.entries(card.cost)) {
+            if (player.spices[spiceType] < required) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    payForCard(player, card) {
+        if (!card.cost) return;
+        
+        for (const [spiceType, required] of Object.entries(card.cost)) {
+            player.spices[spiceType] -= required;
         }
     }
 
@@ -229,10 +310,27 @@ class Game {
             player.removeSpices(spiceType, amount);
         }
 
-        // Gain the card and any coin
+        // Gain the card and any coins
         player.victoryCards.push(card);
-        if (card.coin) {
-            player.coins.push(card.coin);
+        
+        // Handle coin rewards based on card position and availability
+        if (cardIndex === 0) {
+            // 1st victory card position
+            if (this.goldCoinsRemaining > 0) {
+                // Give gold coin if available
+                player.coins.push({ type: 'gold', points: 3 });
+                this.goldCoinsRemaining--;
+            } else if (this.silverCoinsRemaining > 0) {
+                // Give silver coin if gold depleted but silver available
+                player.coins.push({ type: 'silver', points: 1 });
+                this.silverCoinsRemaining--;
+            }
+        } else if (cardIndex === 1) {
+            // 2nd victory card position - always gives silver coin if available
+            if (this.silverCoinsRemaining > 0) {
+                player.coins.push({ type: 'silver', points: 1 });
+                this.silverCoinsRemaining--;
+            }
         }
 
         // Add bonus spices if any
@@ -358,31 +456,44 @@ class Game {
             this.victoryCards.push(this.victoryDeck.pop());
         }
         
-        // Add coins to first two cards (gold on first, silver on second)
-        // Clear existing coins first
-        this.victoryCards.forEach(card => {
-            delete card.coin;
-        });
+        // Handle coin mechanics: cards that shift into coin positions get ADDITIONAL coins
+        // First card position gets gold coin (if it doesn't already have one)
+        if (this.victoryCards[0] && this.victoryCards[0].coin !== 'gold') {
+            // If the card already has a silver coin, it keeps it AND gets a gold coin
+            if (this.victoryCards[0].coin === 'silver') {
+                // Card now has both silver and gold - we'll track this as an array
+                this.victoryCards[0].coins = ['silver', 'gold'];
+                delete this.victoryCards[0].coin; // Remove single coin property
+            } else {
+                // Card gets a gold coin
+                this.victoryCards[0].coin = 'gold';
+            }
+        }
         
-        // Add new coins
-        if (this.victoryCards[0]) this.victoryCards[0].coin = 'gold';
-        if (this.victoryCards[1]) this.victoryCards[1].coin = 'silver';
+        // Second card position gets silver coin (if it doesn't already have one)
+        if (this.victoryCards[1] && !this.victoryCards[1].coin && !this.victoryCards[1].coins) {
+            this.victoryCards[1].coin = 'silver';
+        }
     }
 
     calculateFinalScore(player) {
         let score = 0;
         
-        // Victory points from cards
+        // 1. Victory points from cards
         for (const card of player.victoryCards) {
             score += card.points;
         }
         
-        // Points from coins
+        // 2. Points from coins (correct scoring)
         for (const coin of player.coins) {
-            score += coin === 'gold' ? 5 : 3;
+            if (coin.type === 'gold') {
+                score += 3; // Gold coins worth 3 points
+            } else if (coin.type === 'silver') {
+                score += 1; // Silver coins worth 1 point
+            }
         }
         
-        // Points from spices (except yellow)
+        // 3. Points from non-yellow spices (1 point each)
         score += player.spices.red + player.spices.green + player.spices.brown;
         
         return score;

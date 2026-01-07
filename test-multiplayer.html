@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Multiplayer</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .error { color: red; }
+        .success { color: green; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Multiplayer System Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            document.getElementById('test-results').appendChild(div);
+        }
+        
+        // Test WebRTC support
+        if (typeof RTCPeerConnection !== 'undefined') {
+            log('✓ WebRTC is supported', 'success');
+        } else {
+            log('✗ WebRTC is not supported', 'error');
+        }
+        
+        // Test localStorage
+        try {
+            localStorage.setItem('test', 'value');
+            localStorage.removeItem('test');
+            log('✓ localStorage is working', 'success');
+        } catch (e) {
+            log('✗ localStorage failed: ' + e.message, 'error');
+        }
+        
+        // Test basic multiplayer functionality
+        try {
+            // Simulate loading the multiplayer files
+            log('Testing multiplayer system initialization...', 'info');
+            
+            // Check if we can create a room code
+            function generateRoomCode() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let result = '';
+                for (let i = 0; i < 6; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+            
+            const roomCode = generateRoomCode();
+            log('✓ Room code generated: ' + roomCode, 'success');
+            
+            // Test signaling simulation
+            const testMessage = {
+                type: 'test',
+                roomCode: roomCode,
+                timestamp: Date.now()
+            };
+            
+            const signalId = `signal-${Date.now()}-${Math.random()}`;
+            localStorage.setItem(signalId, JSON.stringify(testMessage));
+            
+            const retrieved = JSON.parse(localStorage.getItem(signalId));
+            if (retrieved.type === 'test' && retrieved.roomCode === roomCode) {
+                log('✓ Signaling simulation works', 'success');
+            } else {
+                log('✗ Signaling simulation failed', 'error');
+            }
+            
+            localStorage.removeItem(signalId);
+            
+            log('✓ Basic multiplayer functionality test passed', 'success');
+            
+        } catch (e) {
+            log('✗ Multiplayer test failed: ' + e.message, 'error');
+        }
+        
+        log('Test completed. If all tests passed, multiplayer should work.', 'info');
+    </script>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Position Editor</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #8B4513, #D2691E);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        #game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        header h1 {
+            color: #8B4513;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        /* Victory cards section */
+        #victory-cards-section {
+            position: relative;
+            padding: 300px 20px 20px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        #victory-cards-section h2 {
+            position: absolute;
+            top: -280px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #8B4513;
+            font-size: 1.5em;
+            margin: 0;
+            z-index: 15;
+        }
+        
+        .cards-container {
+            position: relative;
+        }
+        
+        .card-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            padding: 10px 0;
+            justify-content: center;
+        }
+        
+        .card {
+            width: 150px;
+            height: 200px;
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            padding: 10px;
+            background: #FFF8DC;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .victory-card {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+        }
+        
+        .card-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #8B4513;
+        }
+        
+        .victory-card-cost-bottom {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 2px;
+        }
+        
+        .spice-cube {
+            width: 18px;
+            height: 18px;
+            border-radius: 3px;
+            border: 1px solid #333;
+        }
+        
+        .spice-red { background: #DC143C; }
+        .spice-green { background: #228B22; }
+        .spice-brown { background: #8B4513; }
+        
+        /* Coin tracking system */
+        #coin-tracking {
+            position: absolute;
+            top: -180px;
+            left: 0;
+            width: 100%;
+            height: 160px;
+            z-index: 10;
+        }
+        
+        .coin-stack {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: translateX(-50%);
+            user-select: none;
+        }
+        
+        .coin-stack-label {
+            font-size: 0.9em;
+            color: #8B4513;
+            font-weight: bold;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        
+        .coin-bars {
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 1px;
+        }
+        
+        .coin-bar {
+            width: 30px;
+            height: 9px;
+            border-radius: 3px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .gold-bar {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border: 1px solid #B8860B;
+        }
+        
+        .silver-bar {
+            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+            border: 1px solid #808080;
+        }
+        
+        .silver-bars-container {
+            display: flex;
+            gap: 6px;
+            align-items: flex-end;
+        }
+        
+        /* Editor-specific styles */
+        #coin-tracking {
+            border: 2px dashed red !important;
+            background: rgba(255, 0, 0, 0.1) !important;
+            pointer-events: auto !important;
+        }
+        
+        #victory-cards-section {
+            border: 2px solid blue !important;
+        }
+        
+        #victory-cards-section h2 {
+            border: 2px dashed green !important;
+            background: rgba(0, 255, 0, 0.2) !important;
+            padding: 5px !important;
+        }
+        
+        .coin-stack {
+            cursor: move !important;
+            border: 2px solid orange !important;
+            background: rgba(255, 165, 0, 0.2) !important;
+            padding: 5px !important;
+            border-radius: 5px !important;
+            pointer-events: auto !important;
+        }
+        
+        .coin-stack:hover {
+            background: rgba(255, 165, 0, 0.4) !important;
+        }
+        
+        .dragging {
+            opacity: 0.7 !important;
+            transform: scale(1.1) translateX(-50%) !important;
+            z-index: 1000 !important;
+        }
+        
+        .position-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: white;
+            border: 2px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .legend {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: white;
+            border: 2px solid #333;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .legend div {
+            margin: 5px 0;
+        }
+        
+        .save-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        
+        .save-button:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="legend">
+        <h3>Legend:</h3>
+        <div><span style="color: blue;">■</span> Victory Cards Section (blue border)</div>
+        <div><span style="color: green;">■</span> Title Area (green dashed border)</div>
+        <div><span style="color: red;">■</span> Coin Tracking Area (red dashed border)</div>
+        <div><span style="color: orange;">■</span> Draggable Coin Stacks (orange border)</div>
+        <br>
+        <strong>Instructions:</strong><br>
+        1. Drag the coin stacks to desired positions<br>
+        2. Keep them within the victory cards section<br>
+        3. Make sure they don't overlap the title<br>
+        4. Click "Save Positions" when done
+    </div>
+    
+    <div class="position-info" id="position-info">
+        <h3>Current Positions:</h3>
+        <div id="gold-position">Gold Stack: Not positioned</div>
+        <div id="silver-position">Silver Stack: Not positioned</div>
+        <br>
+        <div><strong>Victory Cards Section:</strong></div>
+        <div id="section-bounds">Loading...</div>
+        <br>
+        <div><strong>Title Position:</strong></div>
+        <div id="title-bounds">Loading...</div>
+    </div>
+
+    <div id="game-container">
+        <header>
+            <h1>Coin Position Editor</h1>
+            <p>Drag the coin stacks to position them exactly where you want them</p>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Mock victory cards -->
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>5 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-red"></div>
+                                <div class="spice-cube spice-green"></div>
+                            </div>
+                        </div>
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>7 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-green"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>9 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>11 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>13 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coin tracking stacks positioned relative to cards -->
+                    <div id="coin-tracking">
+                        <div id="gold-coin-stack" class="coin-stack" draggable="true">
+                            <div class="coin-stack-label">Gold Coins</div>
+                            <div id="gold-bars" class="coin-bars">
+                                <div class="coin-bar gold-bar"></div>
+                                <div class="coin-bar gold-bar"></div>
+                                <div class="coin-bar gold-bar"></div>
+                                <div class="coin-bar gold-bar"></div>
+                            </div>
+                        </div>
+                        <div id="silver-coin-stack" class="coin-stack" draggable="true">
+                            <div class="coin-stack-label">Silver Coins</div>
+                            <div class="silver-bars-container">
+                                <div id="silver-bars-stack1" class="coin-bars">
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                </div>
+                                <div id="silver-bars-stack2" class="coin-bars">
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <button class="save-button" onclick="savePositions()">Save Positions</button>
+
+    <script>
+        let draggedElement = null;
+        let startX, startY, startLeft, startTop;
+        let isDragging = false;
+        
+        // Initialize dragging when page loads
+        window.addEventListener('load', function() {
+            initializeDragging();
+            setTimeout(updatePositionInfo, 100);
+        });
+        
+        function initializeDragging() {
+            const coinStacks = document.querySelectorAll('.coin-stack');
+            console.log('Found coin stacks:', coinStacks.length);
+            
+            coinStacks.forEach((stack, index) => {
+                console.log('Setting up stack', index, stack.id);
+                
+                // Remove any existing event listeners
+                stack.removeEventListener('mousedown', startDrag);
+                
+                // Add new event listeners
+                stack.addEventListener('mousedown', startDrag);
+                stack.style.cursor = 'move';
+                
+                // Set initial position if not set
+                if (!stack.style.left) {
+                    stack.style.left = (200 + index * 150) + 'px';
+                }
+                if (!stack.style.top) {
+                    stack.style.top = '50px';
+                }
+            });
+        }
+        
+        function startDrag(e) {
+            console.log('Start drag triggered');
+            e.preventDefault();
+            e.stopPropagation();
+            
+            draggedElement = e.currentTarget;
+            isDragging = true;
+            
+            draggedElement.classList.add('dragging');
+            
+            // Get current position
+            const rect = draggedElement.getBoundingClientRect();
+            const parentRect = draggedElement.parentElement.getBoundingClientRect();
+            
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            // Get current left/top values or use computed position
+            const currentLeft = parseInt(draggedElement.style.left) || (rect.left - parentRect.left);
+            const currentTop = parseInt(draggedElement.style.top) || (rect.top - parentRect.top);
+            
+            startLeft = currentLeft;
+            startTop = currentTop;
+            
+            console.log('Drag started at:', startX, startY, 'Element at:', startLeft, startTop);
+            
+            // Add global event listeners
+            document.addEventListener('mousemove', drag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+        
+        function drag(e) {
+            if (!draggedElement || !isDragging) return;
+            
+            e.preventDefault();
+            
+            const deltaX = e.clientX - startX;
+            const deltaY = e.clientY - startY;
+            
+            const newLeft = startLeft + deltaX;
+            const newTop = startTop + deltaY;
+            
+            draggedElement.style.left = newLeft + 'px';
+            draggedElement.style.top = newTop + 'px';
+            
+            updatePositionInfo();
+        }
+        
+        function stopDrag(e) {
+            console.log('Stop drag');
+            
+            if (draggedElement) {
+                draggedElement.classList.remove('dragging');
+            }
+            
+            draggedElement = null;
+            isDragging = false;
+            
+            document.removeEventListener('mousemove', drag);
+            document.removeEventListener('mouseup', stopDrag);
+            
+            updatePositionInfo();
+        }
+        
+        function updatePositionInfo() {
+            const goldStack = document.getElementById('gold-coin-stack');
+            const silverStack = document.getElementById('silver-coin-stack');
+            const section = document.getElementById('victory-cards-section');
+            const title = section.querySelector('h2');
+            
+            if (!goldStack || !silverStack || !section || !title) return;
+            
+            const sectionRect = section.getBoundingClientRect();
+            const titleRect = title.getBoundingClientRect();
+            const goldRect = goldStack.getBoundingClientRect();
+            const silverRect = silverStack.getBoundingClientRect();
+            
+            // Calculate positions relative to section
+            const goldRelativeX = goldRect.left - sectionRect.left;
+            const goldRelativeY = goldRect.top - sectionRect.top;
+            const silverRelativeX = silverRect.left - sectionRect.left;
+            const silverRelativeY = silverRect.top - sectionRect.top;
+            
+            document.getElementById('gold-position').innerHTML = 
+                `Gold Stack: left: ${Math.round(goldRelativeX)}px, top: ${Math.round(goldRelativeY)}px`;
+            document.getElementById('silver-position').innerHTML = 
+                `Silver Stack: left: ${Math.round(silverRelativeX)}px, top: ${Math.round(silverRelativeY)}px`;
+            
+            document.getElementById('section-bounds').innerHTML = 
+                `Width: ${Math.round(sectionRect.width)}px, Height: ${Math.round(sectionRect.height)}px`;
+            
+            document.getElementById('title-bounds').innerHTML = 
+                `Title Y: ${Math.round(titleRect.top - sectionRect.top)}px, Height: ${Math.round(titleRect.height)}px`;
+        }
+        
+        function savePositions() {
+            const goldStack = document.getElementById('gold-coin-stack');
+            const silverStack = document.getElementById('silver-coin-stack');
+            const section = document.getElementById('victory-cards-section');
+            
+            if (!goldStack || !silverStack || !section) {
+                alert('Could not find elements to save positions');
+                return;
+            }
+            
+            const sectionRect = section.getBoundingClientRect();
+            const goldRect = goldStack.getBoundingClientRect();
+            const silverRect = silverStack.getBoundingClientRect();
+            
+            // Calculate positions relative to section
+            const goldRelativeX = goldRect.left - sectionRect.left;
+            const goldRelativeY = goldRect.top - sectionRect.top;
+            const silverRelativeX = silverRect.left - sectionRect.left;
+            const silverRelativeY = silverRect.top - sectionRect.top;
+            
+            // Also get the coin tracking area position
+            const coinTracking = document.getElementById('coin-tracking');
+            const trackingRect = coinTracking.getBoundingClientRect();
+            const trackingRelativeY = trackingRect.top - sectionRect.top;
+            
+            const positions = {
+                goldStack: {
+                    left: Math.round(goldRelativeX),
+                    top: Math.round(goldRelativeY)
+                },
+                silverStack: {
+                    left: Math.round(silverRelativeX),
+                    top: Math.round(silverRelativeY)
+                },
+                coinTrackingTop: Math.round(trackingRelativeY),
+                sectionDimensions: {
+                    width: Math.round(sectionRect.width),
+                    height: Math.round(sectionRect.height)
+                }
+            };
+            
+            // Save to localStorage so we can read it
+            localStorage.setItem('coinPositions', JSON.stringify(positions));
+            
+            // Also display in a format that can be copied
+            const output = `COIN POSITIONS SAVED:
+
+Gold Stack Position:
+- Left: ${positions.goldStack.left}px (from section left edge)
+- Top: ${positions.goldStack.top}px (from section top edge)
+
+Silver Stack Position:
+- Left: ${positions.silverStack.left}px (from section left edge)  
+- Top: ${positions.silverStack.top}px (from section top edge)
+
+Coin Tracking Area:
+- Top: ${positions.coinTrackingTop}px (from section top edge)
+
+Section Dimensions:
+- Width: ${positions.sectionDimensions.width}px
+- Height: ${positions.sectionDimensions.height}px
+
+CSS Updates Needed:
+#coin-tracking { top: ${positions.coinTrackingTop}px; }
+#gold-coin-stack { left: ${positions.goldStack.left}px; top: ${positions.goldStack.top - positions.coinTrackingTop}px; }
+#silver-coin-stack { left: ${positions.silverStack.left}px; top: ${positions.silverStack.top - positions.coinTrackingTop}px; }`;
+            
+            alert('Positions saved! Check console for details and a file will be downloaded.');
+            console.log(output);
+            
+            // Create a downloadable file
+            const blob = new Blob([output], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'coin-positions.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Update position info on window resize
+        window.addEventListener('resize', updatePositionInfo);
+        
+        // Prevent default drag behavior on images and other elements
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html>

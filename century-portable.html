@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Century: Spice Road - Portable Edition</title>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #8B4513, #D2691E); color: #333; min-height: 100vh; }
+#game-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+header { text-align: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+header h1 { color: #8B4513; font-size: 2.5em; margin-bottom: 10px; }
+#game-info { display: flex; justify-content: space-between; align-items: center; font-size: 1.2em; font-weight: bold; gap: 20px; }
+.header-buttons { display: flex; gap: 10px; align-items: center; }
+.help-button { background: rgba(255, 255, 255, 0.2); border: 2px solid rgba(255, 255, 255, 0.5); color: #8B4513; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+.help-button:hover { background: rgba(255, 255, 255, 0.4); transform: scale(1.1); }
+.game-message { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff6b6b; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); z-index: 1000; max-width: 500px; text-align: center; transition: opacity 0.3s ease; white-space: pre-line; line-height: 1.4; }
+.game-message.success { background: #51cf66; }
+.game-message.info { background: #339af0; }
+.game-message.error { background: #ff6b6b; }
+.game-message.hidden { display: none; }
+section { margin-bottom: 30px; background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+section h2 { color: #8B4513; margin-bottom: 15px; font-size: 1.5em; }
+
+/* Victory cards section with coin tracking */
+#victory-cards-section { position: relative; padding-top: 200px; }
+#victory-cards-section h2 { position: absolute; top: 20px; left: 60px; color: #8B4513; font-size: 1.5em; margin: 0; z-index: 15; transform: none; }
+
+/* Coin tracking system */
+#coin-tracking { position: absolute; top: 50px; left: 0; width: 100%; height: 120px; z-index: 10; pointer-events: none; }
+.coin-stack { position: absolute; display: flex; flex-direction: column; align-items: center; transform: translateX(-50%); height: 100%; justify-content: flex-end; }
+.coin-stack-label { font-size: 0.9em; color: #8B4513; font-weight: bold; margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); position: relative; top: 10px; }
+.coin-bars { display: flex; flex-direction: column-reverse; align-items: center; gap: 1px; }
+.coin-bar { width: 30px; height: 9px; border-radius: 3px; box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: all 0.3s ease; }
+.gold-bar { background: linear-gradient(135deg, #FFD700, #FFA500); border: 1px solid #B8860B; }
+.silver-bar { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); border: 1px solid #808080; }
+.coin-bar.taken { opacity: 0.3; transform: scale(0.8); }
+.silver-bars-container { display: flex; gap: 6px; align-items: flex-end; }
+#gold-coin-stack { left: 270px !important; top: -180px !important; }
+#silver-coin-stack { left: 420px !important; top: -180px !important; }
+#silver-coin-stack.gold-depleted { left: 270px !important; }
+.card-row { display: flex; gap: 15px; align-items: flex-start; padding: 10px 0; }
+.cards-container { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.card { width: 150px; height: 200px; border: 2px solid #8B4513; border-radius: 10px; padding: 10px; background: #FFF8DC; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative; display: flex; flex-direction: column; justify-content: center; overflow: hidden; box-sizing: border-box; }
+.card:hover { transform: translateY(-5px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+.card.selected { border-color: #FFD700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.6); background-color: rgba(255, 255, 0, 0.2) !important; background-blend-mode: overlay; }
+.victory-card { background: linear-gradient(135deg, #FFD700, #FFA500); position: relative; }
+.merchant-card { background: linear-gradient(135deg, #F0E68C, #DDD); position: relative; overflow: visible; }
+.card-header { text-align: center; font-family: 'Cinzel', serif; font-weight: 700; font-size: 2.42em; margin-bottom: 10px; flex-shrink: 0; color: #8B4513; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); }
+.card-effect { text-align: center; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 5px; overflow: hidden; width: 100%; height: 100%; }
+.spice-cube { width: 24px; height: 24px; border-radius: 3px; display: inline-block; margin: 2px; border: 1px solid #333; flex-shrink: 0; }
+.spice-group { display: flex; align-items: center; gap: 2px; margin: 2px; flex-wrap: wrap; }
+.upgrade-effect { font-size: 1.4em; font-weight: bold; color: #8B4513; margin: 8px 0; }
+.trade-effect { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; width: 100%; box-sizing: border-box; }
+.trade-input, .trade-output { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; max-width: 100%; }
+.trade-arrow { font-size: 1.4em; font-weight: bold; color: #8B4513; margin: 4px 0; }
+.coin { width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin: 2px; border: 2px solid #333; position: absolute; top: 5px; right: 5px; z-index: 10; font-family: 'Cinzel', serif; font-weight: 700; font-size: 42px; text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.4); }
+.coin-gold { background: radial-gradient(circle, #FFD700, #B8860B); color: #8B4513; }
+.coin-silver { background: radial-gradient(circle, #C0C0C0, #808080); color: #333; }
+.victory-card-cost-bottom { position: absolute; bottom: 0; left: 0; right: 0; display: flex; flex-wrap: nowrap; justify-content: center; align-items: center; gap: 2px; z-index: 5; background: rgba(255, 255, 255, 0.9); border-radius: 0 0 10px 10px; padding: 4px; border-top: 1px solid rgba(139, 69, 19, 0.3); min-height: 26px; }
+.victory-card-cost-bottom .spice-cube { width: 18px; height: 18px; margin: 0px; flex-shrink: 0; }
+.spice-yellow { background: #FFD700; }
+.spice-red { background: #DC143C; }
+.spice-green { background: #228B22; }
+.spice-brown { background: #8B4513; }
+.deck { width: 150px; height: 200px; border: 2px dashed #8B4513; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: rgba(139, 69, 19, 0.1); font-weight: bold; color: #8B4513; text-align: center; flex-shrink: 0; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal.hidden { display: none; }
+.modal-content { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); max-width: 500px; width: 90%; }
+.modal-content h2, .modal-content h3 { color: #8B4513; margin-bottom: 20px; text-align: center; }
+.modal-content label { display: block; margin-bottom: 10px; font-weight: bold; }
+.modal-content select, .modal-content button { width: 100%; padding: 10px; margin-bottom: 15px; border: 2px solid #8B4513; border-radius: 5px; font-size: 1em; }
+.modal-content button { background: #8B4513; color: white; cursor: pointer; transition: background 0.2s; }
+.modal-content button:hover { background: #A0522D; }
+.setup-options { display: flex !important; flex-direction: column !important; gap: 20px; margin: 20px 0; visibility: visible !important; opacity: 1 !important; }
+.setup-section { display: flex !important; flex-direction: column !important; gap: 8px; visibility: visible !important; opacity: 1 !important; position: relative !important; }
+.setup-section label { font-weight: bold; color: #8B4513; display: block !important; visibility: visible !important; }
+.setup-section select { padding: 8px 12px; border: 2px solid #8B4513; border-radius: 4px; background: white !important; font-size: 14px; display: block !important; width: 100% !important; visibility: visible !important; opacity: 1 !important; }
+#ai-players, #ai-difficulty { display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important; }
+@media (max-width: 768px) {
+    .card { flex: 1; min-width: calc(50% - 2.5px); max-width: calc(50% - 2.5px); width: auto; height: 120px; font-size: 9px; padding: 5px; }
+    .coin { width: 28px; height: 28px; font-size: 20px; }
+}
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+                <div class="header-buttons">
+                    <button id="menu-btn" class="help-button" title="Game Menu">☰</button>
+                </div>
+            </div>
+            <div id="game-message" class="game-message hidden"></div>
+        </header>
+
+        <main id="game-board">
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <!-- Coin tracking stacks positioned relative to cards -->
+                    <div id="coin-tracking">
+                        <div id="gold-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Gold Coins</div>
+                            <div id="gold-bars" class="coin-bars">
+                                <!-- Gold bars will be populated here -->
+                            </div>
+                        </div>
+                        <div id="silver-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Silver Coins</div>
+                            <div class="silver-bars-container">
+                                <div id="silver-bars-stack1" class="coin-bars">
+                                    <!-- First silver stack (5 bars) -->
+                                </div>
+                                <div id="silver-bars-stack2" class="coin-bars">
+                                    <!-- Second silver stack (4 bars) -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row"></div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <section id="players-area"></section>
+        </main>
+
+        <div id="setup-modal" class="modal">
+            <div class="modal-content">
+                <h2>Game Setup</h2>
+                <div class="setup-options">
+                    <div class="setup-section">
+                        <label for="player-count">Number of Players:</label>
+                        <select id="player-count">
+                            <option value="2">2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                            <option value="5">5 Players</option>
+                        </select>
+                    </div>
+                    <div class="setup-section">
+                        <label for="ai-players">AI Players:</label>
+                        <select id="ai-players">
+                            <option value="0">No AI (Human Only)</option>
+                            <option value="1">1 AI Player</option>
+                            <option value="2">2 AI Players</option>
+                            <option value="3">3 AI Players</option>
+                            <option value="4">4 AI Players</option>
+                        </select>
+                    </div>
+                    <div class="setup-section">
+                        <label for="ai-difficulty">AI Difficulty:</label>
+                        <select id="ai-difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="start-game">Start Game</button>
+            </div>
+        </div>
+    </div>
+    <script>
+// Century: Spice Road - Portable Edition - Essential JavaScript
+
+// Card Data
+const MERCHANT_CARDS = [
+    { id: 'gain-yy', name: 'Gain YY', type: 'gain', effect: { yellow: 2 }, description: 'Gain 2 yellow spices' },
+    { id: 'upgrade-2', name: 'Upgrade 2', type: 'upgrade', effect: { amount: 2 }, description: 'Upgrade up to 2 spice levels' },
+    { id: 'trade-yyy-b', name: 'YYY → B', type: 'trade', effect: { input: { yellow: 3 }, output: { brown: 1 } }, description: 'Trade 3 yellow for 1 brown' },
+    { id: 'trade-r-yyy', name: 'R → YYY', type: 'trade', effect: { input: { red: 1 }, output: { yellow: 3 } }, description: 'Trade 1 red for 3 yellow' },
+    { id: 'gain-yr', name: 'Gain YR', type: 'gain', effect: { yellow: 1, red: 1 }, description: 'Gain 1 yellow and 1 red' },
+    { id: 'gain-g', name: 'Gain G', type: 'gain', effect: { green: 1 }, description: 'Gain 1 green spice' },
+    { id: 'gain-yyy', name: 'Gain YYY', type: 'gain', effect: { yellow: 3 }, description: 'Gain 3 yellow spices' },
+    { id: 'upgrade-3', name: 'Upgrade 3', type: 'upgrade', effect: { amount: 3 }, description: 'Upgrade up to 3 spice levels' }
+];
+
+const VICTORY_CARDS = [
+    { id: 'victory-yyrr-6', points: 6, cost: { yellow: 2, red: 2 }, description: '6 points for 2 yellow, 2 red' },
+    { id: 'victory-yyyrr-7', points: 7, cost: { yellow: 3, red: 2 }, description: '7 points for 3 yellow, 2 red' },
+    { id: 'victory-rrrr-8', points: 8, cost: { red: 4 }, description: '8 points for 4 red' },
+    { id: 'victory-yygg-8', points: 8, cost: { yellow: 2, green: 2 }, description: '8 points for 2 yellow, 2 green' },
+    { id: 'victory-yyrrr-8', points: 8, cost: { yellow: 2, red: 3 }, description: '8 points for 2 yellow, 3 red' },
+    { id: 'victory-yyygg-9', points: 9, cost: { yellow: 3, green: 2 }, description: '9 points for 3 yellow, 2 green' }
+];
+
+// Simple Game Class
+class Game {
+    constructor() {
+        this.players = [];
+        this.currentPlayerIndex = 0;
+        this.turn = 1;
+        this.victoryCards = [];
+        this.merchantCards = [];
+        this.victoryDeck = [];
+        this.merchantDeck = [];
+        this.gameEnded = false;
+        this.winner = null;
+        this.finalRoundTriggered = false;
+        this.finalRoundTriggerPlayer = null;
+        
+        // Coin tracking
+        this.goldCoinsRemaining = 5; // Changed from 4 to 5
+        this.silverCoinsRemaining = 10; // Changed from 9 to 10 (5+5)
+        
+        // Game constants
+        this.SPICE_TYPES = ['yellow', 'red', 'green', 'brown'];
+        this.MAX_SPICES = 10;
+    }
+
+    setupGame(playerCount) {
+        this.playerCount = playerCount;
+        this.victoryCardsNeeded = playerCount <= 3 ? 5 : 6;
+        this.initializePlayers(playerCount);
+        this.setupMarket();
+        console.log(`Game started with ${playerCount} players`);
+    }
+
+    initializePlayers(count) {
+        this.players = [];
+        for (let i = 0; i < count; i++) {
+            this.players.push(new Player(`Player ${i + 1}`, i));
+        }
+    }
+
+    setupMarket() {
+        // Setup victory cards market (5 cards)
+        this.victoryCards = [];
+        for (let i = 0; i < 5; i++) {
+            if (i < VICTORY_CARDS.length) {
+                this.victoryCards.push(VICTORY_CARDS[i]);
+            }
+        }
+        
+        // Add coins based on new rules
+        this.assignCoinsToVictoryCards();
+        
+        // Setup merchant cards market (6 cards)
+        this.merchantCards = [];
+        for (let i = 0; i < 6; i++) {
+            if (i < MERCHANT_CARDS.length) {
+                this.merchantCards.push(MERCHANT_CARDS[i]);
+            }
+        }
+    }
+
+    assignCoinsToVictoryCards() {
+        // Clear existing coins from all cards
+        this.victoryCards.forEach(card => {
+            if (card) delete card.coin;
+        });
+        
+        // Coin assignment rules (only 1 coin per card):
+        // 1. Gold coin ONLY on 1st card (while gold coins > 0)
+        // 2. Silver coin ONLY on 2nd card (while gold coins > 0 AND silver coins > 0)
+        // 3. When gold coins = 0: Silver coin moves to 1st card (while silver coins > 0)
+        // 4. No coin on 2nd card when gold coins are depleted
+        
+        if (this.goldCoinsRemaining > 0) {
+            // Gold coins available: gold on 1st card only
+            if (this.victoryCards[0]) {
+                this.victoryCards[0].coin = 'gold';
+            }
+            // Silver coin on 2nd card only (if silver coins available)
+            if (this.victoryCards[1] && this.silverCoinsRemaining > 0) {
+                this.victoryCards[1].coin = 'silver';
+            }
+        } else {
+            // No gold coins left: silver coin moves to 1st card only
+            if (this.victoryCards[0] && this.silverCoinsRemaining > 0) {
+                this.victoryCards[0].coin = 'silver';
+            }
+            // No coin on 2nd card when gold is depleted
+        }
+    }
+
+    // Action: Claim Victory Point Card
+    claimVictoryCard(player, cardIndex) {
+        if (cardIndex < 0 || cardIndex >= this.victoryCards.length) {
+            return { success: false, message: "Invalid card index" };
+        }
+
+        const card = this.victoryCards[cardIndex];
+        if (!this.canAffordVictoryCard(player, card)) {
+            return { success: false, message: "Cannot afford this victory card" };
+        }
+
+        // Pay the cost
+        for (const [spiceType, amount] of Object.entries(card.cost)) {
+            player.removeSpices(spiceType, amount);
+        }
+
+        // Gain the card and any coins
+        player.victoryCards.push(card);
+        
+        // Handle coin rewards based on card position and availability
+        if (cardIndex === 0) {
+            // 1st victory card position
+            if (this.goldCoinsRemaining > 0) {
+                // Give gold coin if available
+                player.coins.push({ type: 'gold', points: 3 });
+                this.goldCoinsRemaining--;
+            } else if (this.silverCoinsRemaining > 0) {
+                // Give silver coin if gold depleted but silver available
+                player.coins.push({ type: 'silver', points: 1 });
+                this.silverCoinsRemaining--;
+            }
+        } else if (cardIndex === 1) {
+            // 2nd victory card position - always gives silver coin if available
+            if (this.silverCoinsRemaining > 0) {
+                player.coins.push({ type: 'silver', points: 1 });
+                this.silverCoinsRemaining--;
+            }
+        }
+
+        // Check for game end trigger (not immediate end)
+        if (player.victoryCards.length >= this.victoryCardsNeeded && !this.finalRoundTriggered) {
+            this.finalRoundTriggered = true;
+            this.finalRoundTriggerPlayer = player;
+            console.log(`Final round triggered by ${player.name}! Other players get one more turn each.`);
+        }
+
+        // Refill market - simplified for portable version
+        this.victoryCards.splice(cardIndex, 1);
+        if (this.victoryCards.length < 5 && VICTORY_CARDS.length > 5) {
+            // Add more cards if available
+            for (let i = 5; i < VICTORY_CARDS.length && this.victoryCards.length < 5; i++) {
+                this.victoryCards.push(VICTORY_CARDS[i]);
+            }
+        }
+        
+        // Reassign coins based on new positions
+        this.assignCoinsToVictoryCards();
+        
+        return { success: true, message: "Victory card claimed" };
+    }
+
+    canAffordVictoryCard(player, card) {
+        for (const [spiceType, amount] of Object.entries(card.cost)) {
+            if (player.spices[spiceType] < amount) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    getCurrentPlayer() {
+        return this.players[this.currentPlayerIndex];
+    }
+}
+
+// Simple Player Class
+class Player {
+    constructor(name, id) {
+        this.name = name;
+        this.id = id;
+        this.spices = { yellow: 3, red: 0, green: 0, brown: 0 };
+        this.hand = [
+            { id: 'upgrade-2', name: 'Upgrade 2', type: 'upgrade', effect: { amount: 2 } },
+            { id: 'gain-2y', name: 'Gain 2 Yellow', type: 'gain', effect: { yellow: 2 } }
+        ];
+        this.discardPile = [];
+        this.victoryCards = [];
+        this.coins = [];
+    }
+
+    removeSpices(type, amount) {
+        const canRemove = Math.min(amount, this.spices[type]);
+        this.spices[type] -= canRemove;
+        return canRemove;
+    }
+
+    getTotalSpices() {
+        return Object.values(this.spices).reduce((sum, count) => sum + count, 0);
+    }
+}
+
+// Simple UI Class
+class GameUI {
+    constructor(game) {
+        this.game = game;
+        this.selectedCard = null;
+        this.selectedCardType = null;
+        this.initializeEventListeners();
+    }
+
+    initializeEventListeners() {
+        const startGameBtn = document.getElementById('start-game');
+        if (startGameBtn) {
+            startGameBtn.addEventListener('click', () => {
+                this.startGame();
+            });
+        }
+
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                this.showGameMenu();
+            });
+        }
+    }
+
+    showGameMenu() {
+        const options = [
+            'Game Rules',
+            'Statistics', 
+            'Restart Game',
+            'Close'
+        ];
+        
+        const choice = prompt('Game Menu:\n1. Game Rules\n2. Statistics\n3. Restart Game\n4. Close\n\nEnter your choice (1-4):');
+        
+        switch(choice) {
+            case '1':
+                this.showGameRules();
+                break;
+            case '2':
+                this.showMessage('Statistics feature coming soon!', 'info');
+                break;
+            case '3':
+                if (confirm('Are you sure you want to restart the game? All progress will be lost!')) {
+                    location.reload();
+                }
+                break;
+            case '4':
+                // Close menu - do nothing
+                break;
+        }
+    }
+
+    showGameRules() {
+        alert(`Century: Spice Road - Game Rules
+
+Objective: Be the first to claim 5 victory cards (6 in 4-5 player games)
+
+Player Actions (Choose 1 per turn):
+• Play Card - Use a merchant card from your hand
+• Acquire Card - Buy a merchant card from the market  
+• Claim Victory - Purchase a victory point card
+• Rest - Return all played cards to your hand
+
+Spice Types (basic to valuable):
+🟡 Yellow → 🔴 Red → 🟢 Green → 🟤 Brown
+
+Victory: Highest total score wins!
+- Victory point cards: Face value
+- Gold coins: 3 points each  
+- Silver coins: 1 point each`);
+    }
+
+    startGame() {
+        const playerCountEl = document.getElementById('player-count');
+        const playerCount = parseInt(playerCountEl.value) || 2;
+        
+        this.game.setupGame(playerCount);
+        document.getElementById('setup-modal').classList.add('hidden');
+        this.renderGame();
+    }
+
+    renderGame() {
+        this.renderVictoryCards();
+        this.renderMerchantCards();
+        this.renderPlayers();
+        this.renderCoinBars();
+        this.positionCoinStacks();
+    }
+
+    renderCoinBars() {
+        // Render gold coin bars (4 bars)
+        const goldBarsContainer = document.getElementById('gold-bars');
+        if (goldBarsContainer) {
+            goldBarsContainer.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'coin-bar gold-bar';
+                if (i >= this.game.goldCoinsRemaining) {
+                    bar.classList.add('taken');
+                }
+                goldBarsContainer.appendChild(bar);
+            }
+        }
+        
+        // Render silver coin bars (split into 5 + 4 stacks)
+        // Stack 1: 5 bars (taken last)
+        const silverStack1Container = document.getElementById('silver-bars-stack1');
+        if (silverStack1Container) {
+            silverStack1Container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'coin-bar silver-bar';
+                // These bars are taken when silverCoinsRemaining <= 4 (after stack 2 is depleted)
+                if (this.game.silverCoinsRemaining <= 4 && i >= this.game.silverCoinsRemaining) {
+                    bar.classList.add('taken');
+                }
+                silverStack1Container.appendChild(bar);
+            }
+        }
+        
+        // Stack 2: 4 bars (taken first)
+        const silverStack2Container = document.getElementById('silver-bars-stack2');
+        if (silverStack2Container) {
+            silverStack2Container.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'coin-bar silver-bar';
+                // These bars are taken first (when silverCoinsRemaining <= 8)
+                if (this.game.silverCoinsRemaining <= 8 && i >= (this.game.silverCoinsRemaining - 5)) {
+                    bar.classList.add('taken');
+                }
+                silverStack2Container.appendChild(bar);
+            }
+        }
+    }
+
+    positionCoinStacks() {
+        const goldStack = document.getElementById('gold-coin-stack');
+        const silverStack = document.getElementById('silver-coin-stack');
+        
+        if (!goldStack || !silverStack) return;
+        
+        // Position based on coin availability
+        if (this.game.goldCoinsRemaining > 0) {
+            // Gold coins available: normal positioning
+            goldStack.style.display = 'flex';
+            silverStack.classList.remove('gold-depleted');
+        } else {
+            // No gold coins left: hide gold stack, move silver to left position
+            goldStack.style.display = 'none';
+            
+            if (this.game.silverCoinsRemaining > 0) {
+                silverStack.classList.add('gold-depleted');
+            } else {
+                silverStack.style.display = 'none';
+            }
+        }
+    }
+
+    renderVictoryCards() {
+        const container = document.getElementById('victory-cards-row');
+        container.innerHTML = '';
+        
+        this.game.victoryCards.forEach((card, index) => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card victory-card';
+            cardDiv.dataset.index = index;
+            
+            if (card.coin) {
+                const coin = document.createElement('div');
+                coin.className = `coin coin-${card.coin}`;
+                coin.textContent = card.coin === 'gold' ? 'G' : 'S';
+                cardDiv.appendChild(coin);
+            }
+            
+            cardDiv.innerHTML += `
+                <div class="card-header">${card.points} VP</div>
+                <div class="victory-card-cost-bottom">
+                    ${this.renderSpiceCost(card.cost)}
+                </div>
+            `;
+            
+            // Add click handler for card selection
+            cardDiv.addEventListener('click', () => {
+                this.selectVictoryCard(index);
+            });
+            
+            container.appendChild(cardDiv);
+        });
+    }
+
+    selectVictoryCard(cardIndex) {
+        this.selectedCard = cardIndex;
+        this.selectedCardType = 'victory';
+        
+        // Clear other selections
+        document.querySelectorAll('.card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Highlight selected card
+        const cardElement = document.querySelector(`#victory-cards-row .card[data-index="${cardIndex}"]`);
+        if (cardElement) {
+            cardElement.classList.add('selected');
+        }
+        
+        console.log('Selected victory card:', cardIndex);
+    }
+
+    renderMerchantCards() {
+        const container = document.getElementById('merchant-cards-row');
+        container.innerHTML = '';
+        
+        this.game.merchantCards.forEach((card, index) => {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card merchant-card';
+            
+            cardDiv.innerHTML = `
+                <div class="card-effect">
+                    ${this.renderCardEffect(card)}
+                </div>
+            `;
+            
+            container.appendChild(cardDiv);
+        });
+    }
+
+    renderPlayers() {
+        const container = document.getElementById('players-area');
+        container.innerHTML = '';
+        
+        this.game.players.forEach((player, index) => {
+            const isActive = index === this.game.currentPlayerIndex;
+            const playerDiv = document.createElement('div');
+            playerDiv.style.cssText = `
+                border: 3px solid ${isActive ? '#FF6B35' : '#8B4513'};
+                border-radius: 15px;
+                padding: 20px;
+                margin: 15px 0;
+                background: #FFF8DC;
+                ${isActive ? 'box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);' : ''}
+            `;
+            
+            playerDiv.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #8B4513; font-size: 1.5em;">${player.name}${isActive ? ' (Current Turn)' : ''}</h3>
+                    <div style="font-size: 1.3em; font-weight: bold; color: #FF6B35;">
+                        ${player.victoryCards.length}/${this.game.playerCount <= 3 ? 5 : 6} Victory Cards
+                    </div>
+                </div>
+                
+                <div style="margin: 10px 0;">
+                    <strong>Spices:</strong> 
+                    <span style="color: #FFD700;">●${player.spices.yellow}</span>
+                    <span style="color: #DC143C;">●${player.spices.red}</span>
+                    <span style="color: #228B22;">●${player.spices.green}</span>
+                    <span style="color: #8B4513;">●${player.spices.brown}</span>
+                    (${player.spices.yellow + player.spices.red + player.spices.green + player.spices.brown}/10)
+                </div>
+                
+                <div style="margin: 10px 0;">
+                    <strong>Hand:</strong> ${player.hand.length} cards | 
+                    <strong>Played:</strong> ${player.discardPile.length} cards |
+                    <strong>Coins:</strong> ${player.coins.length}
+                </div>
+                
+                ${isActive ? `
+                <div style="margin-top: 15px;">
+                    <button onclick="gameUI.playCard()" style="margin: 5px; padding: 8px 16px; background: #8B4513; color: white; border: none; border-radius: 5px; cursor: pointer;">Play Card</button>
+                    <button onclick="gameUI.acquireCard()" style="margin: 5px; padding: 8px 16px; background: #8B4513; color: white; border: none; border-radius: 5px; cursor: pointer;">Acquire Card</button>
+                    <button onclick="gameUI.claimVictory()" style="margin: 5px; padding: 8px 16px; background: #8B4513; color: white; border: none; border-radius: 5px; cursor: pointer;">Claim Victory</button>
+                    <button onclick="gameUI.rest()" style="margin: 5px; padding: 8px 16px; background: #8B4513; color: white; border: none; border-radius: 5px; cursor: pointer;">Rest</button>
+                </div>
+                ` : ''}
+            `;
+            container.appendChild(playerDiv);
+        });
+    }
+
+    // Game Actions
+    playCard() {
+        const player = this.game.getCurrentPlayer();
+        if (player.hand.length === 0) {
+            this.showMessage('No cards in hand to play!', 'error');
+            return;
+        }
+        
+        const cardNames = player.hand.map((card, i) => `${i + 1}. ${card.name}`).join('\n');
+        const choice = prompt(`Choose a card to play:\n${cardNames}\n\nEnter card number:`);
+        
+        if (choice && !isNaN(choice)) {
+            const cardIndex = parseInt(choice) - 1;
+            if (cardIndex >= 0 && cardIndex < player.hand.length) {
+                const card = player.hand[cardIndex];
+                
+                // Simple card execution
+                if (card.type === 'gain') {
+                    Object.entries(card.effect).forEach(([spice, amount]) => {
+                        player.spices[spice] += amount;
+                    });
+                    player.discardPile.push(player.hand.splice(cardIndex, 1)[0]);
+                    this.showMessage(`Played ${card.name}!`, 'success');
+                    this.nextTurn();
+                } else {
+                    this.showMessage(`${card.type} cards need special handling - feature coming soon!`, 'info');
+                }
+            }
+        }
+    }
+
+    acquireCard() {
+        this.showMessage('Acquire card feature coming soon!', 'info');
+    }
+
+    claimVictory() {
+        if (this.game.victoryCards.length === 0) {
+            this.showMessage('No victory cards available!', 'error');
+            return;
+        }
+        
+        if (this.selectedCardType !== 'victory' || this.selectedCard === null) {
+            this.showMessage('Please select a victory card first!', 'error');
+            return;
+        }
+        
+        const currentPlayer = this.game.getCurrentPlayer();
+        const result = this.game.claimVictoryCard(currentPlayer, this.selectedCard);
+        
+        if (result.success) {
+            this.showMessage(`${currentPlayer.name} claimed a victory card!`, 'success');
+            this.selectedCard = null;
+            this.selectedCardType = null;
+            
+            // Clear selection
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Check if final round was just triggered
+            if (this.game.finalRoundTriggered) {
+                this.showMessage(`${this.game.finalRoundTriggerPlayer.name} has triggered the final round! Each remaining player gets one more turn.`, 'info');
+            }
+            
+            this.nextTurn();
+        } else {
+            this.showMessage(result.message || 'Cannot afford this victory card!', 'error');
+        }
+    }
+
+    rest() {
+        const player = this.game.getCurrentPlayer();
+        if (player.discardPile.length === 0) {
+            this.showMessage('No cards to recover!', 'error');
+            return;
+        }
+        
+        player.hand = player.hand.concat(player.discardPile);
+        player.discardPile = [];
+        this.showMessage('All cards recovered to hand!', 'success');
+        this.nextTurn();
+    }
+
+    nextTurn() {
+        this.game.currentPlayerIndex = (this.game.currentPlayerIndex + 1) % this.game.players.length;
+        if (this.game.currentPlayerIndex === 0) {
+            this.game.turn++;
+        }
+        
+        document.getElementById('current-player').textContent = `${this.game.getCurrentPlayer().name}'s Turn`;
+        document.getElementById('turn-counter').textContent = `Turn ${this.game.turn}`;
+        
+        this.renderPlayers();
+    }
+
+    renderCardEffect(card) {
+        switch (card.type) {
+            case 'gain':
+                return this.renderSpices(card.effect);
+            case 'upgrade':
+                return `<div class="upgrade-effect">↑${card.effect.amount}</div>`;
+            case 'trade':
+                return `<div class="trade-effect">
+                    <div class="trade-input">${this.renderSpices(card.effect.input)}</div>
+                    <div class="trade-arrow">↓</div>
+                    <div class="trade-output">${this.renderSpices(card.effect.output)}</div>
+                </div>`;
+            default:
+                return '';
+        }
+    }
+
+    renderSpices(spices) {
+        let html = '<div class="spice-group">';
+        Object.entries(spices).forEach(([type, count]) => {
+            for (let i = 0; i < count; i++) {
+                html += `<div class="spice-cube spice-${type}"></div>`;
+            }
+        });
+        html += '</div>';
+        return html;
+    }
+
+    renderSpiceCost(cost) {
+        let html = '';
+        Object.entries(cost).forEach(([type, count]) => {
+            for (let i = 0; i < count; i++) {
+                html += `<div class="spice-cube spice-${type}"></div>`;
+            }
+        });
+        return html;
+    }
+
+    showMessage(message, type = 'info') {
+        const messageElement = document.getElementById('game-message');
+        messageElement.textContent = message;
+        messageElement.className = `game-message ${type}`;
+        
+        setTimeout(() => {
+            messageElement.classList.add('hidden');
+        }, 3000);
+    }
+}
+
+// Initialize the game
+let game, gameUI;
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Century: Spice Road - Portable Edition Loading...');
+    
+    game = new Game();
+    gameUI = new GameUI(game);
+    
+    // Show setup modal
+    const setupModal = document.getElementById('setup-modal');
+    if (setupModal) {
+        setupModal.classList.remove('hidden');
+        console.log('Setup modal shown - Start Game button should work now!');
+    }
+});
+
+console.log('Century: Spice Road - Portable Edition Loaded!');
+    </script>
+</body>
+</html>

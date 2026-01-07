@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title>Century: Spice Road</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=8">
 </head>
 <body>
     <div id="game-container">
@@ -13,7 +16,13 @@
             <div id="game-info">
                 <span id="current-player">Player 1's Turn</span>
                 <span id="turn-counter">Turn 1</span>
+                <div class="header-buttons">
+                    <button id="stats-btn" class="help-button" title="View Statistics">📊</button>
+                    <button id="help-btn" class="help-button" title="Press H for help">?</button>
+                </div>
             </div>
+            <!-- In-game message display -->
+            <div id="game-message" class="game-message hidden"></div>
         </header>
 
         <main id="game-board">
@@ -49,13 +58,37 @@
         <div id="setup-modal" class="modal">
             <div class="modal-content">
                 <h2>Game Setup</h2>
-                <label for="player-count">Number of Players:</label>
-                <select id="player-count">
-                    <option value="2">2 Players</option>
-                    <option value="3">3 Players</option>
-                    <option value="4">4 Players</option>
-                    <option value="5">5 Players</option>
-                </select>
+                <div class="setup-options">
+                    <div class="setup-section">
+                        <label for="player-count">Number of Players:</label>
+                        <select id="player-count">
+                            <option value="2">2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                            <option value="5">5 Players</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setup-section">
+                        <label for="ai-players">AI Players:</label>
+                        <select id="ai-players">
+                            <option value="0">No AI (Human Only)</option>
+                            <option value="1">1 AI Player</option>
+                            <option value="2">2 AI Players</option>
+                            <option value="3">3 AI Players</option>
+                            <option value="4">4 AI Players</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setup-section">
+                        <label for="ai-difficulty">AI Difficulty:</label>
+                        <select id="ai-difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
                 <button id="start-game">Start Game</button>
             </div>
         </div>
@@ -75,9 +108,48 @@
         </div>
     </div>
 
-    <script src="js/cards.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/cards.js?v=5"></script>
+    <script src="js/game.js?v=5"></script>
+    <script src="js/ai-player.js?v=5"></script>
+    <script src="js/analytics.js?v=5"></script>
+    <script src="js/ui.js?v=7"></script>
+    <script src="js/main.js?v=7"></script>
+    
+    <!-- Debug script for AI setup -->
+    <script>
+        // Debug: Check AI setup elements after page load
+        window.addEventListener('load', function() {
+            console.log('🔍 Page loaded, checking AI elements...');
+            
+            setTimeout(() => {
+                const aiPlayers = document.getElementById('ai-players');
+                const aiDifficulty = document.getElementById('ai-difficulty');
+                const setupModal = document.getElementById('setup-modal');
+                
+                console.log('=== AI SETUP DEBUG ===');
+                console.log('Setup Modal:', setupModal);
+                console.log('Setup Modal classes:', setupModal ? setupModal.className : 'N/A');
+                console.log('AI Players element:', aiPlayers);
+                console.log('AI Difficulty element:', aiDifficulty);
+                
+                if (aiPlayers && aiDifficulty) {
+                    console.log('✅ AI elements found!');
+                    console.log('AI Players options:', aiPlayers.options.length);
+                    console.log('AI Difficulty options:', aiDifficulty.options.length);
+                } else {
+                    console.error('❌ AI elements missing!');
+                    
+                    // Check if they exist anywhere in the document
+                    const allSelects = document.querySelectorAll('select');
+                    console.log('All select elements found:', allSelects.length);
+                    allSelects.forEach((select, index) => {
+                        console.log(`Select ${index}:`, select.id, select);
+                    });
+                }
+                
+                console.log('=== END DEBUG ===');
+            }, 1000);
+        });
+    </script>
 </body>
 </html>

@@ -374,17 +374,21 @@ class Game {
     calculateFinalScore(player) {
         let score = 0;
         
-        // Victory points from cards
+        // 1. Victory points from cards
         for (const card of player.victoryCards) {
             score += card.points;
         }
         
-        // Points from coins
+        // 2. Points from coins (correct scoring)
         for (const coin of player.coins) {
-            score += coin === 'gold' ? 5 : 3;
+            if (coin.type === 'gold') {
+                score += 3; // Gold coins worth 3 points
+            } else if (coin.type === 'silver') {
+                score += 1; // Silver coins worth 1 point
+            }
         }
         
-        // Points from spices (except yellow)
+        // 3. Points from non-yellow spices (1 point each)
         score += player.spices.red + player.spices.green + player.spices.brown;
         
         return score;

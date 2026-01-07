@@ -1,0 +1,21 @@
+COIN POSITIONS SAVED:
+
+Gold Stack Position:
+- Left: 304px (from section left edge)
+- Top: 202px (from section top edge)
+
+Silver Stack Position:
+- Left: 463px (from section left edge)  
+- Top: 192px (from section top edge)
+
+Coin Tracking Area:
+- Top: 122px (from section top edge)
+
+Section Dimensions:
+- Width: 1360px
+- Height: 543px
+
+CSS Updates Needed:
+#coin-tracking { top: 122px; }
+#gold-coin-stack { left: 304px; top: 80px; }
+#silver-coin-stack { left: 463px; top: 70px; }

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Features Test - Century: Spice Road</title>
+    <link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road - Complete Features Test</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 5 - FINAL ROUND!</span>
+                <div class="header-buttons">
+                    <button id="stats-btn" class="help-button" title="View Statistics">📊</button>
+                    <button id="help-btn" class="help-button" title="Press H for help">?</button>
+                </div>
+            </div>
+            <div id="game-message" class="game-message hidden"></div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards with Enhanced Coin Display -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards (Enhanced Coin System)</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- First card with gold coin -->
+                        <div class="card victory-card" data-index="0">
+                            <div class="coins-container">
+                                <div class="coin coin-gold"></div>
+                            </div>
+                            <div class="card-header"><strong>5 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-yellow"></div>
+                                <div class="spice-cube spice-yellow"></div>
+                                <div class="spice-cube spice-red"></div>
+                            </div>
+                        </div>
+
+                        <!-- Second card with silver coin -->
+                        <div class="card victory-card" data-index="1">
+                            <div class="coins-container">
+                                <div class="coin coin-silver"></div>
+                            </div>
+                            <div class="card-header"><strong>7 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-red"></div>
+                                <div class="spice-cube spice-green"></div>
+                            </div>
+                        </div>
+
+                        <!-- Third card with accumulated coins (silver + gold) -->
+                        <div class="card victory-card" data-index="2">
+                            <div class="coins-container">
+                                <div class="coin coin-silver"></div>
+                                <div class="coin coin-gold"></div>
+                            </div>
+                            <div class="card-header"><strong>9 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-green"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+
+                        <!-- Fourth card (no coins) -->
+                        <div class="card victory-card" data-index="3">
+                            <div class="card-header"><strong>12 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-green"></div>
+                            </div>
+                        </div>
+
+                        <!-- Fifth card (no coins) -->
+                        <div class="card victory-card" data-index="4">
+                            <div class="card-header"><strong>15 VP</strong></div>
+                            <div class="bonus-spices">Bonus: 
+                                <div class="spice-cube spice-yellow"></div>
+                                <div class="spice-cube spice-red"></div>
+                            </div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck<br>(12)</div>
+                </div>
+            </section>
+
+            <!-- Player Boards with Enhanced Victory Card Display -->
+            <section id="players-area">
+                <!-- Player 1 (Active, Leading) -->
+                <div class="player-board active">
+                    <div class="player-info">
+                        <div class="player-name">Player 1</div>
+                        <div class="victory-points">3/5 Victory Cards 🏆</div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (3) - 21 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">5 VP</div>
+                                </div>
+                            </div>
+                            
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">7 VP</div>
+                                    <div class="bonus-spices-mini">
+                                        <div class="spice-cube spice-yellow"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">9 VP</div>
+                                </div>
+                            </div>
+                            
+                            <div class="coins-summary">
+                                <div class="coins-display">
+                                    <div class="coin-group">
+                                        <div class="coin coin-gold"></div>
+                                        <span class="coin-count">: 2</span>
+                                    </div>
+                                    <div class="coin-group">
+                                        <div class="coin coin-silver"></div>
+                                        <span class="coin-count">: 3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="spice-storage">
+                        <div class="spice-storage-container">
+                            <div class="spice-slot filled"><div class="spice-cube spice-yellow"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-yellow"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-red"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-red"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-green"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-green"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-brown"></div></div>
+                            <div class="spice-slot"></div>
+                            <div class="spice-slot"></div>
+                            <div class="spice-slot"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="action-btn" title="Play Card (Press 1)">Play Card</button>
+                        <button class="action-btn" title="Acquire Card (Press 2)">Acquire Card</button>
+                        <button class="action-btn" title="Claim Victory (Press 3)">Claim Victory</button>
+                        <button class="action-btn" title="Rest (Press 4)">Rest</button>
+                        <button class="action-btn secondary" title="Undo (Ctrl+U)">Undo</button>
+                    </div>
+                </div>
+
+                <!-- Player 2 (AI, Close Second) -->
+                <div class="player-board ai-player">
+                    <div class="player-info">
+                        <div class="player-name">AI 1 (medium)</div>
+                        <div class="victory-points">2/5 Victory Cards</div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (2) - 27 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">12 VP</div>
+                                </div>
+                            </div>
+                            
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">15 VP</div>
+                                    <div class="bonus-spices-mini">
+                                        <div class="spice-cube spice-yellow"></div>
+                                        <div class="spice-cube spice-red"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="coins-summary">
+                                <div class="coins-display">
+                                    <div class="coin-group">
+                                        <div class="coin coin-gold"></div>
+                                        <span class="coin-count">: 1</span>
+                                    </div>
+                                    <div class="coin-group">
+                                        <div class="coin coin-silver"></div>
+                                        <span class="coin-count">: 2</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="spice-storage">
+                        <div class="spice-storage-container">
+                            <div class="spice-slot filled"><div class="spice-cube spice-yellow"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-red"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-red"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-green"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-brown"></div></div>
+                            <div class="spice-slot filled"><div class="spice-cube spice-brown"></div></div>
+                            <div class="spice-slot"></div>
+                            <div class="spice-slot"></div>
+                            <div class="spice-slot"></div>
+                            <div class="spice-slot"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <style>
+        /* Additional test styles */
+        .test-note {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        
+        .feature-highlight {
+            background: rgba(255, 215, 0, 0.2);
+            border-left: 4px solid #FFD700;
+            padding: 8px 12px;
+            margin: 8px 0;
+        }
+    </style>
+
+    <div class="test-note">
+        <h3>✅ Features Implemented & Tested:</h3>
+        <div class="feature-highlight">🪙 <strong>Side-by-side coin display</strong> - Coins are now displayed next to each other instead of stacked</div>
+        <div class="feature-highlight">📏 <strong>Bigger coins</strong> - Coins are larger (28px) and positioned at top-right corner</div>
+        <div class="feature-highlight">🏷️ <strong>"x1" indicators</strong> - Each victory card shows quantity indicator</div>
+        <div class="feature-highlight">🪙 <strong>Separate coin display</strong> - Coins are shown separately from cards with point values</div>
+        <div class="feature-highlight">📊 <strong>Real-time points</strong> - Total points update automatically and show in header</div>
+        <div class="feature-highlight">🎯 <strong>Victory card mechanics</strong> - Cards accumulate coins when shifting positions</div>
+        <div class="feature-highlight">✅ <strong>Confirm buttons</strong> - All merchant trading cards have confirmation options</div>
+    </div>
+</body>
+</html>

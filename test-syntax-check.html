@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syntax Check Test</title>
+</head>
+<body>
+    <h1>JavaScript Syntax Check</h1>
+    <div id="results"></div>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function logResult(message, isError = false) {
+            const div = document.createElement('div');
+            div.style.padding = '5px';
+            div.style.margin = '5px 0';
+            div.style.color = isError ? 'red' : 'green';
+            div.textContent = message;
+            results.appendChild(div);
+        }
+
+        // Test script loading
+        const scripts = [
+            'js/cards.js',
+            'js/game.js', 
+            'js/ai-player.js',
+            'js/analytics.js',
+            'js/ui.js',
+            'js/main.js'
+        ];
+
+        let loadedScripts = 0;
+        
+        scripts.forEach((scriptPath, index) => {
+            const script = document.createElement('script');
+            script.src = scriptPath;
+            
+            script.onload = function() {
+                logResult(`✅ ${scriptPath} loaded successfully`);
+                loadedScripts++;
+                
+                if (loadedScripts === scripts.length) {
+                    // All scripts loaded, test classes
+                    setTimeout(() => {
+                        testClasses();
+                    }, 100);
+                }
+            };
+            
+            script.onerror = function() {
+                logResult(`❌ ${scriptPath} failed to load`, true);
+            };
+            
+            document.head.appendChild(script);
+        });
+
+        function testClasses() {
+            logResult('--- Testing Class Definitions ---');
+            
+            try {
+                if (typeof Game !== 'undefined') {
+                    logResult('✅ Game class is defined');
+                    const testGame = new Game();
+                    logResult('✅ Game class can be instantiated');
+                } else {
+                    logResult('❌ Game class is not defined', true);
+                }
+            } catch (e) {
+                logResult(`❌ Game class error: ${e.message}`, true);
+            }
+
+            try {
+                if (typeof GameUI !== 'undefined') {
+                    logResult('✅ GameUI class is defined');
+                    const testGame = new Game();
+                    const testUI = new GameUI(testGame);
+                    logResult('✅ GameUI class can be instantiated');
+                } else {
+                    logResult('❌ GameUI class is not defined', true);
+                }
+            } catch (e) {
+                logResult(`❌ GameUI class error: ${e.message}`, true);
+            }
+
+            try {
+                if (typeof AIPlayer !== 'undefined') {
+                    logResult('✅ AIPlayer class is defined');
+                } else {
+                    logResult('❌ AIPlayer class is not defined', true);
+                }
+            } catch (e) {
+                logResult(`❌ AIPlayer class error: ${e.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>

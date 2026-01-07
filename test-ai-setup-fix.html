@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Setup Fix Test</title>
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🤖 AI Setup Elements Fix Test</h1>
+        </header>
+
+        <main>
+            <!-- Test Setup Modal -->
+            <div id="setup-modal" class="modal">
+                <div class="modal-content">
+                    <h2>Game Setup</h2>
+                    <div class="setup-options">
+                        <div class="setup-section">
+                            <label for="player-count">Number of Players:</label>
+                            <select id="player-count">
+                                <option value="2">2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4">4 Players</option>
+                                <option value="5">5 Players</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setup-section">
+                            <label for="ai-players">AI Players:</label>
+                            <select id="ai-players">
+                                <option value="0">No AI (Human Only)</option>
+                                <option value="1">1 AI Player</option>
+                                <option value="2">2 AI Players</option>
+                                <option value="3">3 AI Players</option>
+                                <option value="4">4 AI Players</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setup-section">
+                            <label for="ai-difficulty">AI Difficulty:</label>
+                            <select id="ai-difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="test-elements">Test AI Elements</button>
+                    <button id="start-game">Start Game</button>
+                </div>
+            </div>
+
+            <div id="test-results" style="margin: 20px 0; padding: 20px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+                <h3>🧪 Test Results:</h3>
+                <div id="results-content">Click "Test AI Elements" to check if AI setup elements are working...</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - Testing AI setup elements...');
+            
+            // Test button functionality
+            document.getElementById('test-elements').addEventListener('click', function() {
+                testAIElements();
+            });
+            
+            // Auto-test on load
+            setTimeout(() => {
+                testAIElements();
+            }, 100);
+        });
+        
+        function testAIElements() {
+            const results = [];
+            
+            // Test AI Players element
+            const aiPlayersEl = document.getElementById('ai-players');
+            if (aiPlayersEl) {
+                results.push(`✅ AI Players element found (${aiPlayersEl.options.length} options)`);
+                results.push(`   - Current value: "${aiPlayersEl.value}"`);
+                results.push(`   - Visible: ${getComputedStyle(aiPlayersEl).display !== 'none'}`);
+            } else {
+                results.push('❌ AI Players element NOT found');
+            }
+            
+            // Test AI Difficulty element
+            const aiDifficultyEl = document.getElementById('ai-difficulty');
+            if (aiDifficultyEl) {
+                results.push(`✅ AI Difficulty element found (${aiDifficultyEl.options.length} options)`);
+                results.push(`   - Current value: "${aiDifficultyEl.value}"`);
+                results.push(`   - Visible: ${getComputedStyle(aiDifficultyEl).display !== 'none'}`);
+            } else {
+                results.push('❌ AI Difficulty element NOT found');
+            }
+            
+            // Test Player Count element (for comparison)
+            const playerCountEl = document.getElementById('player-count');
+            if (playerCountEl) {
+                results.push(`✅ Player Count element found (${playerCountEl.options.length} options)`);
+            } else {
+                results.push('❌ Player Count element NOT found');
+            }
+            
+            // Test setup sections
+            const setupSections = document.querySelectorAll('.setup-section');
+            results.push(`📊 Setup sections found: ${setupSections.length}`);
+            
+            // Test all select elements
+            const allSelects = document.querySelectorAll('select');
+            results.push(`📊 Total select elements: ${allSelects.length}`);
+            
+            // Display results
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = results.join('<br>');
+            
+            // Console log for debugging
+            console.log('AI Setup Test Results:', {
+                aiPlayers: !!aiPlayersEl,
+                aiDifficulty: !!aiDifficultyEl,
+                playerCount: !!playerCountEl,
+                setupSections: setupSections.length,
+                totalSelects: allSelects.length
+            });
+        }
+        
+        // Test changing values
+        function testValueChanges() {
+            const aiPlayersEl = document.getElementById('ai-players');
+            const aiDifficultyEl = document.getElementById('ai-difficulty');
+            
+            if (aiPlayersEl && aiDifficultyEl) {
+                aiPlayersEl.value = '2';
+                aiDifficultyEl.value = 'hard';
+                console.log('Values changed successfully');
+                testAIElements();
+            }
+        }
+        
+        // Make test function available globally
+        window.testAIElements = testAIElements;
+        window.testValueChanges = testValueChanges;
+    </script>
+</body>
+</html>

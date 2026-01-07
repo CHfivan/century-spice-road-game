@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Loading Test</title>
+</head>
+<body>
+    <h1>JavaScript Loading Test</h1>
+    <div id="test-output">Loading...</div>
+    
+    <script src="js/cards.js?v=5"></script>
+    <script src="js/game.js?v=5"></script>
+    <script src="js/ai-player.js?v=5"></script>
+    <script src="js/analytics.js?v=5"></script>
+    <script src="js/ui.js?v=7"></script>
+    <script src="js/main.js?v=7"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const output = document.getElementById('test-output');
+            
+            try {
+                // Test if constants are loaded
+                if (typeof MERCHANT_CARDS !== 'undefined') {
+                    output.innerHTML += '<p>✅ MERCHANT_CARDS loaded (' + MERCHANT_CARDS.length + ' cards)</p>';
+                } else {
+                    output.innerHTML += '<p>❌ MERCHANT_CARDS not loaded</p>';
+                }
+                
+                if (typeof VICTORY_CARDS !== 'undefined') {
+                    output.innerHTML += '<p>✅ VICTORY_CARDS loaded (' + VICTORY_CARDS.length + ' cards)</p>';
+                } else {
+                    output.innerHTML += '<p>❌ VICTORY_CARDS not loaded</p>';
+                }
+                
+                // Test if classes are loaded
+                if (typeof Game !== 'undefined') {
+                    output.innerHTML += '<p>✅ Game class loaded</p>';
+                    
+                    // Try to create a game instance
+                    const testGame = new Game();
+                    output.innerHTML += '<p>✅ Game instance created successfully</p>';
+                } else {
+                    output.innerHTML += '<p>❌ Game class not loaded</p>';
+                }
+                
+                if (typeof GameUI !== 'undefined') {
+                    output.innerHTML += '<p>✅ GameUI class loaded</p>';
+                } else {
+                    output.innerHTML += '<p>❌ GameUI class not loaded</p>';
+                }
+                
+                output.innerHTML += '<p>🎉 All JavaScript files loaded successfully!</p>';
+                
+            } catch (error) {
+                output.innerHTML += '<p>❌ JavaScript Error: ' + error.message + '</p>';
+                console.error('JavaScript Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

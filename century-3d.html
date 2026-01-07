@@ -1,0 +1,2047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Century: Spice Road 3D</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cinzel', serif;
+            background: linear-gradient(135deg, #2c1810, #4a2c1a);
+            color: #f4e4bc;
+            overflow: hidden;
+            cursor: default;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #threeCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .ui-panel {
+            position: absolute;
+            background: rgba(44, 24, 16, 0.9);
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+        }
+        
+        #gameInfo {
+            top: 20px;
+            left: 20px;
+            min-width: 320px;
+            max-width: 400px;
+        }
+        
+        #gameInfo h1 {
+            color: #FFD700;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            border-bottom: 2px solid #8B4513;
+            padding-bottom: 8px;
+        }
+        
+        #currentPlayer {
+            font-size: 1.3em;
+            color: #FF6B35;
+            font-weight: bold;
+            background: rgba(255, 107, 53, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid #FF6B35;
+            margin-bottom: 10px;
+        }
+        
+        #turnCounter {
+            color: #f4e4bc;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .turn-icon {
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        #actionPanel {
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 200px;
+        }
+        
+        .action-btn {
+            padding: 15px 28px;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            color: #f4e4bc;
+            border: 2px solid #FFD700;
+            border-radius: 12px;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .action-btn:hover::before {
+            left: 100%;
+        }
+        
+        .action-btn:hover {
+            background: linear-gradient(135deg, #A0522D, #CD853F);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border-color: #FFA500;
+        }
+        
+        .action-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .action-btn:disabled {
+            background: linear-gradient(135deg, #666, #777);
+            border-color: #999;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+        
+        .action-btn:disabled::before {
+            display: none;
+        }
+        
+        #playerStats {
+            top: 20px;
+            right: 20px;
+            min-width: 280px;
+            max-width: 350px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        
+        #playerStats::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #playerStats::-webkit-scrollbar-track {
+            background: rgba(44, 24, 16, 0.3);
+            border-radius: 4px;
+        }
+        
+        #playerStats::-webkit-scrollbar-thumb {
+            background: #8B4513;
+            border-radius: 4px;
+        }
+        
+        .player-info {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: rgba(139, 69, 19, 0.3);
+            border-radius: 8px;
+            border-left: 4px solid #FFD700;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .player-info:hover {
+            background: rgba(139, 69, 19, 0.4);
+            transform: translateX(-3px);
+        }
+        
+        .player-info.active {
+            border-left-color: #FF6B35;
+            background: rgba(255, 107, 53, 0.25);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.3);
+        }
+        
+        .player-info.active::before {
+            content: '👑';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.2em;
+        }
+        
+        .player-name {
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .player-score {
+            font-size: 0.9em;
+            color: #FFA500;
+            font-weight: normal;
+        }
+        
+        .spice-display {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 8px 0;
+        }
+        
+        .spice-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        
+        .spice-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 2px solid #333;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .spice-count {
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        .spice-yellow { 
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-color: #B8860B;
+        }
+        .spice-red { 
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            border-color: #8B0000;
+        }
+        .spice-green { 
+            background: linear-gradient(135deg, #228B22, #006400);
+            border-color: #004000;
+        }
+        .spice-brown { 
+            background: linear-gradient(135deg, #8B4513, #654321);
+            border-color: #4A2C17;
+        }
+        
+        .player-cards-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #DDD;
+        }
+        
+        .card-count {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        
+        #setupModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        #setupModal.hidden {
+            display: none;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #2c1810, #4a2c1a);
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            max-width: 600px;
+            width: 90%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+            animation: modalGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes modalGlow {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+        
+        .modal-content > * {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .modal-content h2 {
+            color: #FFD700;
+            font-size: 2.5em;
+            margin-bottom: 35px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            letter-spacing: 2px;
+        }
+        
+        .setup-section {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .setup-section label {
+            display: block;
+            color: #f4e4bc;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .setup-section select {
+            width: 100%;
+            padding: 15px;
+            background: rgba(44, 24, 16, 0.9);
+            border: 2px solid #8B4513;
+            border-radius: 8px;
+            color: #f4e4bc;
+            font-family: 'Cinzel', serif;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+        
+        .setup-section select:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+        
+        .setup-section select:hover {
+            border-color: #A0522D;
+        }
+        
+        #startGame {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #2c1810;
+            border: none;
+            padding: 18px 50px;
+            font-family: 'Cinzel', serif;
+            font-weight: bold;
+            font-size: 1.4em;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        #startGame:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+            background: linear-gradient(135deg, #FFA500, #FF8C00);
+        }
+        
+        #startGame:active {
+            transform: translateY(-1px);
+        }
+        
+        .loading.hidden {
+            display: none !important;
+        }
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #FFD700;
+            font-size: 1.8em;
+            z-index: 999;
+            text-align: center;
+            background: rgba(44, 24, 16, 0.9);
+            padding: 30px 50px;
+            border-radius: 15px;
+            border: 2px solid #8B4513;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        
+        .loading::after {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto 0;
+            border: 4px solid #8B4513;
+            border-top: 4px solid #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Card hover effects */
+        .card-tooltip {
+            position: absolute;
+            background: rgba(44, 24, 16, 0.95);
+            color: #f4e4bc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 2px solid #8B4513;
+            font-size: 0.9em;
+            max-width: 200px;
+            z-index: 200;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
+        }
+        
+        .card-tooltip.visible {
+            opacity: 1;
+        }
+        
+        /* Game status indicators */
+        .status-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(44, 24, 16, 0.9);
+            color: #FFD700;
+            padding: 20px 30px;
+            border-radius: 10px;
+            border: 2px solid #8B4513;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .status-indicator.show {
+            opacity: 1;
+        }
+        
+        /* Player Hand Cards (2D UI) */
+        .player-hand {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(44, 24, 16, 0.9);
+            border: 2px solid #8B4513;
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(5px);
+            pointer-events: auto;
+            max-width: 600px;
+        }
+        
+        .player-hand h3 {
+            color: #FFD700;
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hand-cards {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .hand-card {
+            background: linear-gradient(135deg, #F0E68C, #DDD);
+            border: 2px solid #8B4513;
+            border-radius: 8px;
+            padding: 15px;
+            width: 150px;
+            height: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .hand-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border-color: #FFD700;
+        }
+        
+        .hand-card.selected {
+            border-color: #FF6B35;
+            background: linear-gradient(135deg, #FFE4B5, #F0E68C);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 0.5);
+            transform: translateY(-3px) scale(1.05);
+        }
+        
+        .hand-card-name {
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 15px;
+            font-size: 1em;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+        }
+        
+        .hand-card-effect {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            flex: 1;
+        }
+        
+        .spice-cube {
+            width: 24px;
+            height: 24px;
+            border-radius: 3px;
+            border: 2px solid #333;
+            display: inline-block;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .spice-cube.yellow { 
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-color: #B8860B;
+        }
+        .spice-cube.red { 
+            background: linear-gradient(135deg, #DC143C, #B22222);
+            border-color: #8B0000;
+        }
+        .spice-cube.green { 
+            background: linear-gradient(135deg, #228B22, #006400);
+            border-color: #004000;
+        }
+        .spice-cube.brown { 
+            background: linear-gradient(135deg, #8B4513, #654321);
+            border-color: #4A2C17;
+        }
+        
+        .upgrade-text {
+            color: #8B4513;
+            font-weight: bold;
+            font-size: 1.2em;
+            text-align: center;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .ui-panel {
+                padding: 10px;
+            }
+            
+            #gameInfo {
+                min-width: 250px;
+            }
+            
+            #playerStats {
+                min-width: 200px;
+                max-width: 250px;
+            }
+            
+            #actionPanel {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .action-btn {
+                min-width: 200px;
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+                margin: 20px;
+            }
+            
+            .modal-content h2 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="threeCanvas"></canvas>
+        
+        <div id="ui">
+            <div id="gameInfo" class="ui-panel">
+                <h1>Century: Spice Road 3D</h1>
+                <div id="currentPlayer">Player 1's Turn</div>
+                <div id="turnCounter">
+                    <span class="turn-icon"></span>
+                    Turn 1
+                </div>
+            </div>
+            
+            <div id="playerStats" class="ui-panel">
+                <div id="playersContainer"></div>
+            </div>
+            
+            <div id="actionPanel" class="ui-panel">
+                <button class="action-btn" id="playCardBtn">🃏 Play Card</button>
+                <button class="action-btn" id="acquireCardBtn">🛒 Acquire Card</button>
+                <button class="action-btn" id="claimVictoryBtn">🏆 Claim Victory</button>
+                <button class="action-btn" id="restBtn">😴 Rest</button>
+            </div>
+            
+            <div id="cardTooltip" class="card-tooltip"></div>
+            <div id="statusIndicator" class="status-indicator"></div>
+            
+            <!-- Player Hand Cards (2D UI) -->
+            <div id="playerHand" class="player-hand">
+                <h3>Your Hand</h3>
+                <div id="handCards" class="hand-cards">
+                    <!-- Hand cards will be populated here -->
+                </div>
+            </div>
+        </div>
+        
+        <div id="setupModal">
+            <div class="modal-content">
+                <h2>Game Setup</h2>
+                <div class="setup-section">
+                    <label for="playerCount">Number of Players:</label>
+                    <select id="playerCount">
+                        <option value="2">2 Players</option>
+                        <option value="3">3 Players</option>
+                        <option value="4">4 Players</option>
+                        <option value="5">5 Players</option>
+                    </select>
+                </div>
+                <div class="setup-section">
+                    <label for="aiPlayers">AI Players:</label>
+                    <select id="aiPlayers">
+                        <option value="0">No AI (Human Only)</option>
+                        <option value="1">1 AI Player</option>
+                        <option value="2">2 AI Players</option>
+                        <option value="3">3 AI Players</option>
+                        <option value="4">4 AI Players</option>
+                    </select>
+                </div>
+                <button id="startGame">Start Game</button>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading hidden">Loading 3D Environment...</div>
+    </div>
+
+    <script>
+        // Immediate loading screen hide - run as soon as possible
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM ready - attempting to hide loading screen');
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+                console.log('Loading screen hidden via style.display');
+            }
+        });
+        
+        // Backup method
+        setTimeout(function() {
+            console.log('Timeout backup - hiding loading screen');
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.style.display = 'none';
+                loading.classList.add('hidden');
+                console.log('Loading screen hidden via timeout backup');
+            }
+        }, 100);
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Load OrbitControls with fallback
+        const script = document.createElement('script');
+        script.src = 'https://threejs.org/examples/js/controls/OrbitControls.js';
+        script.onerror = function() {
+            console.warn('Primary OrbitControls source failed, trying fallback...');
+            const fallbackScript = document.createElement('script');
+            fallbackScript.src = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
+            fallbackScript.onerror = function() {
+                console.warn('OrbitControls fallback also failed - will continue without camera controls');
+                window.orbitControlsLoaded = false;
+            };
+            fallbackScript.onload = function() {
+                console.log('OrbitControls loaded from fallback source');
+                window.orbitControlsLoaded = true;
+            };
+            document.head.appendChild(fallbackScript);
+        };
+        script.onload = function() {
+            console.log('OrbitControls loaded from primary source');
+            window.orbitControlsLoaded = true;
+        };
+        document.head.appendChild(script);
+    </script>
+    <script>
+        // Century: Spice Road 3D - Three.js Implementation
+        
+        // Game Data - Correct Century: Spice Road Rules
+        const MERCHANT_CARDS = [
+            // Starting cards (every player gets these 2)
+            { id: 'gain-yy', name: 'Gain YY', type: 'gain', effect: { yellow: 2 }, description: 'Gain 2 yellow spices' },
+            { id: 'upgrade-2', name: 'Upgrade 2', type: 'upgrade', effect: { amount: 2 }, description: 'Upgrade up to 2 spice levels' },
+            
+            // Market cards (examples from the full deck)
+            { id: 'trade-yyy-b', name: 'YYY → B', type: 'trade', effect: { input: { yellow: 3 }, output: { brown: 1 } }, description: 'Trade 3 yellow for 1 brown' },
+            { id: 'trade-r-yyy', name: 'R → YYY', type: 'trade', effect: { input: { red: 1 }, output: { yellow: 3 } }, description: 'Trade 1 red for 3 yellow' },
+            { id: 'gain-yr', name: 'Gain YR', type: 'gain', effect: { yellow: 1, red: 1 }, description: 'Gain 1 yellow and 1 red' },
+            { id: 'gain-g', name: 'Gain G', type: 'gain', effect: { green: 1 }, description: 'Gain 1 green spice' },
+            { id: 'gain-yyy', name: 'Gain YYY', type: 'gain', effect: { yellow: 3 }, description: 'Gain 3 yellow spices' },
+            { id: 'upgrade-3', name: 'Upgrade 3', type: 'upgrade', effect: { amount: 3 }, description: 'Upgrade up to 3 spice levels' }
+        ];
+
+        const VICTORY_CARDS = [
+            { id: 'victory-yyrr-6', points: 6, cost: { yellow: 2, red: 2 }, description: '6 points for 2 yellow, 2 red' },
+            { id: 'victory-yyyrr-7', points: 7, cost: { yellow: 3, red: 2 }, description: '7 points for 3 yellow, 2 red' },
+            { id: 'victory-rrrr-8', points: 8, cost: { red: 4 }, description: '8 points for 4 red' },
+            { id: 'victory-yygg-8', points: 8, cost: { yellow: 2, green: 2 }, description: '8 points for 2 yellow, 2 green' },
+            { id: 'victory-yyrrr-8', points: 8, cost: { yellow: 2, red: 3 }, description: '8 points for 2 yellow, 3 red' },
+            { id: 'victory-yyygg-9', points: 9, cost: { yellow: 3, green: 2 }, description: '9 points for 3 yellow, 2 green' }
+        ];
+
+        // 3D Game Engine
+        class Century3D {
+            constructor() {
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.controls = null;
+                this.cards = [];
+                this.cardMeshes = new Map();
+                this.animationQueue = [];
+                this.isAnimating = false;
+                
+                this.game = null;
+                this.selectedCard = null;
+                
+                this.init();
+            }
+
+            init() {
+                try {
+                    console.log('Initializing Century 3D...');
+                    this.setupScene();
+                    console.log('Scene setup complete');
+                    
+                    this.setupLighting();
+                    console.log('Lighting setup complete');
+                    
+                    this.setupTable();
+                    console.log('Table setup complete');
+                    
+                    this.setupCamera();
+                    console.log('Camera setup complete');
+                    
+                    this.setupControls();
+                    console.log('Controls setup complete');
+                    
+                    this.setupEventListeners();
+                    console.log('Event listeners setup complete');
+                    
+                    this.animate();
+                    console.log('Animation started');
+                    
+                    console.log('Century 3D initialized successfully');
+                } catch (error) {
+                    console.error('Error initializing Century 3D:', error);
+                    // Hide loading screen on error
+                    const loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.classList.add('hidden');
+                    }
+                    alert('Error initializing 3D environment: ' + error.message);
+                }
+            }
+
+            setupScene() {
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x2c1810);
+                
+                // Add fog for atmosphere
+                this.scene.fog = new THREE.Fog(0x2c1810, 10, 50);
+                
+                this.renderer = new THREE.WebGLRenderer({ 
+                    canvas: document.getElementById('threeCanvas'),
+                    antialias: true 
+                });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            }
+
+            setupLighting() {
+                // Ambient light
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+                this.scene.add(ambientLight);
+                
+                // Main directional light
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                this.scene.add(directionalLight);
+                
+                // Warm table light
+                const tableLight = new THREE.PointLight(0xffaa44, 0.6, 20);
+                tableLight.position.set(0, 5, 0);
+                this.scene.add(tableLight);
+            }
+
+            setupTable() {
+                // Much larger rectangular table for better card distribution
+                const tableGeometry = new THREE.BoxGeometry(24, 0.2, 18); // Much larger table
+                const tableMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x8B4513,
+                    map: this.createWoodTexture()
+                });
+                const table = new THREE.Mesh(tableGeometry, tableMaterial);
+                table.position.y = -0.1;
+                table.receiveShadow = true;
+                this.scene.add(table);
+                
+                // Table legs (4 corners)
+                const legPositions = [
+                    { x: -11, z: -8 },
+                    { x: 11, z: -8 },
+                    { x: -11, z: 8 },
+                    { x: 11, z: 8 }
+                ];
+                
+                legPositions.forEach(pos => {
+                    const legGeometry = new THREE.CylinderGeometry(0.1, 0.1, 3);
+                    const legMaterial = new THREE.MeshLambertMaterial({ color: 0x654321 });
+                    const leg = new THREE.Mesh(legGeometry, legMaterial);
+                    leg.position.set(pos.x, -1.6, pos.z);
+                    leg.castShadow = true;
+                    this.scene.add(leg);
+                });
+            }
+
+            createWoodTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                
+                // Wood grain pattern
+                const gradient = ctx.createLinearGradient(0, 0, 512, 0);
+                gradient.addColorStop(0, '#8B4513');
+                gradient.addColorStop(0.3, '#A0522D');
+                gradient.addColorStop(0.7, '#8B4513');
+                gradient.addColorStop(1, '#654321');
+                
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 512, 512);
+                
+                // Add wood grain lines
+                ctx.strokeStyle = 'rgba(101, 67, 33, 0.3)';
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 20; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * 25 + Math.random() * 10);
+                    ctx.lineTo(512, i * 25 + Math.random() * 10);
+                    ctx.stroke();
+                }
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                texture.wrapS = THREE.RepeatWrapping;
+                texture.wrapT = THREE.RepeatWrapping;
+                texture.repeat.set(2, 2);
+                return texture;
+            }
+
+            createCardBackTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 320;
+                const ctx = canvas.getContext('2d');
+                
+                // Background gradient
+                const gradient = ctx.createLinearGradient(0, 0, 256, 320);
+                gradient.addColorStop(0, '#8B4513');
+                gradient.addColorStop(0.5, '#A0522D');
+                gradient.addColorStop(1, '#654321');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 256, 320);
+                
+                // Border
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 6;
+                ctx.strokeRect(3, 3, 250, 314);
+                
+                // Center design
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 24px Cinzel, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('CENTURY', 128, 140);
+                ctx.fillText('SPICE ROAD', 128, 170);
+                
+                // Decorative corners
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(40, 40, 15, 0, Math.PI * 2);
+                ctx.arc(216, 40, 15, 0, Math.PI * 2);
+                ctx.arc(40, 280, 15, 0, Math.PI * 2);
+                ctx.arc(216, 280, 15, 0, Math.PI * 2);
+                ctx.fill();
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+
+            setupCamera() {
+                this.camera = new THREE.PerspectiveCamera(
+                    80, // 80 degree field of view
+                    window.innerWidth / window.innerHeight, 
+                    0.1, 
+                    1000
+                );
+                // Position camera for nearly top-down view (10 degrees from vertical)
+                this.camera.position.set(0, 25, 4.4); // Calculated for 10-degree angle
+                this.camera.lookAt(0, 0, 0); // Look at center of table
+            }
+
+            setupControls() {
+                // Only setup OrbitControls if available
+                if (typeof THREE.OrbitControls !== 'undefined') {
+                    this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+                    this.controls.enableDamping = true;
+                    this.controls.dampingFactor = 0.05;
+                    this.controls.maxPolarAngle = Math.PI / 3; // Limit to more top-down view
+                    this.controls.minPolarAngle = 0; // Allow completely top-down
+                    this.controls.minDistance = 10;
+                    this.controls.maxDistance = 35;
+                    this.controls.target.set(0, 0, 0);
+                    this.controls.enablePan = true;
+                    console.log('OrbitControls initialized');
+                } else {
+                    console.log('OrbitControls not available - using fixed camera');
+                    this.controls = null;
+                }
+            }
+
+            createCard(cardData, position = { x: 0, y: 0, z: 0 }, rotation = { x: 0, y: 0, z: 0 }, isHandCard = false, isCurrentPlayer = false) {
+                const cardGroup = new THREE.Group();
+                
+                // Card base
+                const cardGeometry = new THREE.BoxGeometry(1.5, 2, 0.02); // Made taller and thinner for upright cards
+                const cardMaterial = new THREE.MeshLambertMaterial({ 
+                    color: cardData.type === 'victory' ? 0xFFD700 : 0xF0E68C 
+                });
+                const cardMesh = new THREE.Mesh(cardGeometry, cardMaterial);
+                cardMesh.castShadow = true;
+                cardMesh.receiveShadow = true;
+                cardGroup.add(cardMesh);
+                
+                // Determine if card should show face or back
+                const showFace = !isHandCard || isCurrentPlayer;
+                
+                if (showFace) {
+                    // Card face texture (front side)
+                    const cardTexture = this.createCardTexture(cardData);
+                    const faceMaterial = new THREE.MeshLambertMaterial({ map: cardTexture });
+                    const faceGeometry = new THREE.PlaneGeometry(1.4, 1.9);
+                    const faceMesh = new THREE.Mesh(faceGeometry, faceMaterial);
+                    faceMesh.position.z = 0.011; // Front face
+                    cardGroup.add(faceMesh);
+                    
+                    // Card back on the back side
+                    const backTexture = this.createCardBackTexture();
+                    const backMaterial = new THREE.MeshLambertMaterial({ map: backTexture });
+                    const backGeometry = new THREE.PlaneGeometry(1.4, 1.9);
+                    const backMesh = new THREE.Mesh(backGeometry, backMaterial);
+                    backMesh.position.z = -0.011; // Back face
+                    backMesh.rotation.y = Math.PI; // Flip to face outward
+                    cardGroup.add(backMesh);
+                } else {
+                    // Hand card for other players - show only back
+                    const backTexture = this.createCardBackTexture();
+                    const backMaterial = new THREE.MeshLambertMaterial({ map: backTexture });
+                    const backGeometry = new THREE.PlaneGeometry(1.4, 1.9);
+                    const backMesh = new THREE.Mesh(backGeometry, backMaterial);
+                    backMesh.position.z = 0.011; // Show back facing forward
+                    cardGroup.add(backMesh);
+                }
+                
+                // Position and rotate the card
+                cardGroup.position.set(position.x, position.y, position.z);
+                
+                // For hand cards, make them stand upright
+                if (isHandCard) {
+                    cardGroup.rotation.set(0, rotation.y, 0); // Only Y rotation, keep cards upright
+                } else {
+                    // Table cards lay flat
+                    cardGroup.rotation.set(-Math.PI / 2, rotation.y, rotation.z); // Lay flat on table
+                }
+                
+                // Store card data
+                cardGroup.userData = cardData;
+                cardGroup.userData.originalPosition = { ...position };
+                cardGroup.userData.originalRotation = { ...rotation };
+                cardGroup.userData.isHandCard = isHandCard;
+                cardGroup.userData.isCurrentPlayer = isCurrentPlayer;
+                
+                return cardGroup;
+            }
+
+            createCardTexture(cardData) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 320;
+                const ctx = canvas.getContext('2d');
+                
+                // Background
+                const gradient = ctx.createLinearGradient(0, 0, 256, 320);
+                if (cardData.type === 'victory') {
+                    gradient.addColorStop(0, '#FFD700');
+                    gradient.addColorStop(1, '#FFA500');
+                } else {
+                    gradient.addColorStop(0, '#F0E68C');
+                    gradient.addColorStop(1, '#DDD');
+                }
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 256, 320);
+                
+                // Border
+                ctx.strokeStyle = '#8B4513';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(2, 2, 252, 316);
+                
+                // Title
+                ctx.fillStyle = '#8B4513';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(cardData.name || `${cardData.points} VP`, 128, 30);
+                
+                // Draw cubes for effects/costs
+                if (cardData.type === 'victory') {
+                    // Victory card - show only points (NO COST as requested)
+                    ctx.fillStyle = '#8B4513';
+                    ctx.font = 'bold 48px Arial';
+                    ctx.fillText(`${cardData.points}`, 128, 120);
+                    ctx.font = 'bold 20px Arial';
+                    ctx.fillText('POINTS', 128, 150);
+                    
+                    // Draw coin if present
+                    if (cardData.coin) {
+                        this.drawCoin(ctx, cardData.coin, 200, 50);
+                    }
+                } else {
+                    // Merchant card - show effect as bigger cubes (like index-fresh.html)
+                    if (cardData.type === 'gain') {
+                        ctx.fillStyle = '#228B22';
+                        ctx.font = 'bold 16px Arial';
+                        ctx.fillText('GAIN', 128, 60);
+                        this.drawSpiceCubes(ctx, cardData.effect, 128, 100, '', 32); // Bigger cubes
+                    } else if (cardData.type === 'upgrade') {
+                        ctx.fillStyle = '#DC143C';
+                        ctx.font = 'bold 16px Arial';
+                        ctx.fillText('UPGRADE', 128, 60);
+                        ctx.font = 'bold 40px Arial';
+                        ctx.fillText(`${cardData.effect.amount}`, 128, 120);
+                        ctx.font = 'bold 16px Arial';
+                        ctx.fillText('levels', 128, 145);
+                    } else if (cardData.type === 'trade') {
+                        ctx.fillStyle = '#4169E1';
+                        ctx.font = 'bold 16px Arial';
+                        ctx.fillText('TRADE', 128, 50);
+                        
+                        // Input cubes (bigger)
+                        this.drawSpiceCubes(ctx, cardData.effect.input, 128, 80, 'Give:', 28);
+                        
+                        // Arrow
+                        ctx.fillStyle = '#8B4513';
+                        ctx.font = 'bold 24px Arial';
+                        ctx.fillText('↓', 128, 160);
+                        
+                        // Output cubes (bigger)
+                        this.drawSpiceCubes(ctx, cardData.effect.output, 128, 180, 'Get:', 28);
+                    }
+                }
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                return texture;
+            }
+
+            drawSpiceCubes(ctx, spices, centerX, startY, label = '', cubeSize = 20) {
+                if (label) {
+                    ctx.fillStyle = '#8B4513';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(label, centerX, startY - 10);
+                }
+                
+                const spacing = cubeSize + 8;
+                const spiceTypes = ['yellow', 'red', 'green', 'brown'];
+                const spiceColors = {
+                    yellow: '#FFD700',
+                    red: '#DC143C', 
+                    green: '#228B22',
+                    brown: '#8B4513'
+                };
+                
+                let totalCubes = 0;
+                spiceTypes.forEach(type => {
+                    if (spices[type]) totalCubes += spices[type];
+                });
+                
+                let currentX = centerX - (totalCubes * spacing) / 2 + spacing / 2;
+                let currentY = startY;
+                
+                spiceTypes.forEach(type => {
+                    if (spices[type]) {
+                        for (let i = 0; i < spices[type]; i++) {
+                            // Draw cube shadow
+                            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                            ctx.fillRect(currentX + 3, currentY + 3, cubeSize, cubeSize);
+                            
+                            // Draw cube
+                            ctx.fillStyle = spiceColors[type];
+                            ctx.fillRect(currentX, currentY, cubeSize, cubeSize);
+                            
+                            // Draw cube border
+                            ctx.strokeStyle = '#333';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(currentX, currentY, cubeSize, cubeSize);
+                            
+                            // Add highlight for 3D effect
+                            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+                            ctx.fillRect(currentX, currentY, cubeSize/2, cubeSize/2);
+                            
+                            currentX += spacing;
+                        }
+                    }
+                });
+            }
+
+            drawCoin(ctx, coinType, x, y) {
+                const radius = 12;
+                
+                // Draw coin shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.beginPath();
+                ctx.arc(x + 2, y + 2, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw coin
+                ctx.fillStyle = coinType === 'gold' ? '#FFD700' : '#C0C0C0';
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Draw coin border
+                ctx.strokeStyle = '#333';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Add coin text
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 8px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(coinType === 'gold' ? '3' : '1', x, y + 3);
+            }
+
+            setupEventListeners() {
+                window.addEventListener('resize', () => this.onWindowResize());
+                
+                // Mouse interaction
+                this.raycaster = new THREE.Raycaster();
+                this.mouse = new THREE.Vector2();
+                
+                this.renderer.domElement.addEventListener('click', (event) => this.onCardClick(event));
+                this.renderer.domElement.addEventListener('mousemove', (event) => this.onMouseMove(event));
+            }
+
+            onWindowResize() {
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            onCardClick(event) {
+                this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+                
+                if (intersects.length > 0) {
+                    const clickedObject = intersects[0].object;
+                    const cardGroup = clickedObject.parent;
+                    
+                    if (cardGroup.userData && cardGroup.userData.id) {
+                        this.selectCard(cardGroup);
+                    }
+                }
+            }
+
+            onMouseMove(event) {
+                this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+                this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+                
+                this.raycaster.setFromCamera(this.mouse, this.camera);
+                const intersects = this.raycaster.intersectObjects(this.scene.children, true);
+                
+                // Reset all cards to original position
+                this.scene.children.forEach(child => {
+                    if (child.userData && (child.userData.id || child.userData.isHandCard || child.userData.isMerchantCard || child.userData.isVictoryCard)) {
+                        child.position.y = child.userData.originalPosition.y;
+                    }
+                });
+                
+                // Hide tooltip by default
+                if (window.gameUI) {
+                    window.gameUI.hideCardTooltip();
+                }
+                
+                // Highlight hovered card
+                if (intersects.length > 0) {
+                    const hoveredObject = intersects[0].object;
+                    const cardGroup = hoveredObject.parent;
+                    
+                    if (cardGroup.userData && (cardGroup.userData.id || cardGroup.userData.isHandCard || cardGroup.userData.isMerchantCard || cardGroup.userData.isVictoryCard)) {
+                        cardGroup.position.y = cardGroup.userData.originalPosition.y + 0.3; // Higher lift for better visibility
+                        document.body.style.cursor = 'pointer';
+                        
+                        // Show tooltip
+                        if (window.gameUI) {
+                            window.gameUI.showCardTooltip(cardGroup.userData, event.clientX + 10, event.clientY - 10);
+                        }
+                        
+                        // Show card info in console for debugging
+                        console.log('Hovering over:', cardGroup.userData.name || cardGroup.userData.id);
+                    }
+                } else {
+                    document.body.style.cursor = 'default';
+                }
+            }
+
+            selectCard(cardGroup) {
+                // Deselect previous card
+                if (this.selectedCard) {
+                    this.selectedCard.children[0].material.emissive.setHex(0x000000);
+                }
+                
+                // Select new card
+                this.selectedCard = cardGroup;
+                cardGroup.children[0].material.emissive.setHex(0x444444);
+                
+                console.log('Selected card:', cardGroup.userData.name);
+            }
+
+            animateCardMovement(card, targetPosition, duration = 1000) {
+                return new Promise((resolve) => {
+                    const startPosition = { ...card.position };
+                    const startTime = Date.now();
+                    
+                    const animate = () => {
+                        const elapsed = Date.now() - startTime;
+                        const progress = Math.min(elapsed / duration, 1);
+                        
+                        // Easing function (ease-out)
+                        const easeOut = 1 - Math.pow(1 - progress, 3);
+                        
+                        card.position.x = startPosition.x + (targetPosition.x - startPosition.x) * easeOut;
+                        card.position.y = startPosition.y + (targetPosition.y - startPosition.y) * easeOut;
+                        card.position.z = startPosition.z + (targetPosition.z - startPosition.z) * easeOut;
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
+                        } else {
+                            card.userData.originalPosition = { ...targetPosition };
+                            resolve();
+                        }
+                    };
+                    
+                    animate();
+                });
+            }
+
+            setupGameBoard() {
+                // Clear existing cards
+                this.scene.children = this.scene.children.filter(child => 
+                    !child.userData || (!child.userData.id && !child.userData.isHandCard && !child.userData.isMerchantCard && !child.userData.isVictoryCard)
+                );
+                
+                // Victory cards row - positioned at top with much more spacing
+                for (let i = 0; i < 5; i++) {
+                    const card = { ...VICTORY_CARDS[i % VICTORY_CARDS.length] };
+                    
+                    // Add coins to first two victory cards (Century rules)
+                    if (i === 0) card.coin = 'gold';
+                    if (i === 1) card.coin = 'silver';
+                    
+                    const cardMesh = this.createCard(card, { 
+                        x: -6 + i * 3, // Much wider spacing: 3 units between cards
+                        y: 0.1, 
+                        z: -6 // Further from center
+                    }, { x: 0, y: 0, z: 0 }, false, false);
+                    
+                    // Mark as victory card
+                    cardMesh.userData.isVictoryCard = true;
+                    cardMesh.userData.cardIndex = i;
+                    
+                    this.scene.add(cardMesh);
+                }
+                
+                // Merchant cards row - positioned in center with much more spacing
+                for (let i = 0; i < 6; i++) {
+                    const card = MERCHANT_CARDS[(i + 2) % MERCHANT_CARDS.length]; // Skip starting cards
+                    const cardMesh = this.createCard(card, { 
+                        x: -7.5 + i * 3, // Much wider spacing: 3 units between cards
+                        y: 0.1, 
+                        z: -2 // Center area with more space
+                    }, { x: 0, y: 0, z: 0 }, false, false);
+                    
+                    // Mark as merchant card
+                    cardMesh.userData.isMerchantCard = true;
+                    cardMesh.userData.cardIndex = i;
+                    
+                    this.scene.add(cardMesh);
+                }
+                
+                // Add deck placeholders - positioned much further to the right
+                this.createDeckPlaceholder('Victory Deck', { x: 10, y: 0.1, z: -6 });
+                this.createDeckPlaceholder('Merchant Deck', { x: 10, y: 0.1, z: -2 });
+                
+                // Player areas with much more space
+                this.setupPlayerAreas();
+                
+                console.log('Game board setup complete');
+            }
+
+            createDeckPlaceholder(label, position) {
+                // Create deck placeholder
+                const deckGeometry = new THREE.BoxGeometry(1.5, 0.1, 2);
+                const deckMaterial = new THREE.MeshLambertMaterial({ color: 0x654321 });
+                const deckMesh = new THREE.Mesh(deckGeometry, deckMaterial);
+                deckMesh.position.set(position.x, position.y, position.z);
+                this.scene.add(deckMesh);
+                
+                // Add label
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.fillStyle = 'rgba(44, 24, 16, 0.9)';
+                ctx.fillRect(0, 0, 256, 64);
+                
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 16px Cinzel, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, 128, 40);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(spriteMaterial);
+                
+                sprite.position.set(position.x, position.y + 0.8, position.z);
+                sprite.scale.set(2, 0.5, 1);
+                
+                this.scene.add(sprite);
+            }
+
+            setupPlayerAreas() {
+                const playerCount = this.game ? this.game.players.length : 2;
+                
+                for (let p = 0; p < playerCount; p++) {
+                    // Position player areas much further from center to avoid overlap
+                    let areaX, areaZ;
+                    
+                    if (p === 0) {
+                        // Current player at bottom - much further from cards
+                        areaX = 0;
+                        areaZ = 6; // Much further from merchant cards
+                    } else if (p === 1) {
+                        // Second player at top - much further from victory cards
+                        areaX = 0;
+                        areaZ = -10; // Much further from victory cards
+                    } else if (p === 2) {
+                        // Third player on left side - much further from table
+                        areaX = -10; // Much further from cards
+                        areaZ = -2;
+                    } else if (p === 3) {
+                        // Fourth player on right side - much further from table
+                        areaX = 10; // Much further from cards (but not overlapping deck)
+                        areaZ = 2; // Offset to avoid deck area
+                    } else {
+                        // Additional players - positioned around the larger table
+                        const angle = ((p - 1) / (playerCount - 1)) * Math.PI * 2;
+                        const radius = 12; // Much larger radius
+                        areaX = Math.cos(angle) * radius;
+                        areaZ = Math.sin(angle) * radius;
+                    }
+                    
+                    // Add player spice tracking area
+                    this.createSpiceTrackingArea(p, areaX, areaZ);
+                    
+                    // Add player name label
+                    this.createPlayerLabel(p, areaX, areaZ);
+                }
+                
+                // Setup 2D hand cards for current player
+                this.setupHandCardsUI();
+            }
+
+            setupHandCardsUI() {
+                const handCardsContainer = document.getElementById('handCards');
+                if (!handCardsContainer) return;
+                
+                handCardsContainer.innerHTML = '';
+                
+                // Add starting cards for current player
+                const startingCards = [
+                    { id: 'gain-yy', name: 'Gain YY', type: 'gain', effect: { yellow: 2 } },
+                    { id: 'upgrade-2', name: 'Upgrade 2', type: 'upgrade', effect: { amount: 2 } }
+                ];
+                
+                startingCards.forEach((card, index) => {
+                    const cardElement = this.createHandCardElement(card, index);
+                    handCardsContainer.appendChild(cardElement);
+                });
+            }
+
+            createHandCardElement(cardData, index) {
+                const cardDiv = document.createElement('div');
+                cardDiv.className = 'hand-card';
+                cardDiv.dataset.cardIndex = index;
+                
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'hand-card-name';
+                nameDiv.textContent = cardData.name;
+                
+                const effectDiv = document.createElement('div');
+                effectDiv.className = 'hand-card-effect';
+                
+                if (cardData.type === 'gain') {
+                    // Show spice cubes for gain effects
+                    Object.entries(cardData.effect).forEach(([spiceType, count]) => {
+                        for (let i = 0; i < count; i++) {
+                            const cube = document.createElement('div');
+                            cube.className = `spice-cube ${spiceType}`;
+                            effectDiv.appendChild(cube);
+                        }
+                    });
+                } else if (cardData.type === 'upgrade') {
+                    // Show upgrade text
+                    const upgradeText = document.createElement('div');
+                    upgradeText.className = 'upgrade-text';
+                    upgradeText.textContent = `Upgrade ${cardData.effect.amount} levels`;
+                    effectDiv.appendChild(upgradeText);
+                }
+                
+                cardDiv.appendChild(nameDiv);
+                cardDiv.appendChild(effectDiv);
+                
+                // Add click handler
+                cardDiv.addEventListener('click', () => {
+                    this.selectHandCard(index);
+                });
+                
+                return cardDiv;
+            }
+
+            selectHandCard(index) {
+                // Remove previous selection
+                document.querySelectorAll('.hand-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Select new card
+                const selectedCard = document.querySelector(`[data-card-index="${index}"]`);
+                if (selectedCard) {
+                    selectedCard.classList.add('selected');
+                    this.selectedHandCardIndex = index;
+                    console.log('Selected hand card:', index);
+                }
+            }
+
+            createSpiceTrackingArea(playerId, x, z) {
+                // Create spice tracking board for each player
+                const boardGeometry = new THREE.PlaneGeometry(3, 1.5);
+                const boardMaterial = new THREE.MeshLambertMaterial({ 
+                    color: 0x8B4513,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const boardMesh = new THREE.Mesh(boardGeometry, boardMaterial);
+                
+                // Position the spice board near the player
+                if (playerId === 0) {
+                    // Current player - board above their cards
+                    boardMesh.position.set(x, 0.05, z - 2);
+                } else if (playerId === 1) {
+                    // Top player - board below their cards
+                    boardMesh.position.set(x, 0.05, z + 2);
+                } else if (playerId === 2) {
+                    // Left player - board to the right of their cards
+                    boardMesh.position.set(x + 2, 0.05, z);
+                } else if (playerId === 3) {
+                    // Right player - board to the left of their cards
+                    boardMesh.position.set(x - 2, 0.05, z);
+                } else {
+                    // Other players - board closer to center
+                    boardMesh.position.set(x * 0.7, 0.05, z * 0.7);
+                }
+                
+                boardMesh.rotation.x = -Math.PI / 2; // Lay flat
+                this.scene.add(boardMesh);
+                
+                // Add spice cubes on the board
+                this.createSpiceCubes(playerId, boardMesh.position.x, boardMesh.position.z);
+            }
+
+            createSpiceCubes(playerId, boardX, boardZ) {
+                const player = this.game ? this.game.players[playerId] : null;
+                if (!player) return;
+                
+                const cubeSize = 0.15;
+                const spiceTypes = ['yellow', 'red', 'green', 'brown'];
+                const spiceColors = {
+                    yellow: 0xFFD700,
+                    red: 0xDC143C,
+                    green: 0x228B22,
+                    brown: 0x8B4513
+                };
+                
+                let currentX = boardX - 1.2; // Start from left side of board
+                
+                spiceTypes.forEach(spiceType => {
+                    const count = player.spices[spiceType];
+                    
+                    for (let i = 0; i < count; i++) {
+                        const cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                        const cubeMaterial = new THREE.MeshLambertMaterial({ 
+                            color: spiceColors[spiceType] 
+                        });
+                        const cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                        
+                        // Stack cubes if more than 5 of same type
+                        const stackLevel = Math.floor(i / 5);
+                        const positionInRow = i % 5;
+                        
+                        cubeMesh.position.set(
+                            currentX + positionInRow * (cubeSize + 0.02),
+                            0.2 + stackLevel * cubeSize,
+                            boardZ + (stackLevel % 2) * (cubeSize + 0.02) // Alternate rows for stacking
+                        );
+                        
+                        cubeMesh.castShadow = true;
+                        cubeMesh.userData.isSpiceCube = true;
+                        cubeMesh.userData.playerId = playerId;
+                        cubeMesh.userData.spiceType = spiceType;
+                        
+                        this.scene.add(cubeMesh);
+                    }
+                    
+                    currentX += 0.6; // Move to next spice type position
+                });
+            }
+
+            createPlayerLabel(playerId, x, z) {
+                // Create a simple text sprite for player name
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 64;
+                const ctx = canvas.getContext('2d');
+                
+                ctx.fillStyle = 'rgba(44, 24, 16, 0.8)';
+                ctx.fillRect(0, 0, 256, 64);
+                
+                ctx.fillStyle = '#FFD700';
+                ctx.font = 'bold 24px Cinzel, serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`Player ${playerId + 1}`, 128, 40);
+                
+                const texture = new THREE.CanvasTexture(canvas);
+                const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+                const sprite = new THREE.Sprite(spriteMaterial);
+                
+                // Position labels appropriately for the new layout
+                if (playerId === 0) {
+                    // Current player label at bottom
+                    sprite.position.set(x, 1.5, z + 2);
+                } else if (playerId === 1) {
+                    // Top player label
+                    sprite.position.set(x, 1.5, z - 1.5);
+                } else if (playerId === 2) {
+                    // Left player label
+                    sprite.position.set(x - 2, 1.5, z);
+                } else if (playerId === 3) {
+                    // Right player label
+                    sprite.position.set(x + 2, 1.5, z);
+                } else {
+                    // Other player labels closer to their positions
+                    sprite.position.set(x * 0.7, 1.5, z * 0.7);
+                }
+                sprite.scale.set(2, 0.5, 1);
+                
+                this.scene.add(sprite);
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                // Only update controls if they exist
+                if (this.controls) {
+                    this.controls.update();
+                }
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        // Game Logic Classes (simplified versions)
+        class Game {
+            constructor() {
+                this.players = [];
+                this.currentPlayerIndex = 0;
+                this.turn = 1;
+                this.gameEnded = false;
+            }
+
+            setupGame(playerCount) {
+                this.playerCount = playerCount;
+                this.initializePlayers(playerCount);
+                console.log(`3D Game started with ${playerCount} players`);
+            }
+
+            initializePlayers(count) {
+                this.players = [];
+                for (let i = 0; i < count; i++) {
+                    this.players.push(new Player(`Player ${i + 1}`, i));
+                }
+            }
+
+            getCurrentPlayer() {
+                return this.players[this.currentPlayerIndex];
+            }
+
+            nextTurn() {
+                this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length;
+                if (this.currentPlayerIndex === 0) {
+                    this.turn++;
+                }
+            }
+        }
+
+        class Player {
+            constructor(name, id) {
+                this.name = name;
+                this.id = id;
+                this.spices = { yellow: 0, red: 0, green: 0, brown: 0 };
+                this.hand = [];
+                this.discardPile = [];
+                this.victoryCards = [];
+                this.coins = [];
+                
+                // Add starting cards (every player gets these 2)
+                this.addStartingCards();
+                
+                // Add starting spices based on player order
+                this.addStartingSpices(id);
+            }
+            
+            addStartingCards() {
+                // Every player starts with these 2 cards
+                this.hand.push({
+                    id: 'gain-yy',
+                    name: 'Gain YY',
+                    type: 'gain',
+                    effect: { yellow: 2 },
+                    description: 'Gain 2 yellow spices'
+                });
+                
+                this.hand.push({
+                    id: 'upgrade-2',
+                    name: 'Upgrade 2',
+                    type: 'upgrade',
+                    effect: { amount: 2 },
+                    description: 'Upgrade up to 2 spice levels'
+                });
+            }
+            
+            addStartingSpices(playerId) {
+                // Starting spices based on Century rules
+                if (playerId === 0) {
+                    // First player: 3 yellow
+                    this.spices.yellow = 3;
+                } else if (playerId <= 2) {
+                    // 2nd and 3rd players: 4 yellow each
+                    this.spices.yellow = 4;
+                } else {
+                    // 4th and 5th players: 3 yellow and 1 red each
+                    this.spices.yellow = 3;
+                    this.spices.red = 1;
+                }
+            }
+            
+            getTotalSpices() {
+                return this.spices.yellow + this.spices.red + this.spices.green + this.spices.brown;
+            }
+            
+            canHoldMoreSpices(amount = 1) {
+                return this.getTotalSpices() + amount <= 10; // Max 10 spices
+            }
+        }
+
+        // Game UI Manager
+        class GameUI {
+            constructor(century3D) {
+                this.century3D = century3D;
+                this.game = null;
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                console.log('Setting up event listeners...');
+                const startBtn = document.getElementById('startGame');
+                console.log('Start button found:', startBtn);
+                
+                if (startBtn) {
+                    startBtn.addEventListener('click', () => {
+                        console.log('Start button clicked!');
+                        this.startGame();
+                    });
+                } else {
+                    console.error('Start button not found!');
+                }
+
+                const playCardBtn = document.getElementById('playCardBtn');
+                if (playCardBtn) {
+                    playCardBtn.addEventListener('click', () => {
+                        this.playCard();
+                    });
+                }
+
+                const acquireCardBtn = document.getElementById('acquireCardBtn');
+                if (acquireCardBtn) {
+                    acquireCardBtn.addEventListener('click', () => {
+                        this.acquireCard();
+                    });
+                }
+
+                const claimVictoryBtn = document.getElementById('claimVictoryBtn');
+                if (claimVictoryBtn) {
+                    claimVictoryBtn.addEventListener('click', () => {
+                        this.claimVictory();
+                    });
+                }
+
+                const restBtn = document.getElementById('restBtn');
+                if (restBtn) {
+                    restBtn.addEventListener('click', () => {
+                        this.rest();
+                    });
+                }
+            }
+
+            startGame() {
+                console.log('Starting game...');
+                const playerCount = parseInt(document.getElementById('playerCount').value);
+                const aiCount = parseInt(document.getElementById('aiPlayers').value);
+                
+                // Hide setup modal and show loading
+                document.getElementById('setupModal').classList.add('hidden');
+                document.getElementById('loading').classList.remove('hidden');
+                
+                try {
+                    // Initialize game
+                    console.log('Initializing game with', playerCount, 'players');
+                    this.game = new Game();
+                    this.game.setupGame(playerCount);
+                    this.century3D.game = this.game;
+                    
+                    setTimeout(() => {
+                        try {
+                            console.log('Setting up 3D game board...');
+                            this.century3D.setupGameBoard();
+                            console.log('3D board setup complete');
+                            
+                            this.updateUI();
+                            console.log('UI updated');
+                            
+                            // Hide loading screen
+                            document.getElementById('loading').classList.add('hidden');
+                            console.log('Game setup complete, loading screen hidden');
+                            
+                        } catch (error) {
+                            console.error('Error setting up game board:', error);
+                            document.getElementById('loading').classList.add('hidden');
+                            alert('Error setting up 3D game: ' + error.message);
+                        }
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Error initializing game:', error);
+                    document.getElementById('loading').classList.add('hidden');
+                    alert('Error starting game: ' + error.message);
+                }
+            }
+
+            updateUI() {
+                if (!this.game) return;
+                
+                const currentPlayer = this.game.getCurrentPlayer();
+                document.getElementById('currentPlayer').textContent = `${currentPlayer.name}'s Turn`;
+                document.getElementById('turnCounter').textContent = `Turn ${this.game.turn}`;
+                
+                this.updatePlayerStats();
+            }
+
+            updatePlayerStats() {
+                const container = document.getElementById('playersContainer');
+                container.innerHTML = '';
+                
+                this.game.players.forEach((player, index) => {
+                    const isActive = index === this.game.currentPlayerIndex;
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = `player-info ${isActive ? 'active' : ''}`;
+                    
+                    // Calculate total victory points
+                    const victoryPoints = player.victoryCards.reduce((sum, card) => sum + (card.points || 0), 0);
+                    
+                    playerDiv.innerHTML = `
+                        <div class="player-name">
+                            ${player.name}
+                            <span class="player-score">${victoryPoints} VP</span>
+                        </div>
+                        <div class="spice-display">
+                            <div class="spice-item">
+                                <span class="spice-icon spice-yellow"></span>
+                                <span class="spice-count">${player.spices.yellow}</span>
+                            </div>
+                            <div class="spice-item">
+                                <span class="spice-icon spice-red"></span>
+                                <span class="spice-count">${player.spices.red}</span>
+                            </div>
+                            <div class="spice-item">
+                                <span class="spice-icon spice-green"></span>
+                                <span class="spice-count">${player.spices.green}</span>
+                            </div>
+                            <div class="spice-item">
+                                <span class="spice-icon spice-brown"></span>
+                                <span class="spice-count">${player.spices.brown}</span>
+                            </div>
+                        </div>
+                        <div class="player-cards-info">
+                            <span class="card-count">Hand: ${player.hand.length}</span>
+                            <span class="card-count">Victory: ${player.victoryCards.length}</span>
+                        </div>
+                    `;
+                    
+                    container.appendChild(playerDiv);
+                });
+            }
+
+            playCard() {
+                if (this.century3D.selectedCard) {
+                    const cardData = this.century3D.selectedCard.userData;
+                    console.log('Playing card:', cardData.name);
+                    
+                    this.showStatusMessage(`Playing ${cardData.name}...`);
+                    
+                    // Animate card to play area
+                    this.century3D.animateCardMovement(
+                        this.century3D.selectedCard,
+                        { x: 0, y: 0.1, z: 3 }
+                    ).then(() => {
+                        this.showStatusMessage(`${cardData.name} played successfully!`);
+                        setTimeout(() => this.nextTurn(), 1000);
+                    });
+                } else {
+                    this.showStatusMessage('Please select a card first!', 'error');
+                }
+            }
+
+            acquireCard() {
+                this.showStatusMessage('Acquiring merchant card...');
+                setTimeout(() => {
+                    this.showStatusMessage('Card acquired successfully!');
+                    setTimeout(() => this.nextTurn(), 1000);
+                }, 500);
+            }
+
+            claimVictory() {
+                this.showStatusMessage('Claiming victory card...');
+                setTimeout(() => {
+                    this.showStatusMessage('Victory card claimed!');
+                    setTimeout(() => this.nextTurn(), 1000);
+                }, 500);
+            }
+
+            rest() {
+                this.showStatusMessage('Resting and recovering cards...');
+                setTimeout(() => {
+                    this.showStatusMessage('All cards returned to hand!');
+                    setTimeout(() => this.nextTurn(), 1000);
+                }, 500);
+            }
+
+            showStatusMessage(message, type = 'info') {
+                const indicator = document.getElementById('statusIndicator');
+                indicator.textContent = message;
+                indicator.className = `status-indicator show ${type}`;
+                
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 2000);
+            }
+
+            showCardTooltip(cardData, x, y) {
+                const tooltip = document.getElementById('cardTooltip');
+                tooltip.innerHTML = `
+                    <strong>${cardData.name || cardData.id}</strong><br>
+                    ${cardData.description || 'No description available'}
+                `;
+                tooltip.style.left = x + 'px';
+                tooltip.style.top = y + 'px';
+                tooltip.classList.add('visible');
+            }
+
+            hideCardTooltip() {
+                const tooltip = document.getElementById('cardTooltip');
+                tooltip.classList.remove('visible');
+            }
+
+            nextTurn() {
+                this.game.nextTurn();
+                this.updateUI();
+            }
+        }
+
+        // Initialize the 3D game
+        let century3D, gameUI;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded - hiding loading screen immediately');
+            const loading = document.getElementById('loading');
+            if (loading) {
+                loading.classList.add('hidden');
+                console.log('Loading screen hidden on DOM load');
+            }
+        });
+
+        window.addEventListener('load', () => {
+            console.log('Window loaded, checking Three.js...');
+            
+            // Fallback timeout to hide loading screen
+            setTimeout(() => {
+                const loading = document.getElementById('loading');
+                if (loading && !loading.classList.contains('hidden')) {
+                    console.warn('Loading screen timeout - forcing hide');
+                    loading.classList.add('hidden');
+                }
+            }, 5000); // 5 second timeout
+            
+            // Check if Three.js is loaded
+            if (typeof THREE === 'undefined') {
+                console.error('Three.js not loaded!');
+                document.getElementById('loading').classList.add('hidden');
+                alert('Error: Three.js library failed to load. Please check your internet connection and refresh the page.');
+                return;
+            }
+            
+            console.log('Three.js loaded successfully');
+            
+            // Wait a bit for OrbitControls to load, then initialize
+            setTimeout(() => {
+                try {
+                    century3D = new Century3D();
+                    gameUI = new GameUI(century3D);
+                    
+                    // Make gameUI globally accessible for tooltips
+                    window.gameUI = gameUI;
+                    
+                    console.log('Century: Spice Road 3D loaded successfully!');
+                    
+                } catch (error) {
+                    console.error('Error initializing game:', error);
+                    alert('Error initializing game: ' + error.message);
+                }
+            }, 1000); // Wait 1 second for OrbitControls to load
+        });
+    </script>
+</body>
+</html>

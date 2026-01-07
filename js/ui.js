@@ -68,48 +68,29 @@ class GameUI {
     }
     
     setupEventListeners() {
-        console.log('Setting up event listeners...');
-        
         // Setup modal
         const startGameBtn = document.getElementById('start-game');
-        console.log('Start game button:', startGameBtn);
         
         if (startGameBtn) {
             startGameBtn.addEventListener('click', () => {
-                console.log('Start game clicked');
-                
                 const playerCountEl = document.getElementById('player-count');
                 const aiCountEl = document.getElementById('ai-players');
                 const aiDifficultyEl = document.getElementById('ai-difficulty');
                 
-                console.log('Elements found:', {
-                    playerCount: playerCountEl,
-                    aiCount: aiCountEl,
-                    aiDifficulty: aiDifficultyEl
-                });
-                
                 if (!playerCountEl || !aiCountEl || !aiDifficultyEl) {
-                    console.error('Setup elements not found');
-                    console.log('DOM state:', document.readyState);
-                    console.log('All elements with IDs:', Array.from(document.querySelectorAll('[id]')).map(el => el.id));
-                    
-                    // Fallback: start with just human players if AI elements are missing
+                    console.error('Setup elements not found - falling back to human-only game');
+                    // Fallback: start with just human players
                     if (playerCountEl) {
                         const playerCount = parseInt(playerCountEl.value);
-                        console.log('Falling back to human-only game with', playerCount, 'players');
                         this.startGame(playerCount, 0, 'medium');
                         return;
-                    } else {
-                        console.error('Even player-count element not found!');
-                        return;
                     }
+                    return;
                 }
                 
                 const playerCount = parseInt(playerCountEl.value);
                 const aiCount = parseInt(aiCountEl.value);
                 const aiDifficulty = aiDifficultyEl.value;
-                
-                console.log('Game settings:', { playerCount, aiCount, aiDifficulty });
                 
                 // Validate AI count doesn't exceed total players
                 if (aiCount >= playerCount) {
@@ -119,8 +100,6 @@ class GameUI {
                 
                 this.startGame(playerCount, aiCount, aiDifficulty);
             });
-        } else {
-            console.error('Start game button not found');
         }
         // Cancel button for action modal
         const cancelBtn = document.getElementById('cancel-action');
@@ -151,11 +130,11 @@ class GameUI {
             });
         }
         
-        // Statistics button
-        const statsBtn = document.getElementById('stats-btn');
-        if (statsBtn) {
-            statsBtn.addEventListener('click', () => {
-                this.showStatsModal();
+        // Menu button
+        const menuBtn = document.getElementById('menu-btn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                this.showGameMenu();
             });
         }
 
@@ -190,10 +169,7 @@ class GameUI {
                 this.showRestAction();
                 break;
             case 'u':
-                if (event.ctrlKey) {
-                    event.preventDefault();
-                    this.undoLastAction();
-                }
+                // Undo functionality removed
                 break;
             case 'h':
                 event.preventDefault();
@@ -227,7 +203,6 @@ class GameUI {
                 <h4>Keyboard Shortcuts</h4>
                 <ul>
                     <li><strong>1-4</strong> - Quick action selection</li>
-                    <li><strong>Ctrl+U</strong> - Undo last action</li>
                     <li><strong>H</strong> - Show this help</li>
                     <li><strong>Escape</strong> - Clear selection</li>
                 </ul>
@@ -246,6 +221,79 @@ class GameUI {
         document.getElementById('confirm-action').style.display = 'none';
         document.getElementById('cancel-action').textContent = 'Close';
         document.getElementById('cancel-action').style.display = 'block';
+        
+        modal.classList.remove('hidden');
+    }
+
+    showGameMenu() {
+        const modal = document.getElementById('game-menu-modal');
+        
+        // Setup menu button event listeners
+        const gameRulesBtn = document.getElementById('game-rules-btn');
+        const statisticsBtn = document.getElementById('statistics-btn');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        
+        if (gameRulesBtn) {
+            gameRulesBtn.onclick = () => {
+                modal.classList.add('hidden');
+                this.showGameRules();
+            };
+        }
+        
+        if (statisticsBtn) {
+            statisticsBtn.onclick = () => {
+                modal.classList.add('hidden');
+                this.showStatsModal();
+            };
+        }
+        
+        if (restartGameBtn) {
+            restartGameBtn.onclick = () => {
+                modal.classList.add('hidden');
+                this.showRestartConfirmation();
+            };
+        }
+        
+        if (closeMenuBtn) {
+            closeMenuBtn.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
+        
+        modal.classList.remove('hidden');
+    }
+
+    showGameRules() {
+        const modal = document.getElementById('game-rules-modal');
+        
+        const closeRulesBtn = document.getElementById('close-rules-btn');
+        if (closeRulesBtn) {
+            closeRulesBtn.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
+        
+        modal.classList.remove('hidden');
+    }
+
+    showRestartConfirmation() {
+        const modal = document.getElementById('restart-confirm-modal');
+        
+        const confirmRestartBtn = document.getElementById('confirm-restart-btn');
+        const cancelRestartBtn = document.getElementById('cancel-restart-btn');
+        
+        if (confirmRestartBtn) {
+            confirmRestartBtn.onclick = () => {
+                location.reload();
+            };
+        }
+        
+        if (cancelRestartBtn) {
+            cancelRestartBtn.onclick = () => {
+                modal.classList.add('hidden');
+            };
+        }
         
         modal.classList.remove('hidden');
     }
@@ -438,13 +486,20 @@ class GameUI {
 
     renderHeader() {
         const currentPlayer = this.game.getCurrentPlayer();
-        document.getElementById('current-player').textContent = `${currentPlayer.name}'s Turn`;
+        const currentPlayerEl = document.getElementById('current-player');
+        const turnCounterEl = document.getElementById('turn-counter');
         
-        let turnText = `Turn ${this.game.turn}`;
-        if (this.game.finalRoundTriggered) {
-            turnText += ' - FINAL ROUND!';
+        if (currentPlayerEl) {
+            currentPlayerEl.textContent = `${currentPlayer.name}'s Turn`;
         }
-        document.getElementById('turn-counter').textContent = turnText;
+        
+        if (turnCounterEl) {
+            let turnText = `Turn ${this.game.turn}`;
+            if (this.game.finalRoundTriggered) {
+                turnText += ' - FINAL ROUND!';
+            }
+            turnCounterEl.textContent = turnText;
+        }
     }
 
     renderVictoryCards() {
@@ -455,6 +510,82 @@ class GameUI {
             const cardElement = this.createVictoryCardElement(card, index);
             container.appendChild(cardElement);
         });
+        
+        // Render coin tracking bars
+        this.renderCoinBars();
+    }
+
+    renderCoinBars() {
+        // Render gold coin bars (5 bars - changed from 4)
+        const goldBarsContainer = document.getElementById('gold-bars');
+        if (goldBarsContainer) {
+            goldBarsContainer.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'coin-bar gold-bar';
+                if (i >= this.game.goldCoinsRemaining) {
+                    bar.classList.add('taken');
+                }
+                goldBarsContainer.appendChild(bar);
+            }
+        }
+        
+        // Render silver coin bars (split into 5 + 5 stacks - changed from 5+4)
+        // Stack 1: 5 bars (taken last)
+        const silverStack1Container = document.getElementById('silver-bars-stack1');
+        if (silverStack1Container) {
+            silverStack1Container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'coin-bar silver-bar';
+                // These bars are taken when silverCoinsRemaining <= 5 (after stack 2 is depleted)
+                if (this.game.silverCoinsRemaining <= 5 && i >= this.game.silverCoinsRemaining) {
+                    bar.classList.add('taken');
+                }
+                silverStack1Container.appendChild(bar);
+            }
+        }
+        
+        // Stack 2: 5 bars (taken first - changed from 4)
+        const silverStack2Container = document.getElementById('silver-bars-stack2');
+        if (silverStack2Container) {
+            silverStack2Container.innerHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'coin-bar silver-bar';
+                // These bars are taken first (when silverCoinsRemaining <= 9)
+                if (this.game.silverCoinsRemaining <= 9 && i >= (this.game.silverCoinsRemaining - 5)) {
+                    bar.classList.add('taken');
+                }
+                silverStack2Container.appendChild(bar);
+            }
+        }
+        
+        // Position coin stacks based on actual card positions
+        this.positionCoinStacks();
+    }
+
+    positionCoinStacks() {
+        const goldStack = document.getElementById('gold-coin-stack');
+        const silverStack = document.getElementById('silver-coin-stack');
+        
+        if (!goldStack || !silverStack) return;
+        
+        // Position based on coin availability
+        if (this.game.goldCoinsRemaining > 0) {
+            // Gold coins available: normal positioning
+            goldStack.style.display = 'flex';
+            silverStack.classList.remove('gold-depleted');
+        } else {
+            // No gold coins left: hide gold stack, move silver to left position
+            goldStack.style.display = 'none';
+            
+            if (this.game.silverCoinsRemaining > 0) {
+                silverStack.classList.add('gold-depleted');
+            } else {
+                silverStack.style.display = 'none';
+            }
+        }
     }
 
     renderMerchantCards() {
@@ -482,21 +613,16 @@ class GameUI {
         cardDiv.className = 'card victory-card';
         cardDiv.dataset.index = index;
         
-        // Add coin if present
-        if (card.coin) {
-            const coin = document.createElement('div');
-            coin.className = `coin coin-${card.coin}`;
-            cardDiv.appendChild(coin);
-        }
+        // No coins displayed on cards anymore - removed coin rendering logic
 
-        cardDiv.innerHTML += `
+        cardDiv.innerHTML = `
             <div class="card-header">
                 <strong>${card.points} VP</strong>
             </div>
-            <div class="card-cost">
+            ${card.bonusSpices ? `<div class="bonus-spices">Bonus: ${this.renderSpices(card.bonusSpices)}</div>` : ''}
+            <div class="victory-card-cost-bottom">
                 ${this.renderSpiceCost(card.cost)}
             </div>
-            ${card.bonusSpices ? `<div class="bonus-spices">Bonus: ${this.renderSpices(card.bonusSpices)}</div>` : ''}
         `;
 
         cardDiv.addEventListener('click', () => {
@@ -552,23 +678,47 @@ class GameUI {
                     ${player.victoryCards.length}/${this.game.victoryCardsNeeded} Victory Cards
                     ${player.victoryCards.length >= this.game.victoryCardsNeeded ? ' 🏆' : ''}
                 </div>
+                <div class="total-score">
+                    Total Score: ${this.calculatePlayerCurrentPoints(player)} points
+                </div>
+                ${this.renderPlayerCoins(player)}
             </div>
+            
+            ${this.renderPlayerVictoryCards(player)}
             
             <div class="spice-storage">
                 ${this.renderSpiceStorage(player)}
             </div>
             
             <div class="player-cards">
+                ${index === this.game.currentPlayerIndex || !isAI ? `
                 <div class="player-hand">
                     <h4>Hand (${player.hand.length})</h4>
                     <div class="hand-cards">
-                        ${player.hand.map((card, cardIndex) => 
-                            `<div class="card mini-card merchant-card" data-player="${index}" data-card="${cardIndex}">
-                                <div class="card-effect">${this.renderCardEffect(card)}</div>
+                        ${index === this.game.currentPlayerIndex ? 
+                            player.hand.map((card, cardIndex) => 
+                                `<div class="card mini-card merchant-card" data-player="${index}" data-card="${cardIndex}">
+                                    <div class="card-effect">${this.renderCardEffect(card)}</div>
+                                </div>`
+                            ).join('') :
+                            `<div class="hidden-hand">
+                                ${Array(player.hand.length).fill().map(() => 
+                                    `<div class="card mini-card card-back">
+                                        <div class="card-back-design">?</div>
+                                    </div>`
+                                ).join('')}
                             </div>`
-                        ).join('')}
+                        }
                     </div>
                 </div>
+                ` : `
+                <div class="player-hand">
+                    <h4>Hand (${player.hand.length} cards)</h4>
+                    <div class="hand-cards">
+                        <div class="hidden-hand-info">Cards hidden from other players</div>
+                    </div>
+                </div>
+                `}
                 
                 <div class="player-discard">
                     <h4>Played (${player.discardPile.length})</h4>
@@ -585,20 +735,15 @@ class GameUI {
             ${index === this.game.currentPlayerIndex && !isAI ? this.renderActionButtons() : ''}
         `;
 
-        // Add event listeners for hand cards for ALL players (not just current player)
-        const handCards = playerDiv.querySelectorAll('.hand-cards .card');
-        handCards.forEach((cardElement, cardIndex) => {
-            cardElement.addEventListener('click', () => {
-                // Only allow selection if this is the current player and not AI
-                if (index === this.game.currentPlayerIndex && !isAI) {
+        // Add event listeners for hand cards only for current player
+        if (index === this.game.currentPlayerIndex && !isAI) {
+            const handCards = playerDiv.querySelectorAll('.hand-cards .card:not(.card-back)');
+            handCards.forEach((cardElement, cardIndex) => {
+                cardElement.addEventListener('click', () => {
                     this.selectHandCard(cardIndex);
-                } else if (isAI) {
-                    this.showError('Cannot control AI player');
-                } else {
-                    this.showError('Cannot select other player\'s cards');
-                }
+                });
             });
-        });
+        }
 
         // Add action buttons and their event listeners only for current human player
         if (index === this.game.currentPlayerIndex && !isAI) {
@@ -607,15 +752,11 @@ class GameUI {
             const acquireCardBtn = playerDiv.querySelector('#acquire-card-btn');
             const claimVictoryBtn = playerDiv.querySelector('#claim-victory-btn');
             const restBtn = playerDiv.querySelector('#rest-btn');
-            const undoBtn = playerDiv.querySelector('#undo-btn');
             
             if (playCardBtn) playCardBtn.addEventListener('click', () => this.showPlayCardAction());
             if (acquireCardBtn) acquireCardBtn.addEventListener('click', () => this.showAcquireCardAction());
             if (claimVictoryBtn) claimVictoryBtn.addEventListener('click', () => this.showClaimVictoryAction());
             if (restBtn) restBtn.addEventListener('click', () => this.showRestAction());
-            if (undoBtn && !undoBtn.disabled) {
-                undoBtn.addEventListener('click', () => this.undoLastAction());
-            }
         }
 
         return playerDiv;
@@ -674,6 +815,92 @@ class GameUI {
         
         return `<div class="spice-storage-container${overflowClass}">${html}</div>`;
     }
+
+    renderPlayerVictoryCards(player) {
+        // Calculate total victory points (cards + coins, not spices)
+        const cardVictoryPoints = player.victoryCards.reduce((sum, card) => sum + card.points, 0);
+        const goldCoins = player.coins.filter(coin => coin === 'gold').length;
+        const silverCoins = player.coins.filter(coin => coin === 'silver').length;
+        const coinPoints = (goldCoins * 3) + (silverCoins * 1);
+        const totalVictoryPoints = cardVictoryPoints + coinPoints;
+        
+        if (player.victoryCards.length === 0) {
+            return `<div class="player-victory-cards">
+                <h4>Victory Cards (0) - ${totalVictoryPoints} VP</h4>
+                <div class="victory-cards-display">
+                    <div class="no-victory-cards">No victory cards claimed yet</div>
+                </div>
+            </div>`;
+        }
+
+        let html = `<div class="player-victory-cards">
+            <h4>Victory Cards (${player.victoryCards.length}) - ${totalVictoryPoints} VP</h4>
+            <div class="victory-cards-display">`;
+
+        // Show victory cards without any icons (including bonus spices)
+        player.victoryCards.forEach((card, index) => {
+            html += `<div class="player-victory-card">
+                <div class="victory-card-mini">
+                    <div class="victory-points-display">${card.points} VP</div>
+                </div>
+            </div>`;
+        });
+
+        html += `</div></div>`;
+        return html;
+    }
+    
+    renderPlayerCoins(player) {
+        const goldCoins = player.coins.filter(coin => coin.type === 'gold').length;
+        const silverCoins = player.coins.filter(coin => coin.type === 'silver').length;
+        
+        if (goldCoins === 0 && silverCoins === 0) {
+            return '';
+        }
+        
+        let html = '<div class="player-coins-display">';
+        
+        if (goldCoins > 0) {
+            html += `<div class="coin-info">
+                <div class="coin coin-gold">G</div>
+                <span class="coin-count">${goldCoins}</span>
+            </div>`;
+        }
+        
+        if (silverCoins > 0) {
+            html += `<div class="coin-info">
+                <div class="coin coin-silver">S</div>
+                <span class="coin-count">${silverCoins}</span>
+            </div>`;
+        }
+        
+        html += '</div>';
+        return html;
+    }
+    
+    calculatePlayerCurrentPoints(player) {
+        let points = 0;
+        
+        // 1. Victory points from cards
+        for (const card of player.victoryCards) {
+            points += card.points;
+        }
+        
+        // 2. Points from coins (correct scoring)
+        for (const coin of player.coins) {
+            if (coin.type === 'gold') {
+                points += 3; // Gold coins worth 3 points
+            } else if (coin.type === 'silver') {
+                points += 1; // Silver coins worth 1 point
+            }
+        }
+        
+        // 3. Points from non-yellow spices (1 point each)
+        points += player.spices.red + player.spices.green + player.spices.brown;
+        
+        return points;
+    }
+
     saveGameState() {
         // Create a deep copy of the current game state
         const gameState = {
@@ -748,14 +975,12 @@ class GameUI {
     }
 
     renderActionButtons() {
-        const undoDisabled = !this.canUndo() ? 'disabled' : '';
         return `
             <div class="action-buttons">
                 <button class="action-btn" id="play-card-btn" title="Play Card (Press 1)">Play Card</button>
                 <button class="action-btn" id="acquire-card-btn" title="Acquire Card (Press 2)">Acquire Card</button>
                 <button class="action-btn" id="claim-victory-btn" title="Claim Victory (Press 3)">Claim Victory</button>
                 <button class="action-btn" id="rest-btn" title="Rest (Press 4)">Rest</button>
-                <button class="action-btn secondary ${undoDisabled}" id="undo-btn" ${undoDisabled} title="Undo (Ctrl+U)">Undo</button>
             </div>
         `;
     }
@@ -783,29 +1008,52 @@ class GameUI {
     }
 
     renderSpices(spices) {
-        return Object.entries(spices)
-            .map(([type, count]) => {
-                // Create multiple cubes instead of showing count + 1 cube
-                let cubes = '';
-                for (let i = 0; i < count; i++) {
-                    cubes += `<div class="spice-cube spice-${type}"></div>`;
-                }
-                return `<div class="spice-group">${cubes}</div>`;
-            })
-            .join('');
+        // Count total cubes to determine layout
+        const totalCubes = Object.values(spices).reduce((sum, count) => sum + count, 0);
+        
+        // Create all cubes
+        let allCubes = [];
+        Object.entries(spices).forEach(([type, count]) => {
+            for (let i = 0; i < count; i++) {
+                allCubes.push(`<div class="spice-cube spice-${type}"></div>`);
+            }
+        });
+        
+        // Determine layout based on total cubes
+        if (totalCubes <= 4) {
+            // Single row for 1-4 cubes
+            return `<div class="spice-group single-row">${allCubes.join('')}</div>`;
+        } else if (totalCubes === 5) {
+            // 3-2 stack for 5 cubes
+            const firstRow = allCubes.slice(0, 3).join('');
+            const secondRow = allCubes.slice(3, 5).join('');
+            return `<div class="spice-group stacked">
+                <div class="spice-row">${firstRow}</div>
+                <div class="spice-row">${secondRow}</div>
+            </div>`;
+        } else if (totalCubes === 6) {
+            // 3-3 stack for 6 cubes
+            const firstRow = allCubes.slice(0, 3).join('');
+            const secondRow = allCubes.slice(3, 6).join('');
+            return `<div class="spice-group stacked">
+                <div class="spice-row">${firstRow}</div>
+                <div class="spice-row">${secondRow}</div>
+            </div>`;
+        } else {
+            // For more than 6, use flexible wrapping
+            return `<div class="spice-group flexible">${allCubes.join('')}</div>`;
+        }
     }
 
     renderSpiceCost(cost) {
-        return Object.entries(cost)
-            .map(([type, count]) => {
-                // Create multiple cubes instead of showing count + 1 cube
-                let cubes = '';
-                for (let i = 0; i < count; i++) {
-                    cubes += `<div class="spice-cube spice-${type}"></div>`;
-                }
-                return `<div class="spice-group">${cubes}</div>`;
-            })
-            .join('');
+        // Put all spices in a single row instead of separate groups
+        let allCubes = '';
+        Object.entries(cost).forEach(([type, count]) => {
+            for (let i = 0; i < count; i++) {
+                allCubes += `<div class="spice-cube spice-${type}"></div>`;
+            }
+        });
+        return `<div class="spice-group">${allCubes}</div>`;
     }
 
     // Action handlers
@@ -904,6 +1152,12 @@ class GameUI {
         // Store the card index for later
         this.pendingMerchantCardIndex = cardIndex;
         
+        // Show the modal with proper buttons
+        document.getElementById('confirm-action').style.display = 'block';
+        document.getElementById('confirm-action').disabled = false;
+        document.getElementById('cancel-action').style.display = 'block';
+        document.getElementById('cancel-action').textContent = 'Cancel';
+        
         modal.classList.remove('hidden');
     }
     
@@ -944,19 +1198,16 @@ class GameUI {
         // Save game state before action
         this.saveGameState();
         
-        // Execute the action immediately
+        // Execute the action using the correct parameter order (player, cardIndex)
         const currentPlayer = this.game.getCurrentPlayer();
         const result = this.game.claimVictoryCard(currentPlayer, this.selectedCard);
+        
         if (result.success) {
-            // No alert for successful claim - just continue
-            console.log(result.message);
+            console.log(`${currentPlayer.name} claimed a victory card!`);
             this.clearSelection();
             
-            // Check if player needs to discard spices
-            if (result.needsDiscard) {
-                this.showSpiceDiscardModal(currentPlayer, 'victory');
-                return; // Don't continue turn yet
-            }
+            // Update UI to reflect changes
+            this.renderGame();
             
             // Check if final round was just triggered
             if (this.game.finalRoundTriggered && !this.finalRoundMessageShown) {
@@ -970,7 +1221,7 @@ class GameUI {
                 this.nextTurn();
             }
         } else {
-            this.showError(result.message);
+            this.showError(result.message || 'Cannot afford this victory card!');
         }
     }
 
@@ -1091,6 +1342,12 @@ class GameUI {
         this.availableUpgradeLevels = upgradeAmount;
         this.individualUpgradeOptions = individualOptions;
         this.selectedUpgradeOptions = [];
+        
+        // Show the modal with proper buttons
+        document.getElementById('confirm-action').style.display = 'block';
+        document.getElementById('confirm-action').disabled = true; // Disabled until selection
+        document.getElementById('cancel-action').style.display = 'block';
+        document.getElementById('cancel-action').textContent = 'Cancel';
         
         modal.classList.remove('hidden');
     }
@@ -1329,6 +1586,12 @@ class GameUI {
         this.currentTradeOutput = outputRatio;
         this.currentTradePlayer = player;
         this.selectedTradeMultiplier = null;
+        
+        // Show the modal with proper buttons
+        document.getElementById('confirm-action').style.display = 'block';
+        document.getElementById('confirm-action').disabled = true; // Disabled until selection
+        document.getElementById('cancel-action').style.display = 'block';
+        document.getElementById('cancel-action').textContent = 'Cancel';
         
         modal.classList.remove('hidden');
     }
@@ -1890,8 +2153,8 @@ class GameUI {
         let goldCoins = 0;
         let silverCoins = 0;
         for (const coin of player.coins) {
-            if (coin === 'gold') goldCoins++;
-            else if (coin === 'silver') silverCoins++;
+            if (coin.type === 'gold') goldCoins++;
+            else if (coin.type === 'silver') silverCoins++;
         }
         
         const spicePoints = player.spices.red + player.spices.green + player.spices.brown;
@@ -1900,8 +2163,8 @@ class GameUI {
             victoryPoints,
             goldCoins,
             silverCoins,
-            goldPoints: goldCoins * 5,
-            silverPoints: silverCoins * 3,
+            goldPoints: goldCoins * 3, // Fixed: Gold coins worth 3 points
+            silverPoints: silverCoins * 1, // Fixed: Silver coins worth 1 point
             spicePoints
         };
     }

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Icons Fix Test</title>
+    <link rel="stylesheet" href="styles.css?v=7">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🪙 Coin Icons & Position Fix Test</h1>
+        </header>
+
+        <main>
+            <section>
+                <h2>✅ FIXED: Coin Icons Display & Position</h2>
+                
+                <!-- Test Player Board Layout -->
+                <div class="player-board active">
+                    <div class="player-info">
+                        <div class="player-name">Test Player</div>
+                        <div class="victory-points">3/5 Victory Cards</div>
+                        <div class="player-coins-display">
+                            <div class="coin-info">
+                                <div class="coin coin-gold"></div>
+                                <span class="coin-count">2</span>
+                            </div>
+                            <div class="coin-info">
+                                <div class="coin coin-silver"></div>
+                                <span class="coin-count">3</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (3) - 27 VP</h4>
+                        <div class="victory-cards-display">
+                            <!-- Clean Victory Cards (No Icons At All) -->
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">5 VP</div>
+                                </div>
+                            </div>
+                            
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">7 VP</div>
+                                </div>
+                            </div>
+                            
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">9 VP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Different Coin Combinations -->
+                <div class="player-board">
+                    <div class="player-info">
+                        <div class="player-name">Player with Gold Only</div>
+                        <div class="victory-points">1/5 Victory Cards</div>
+                        <div class="player-coins-display">
+                            <div class="coin-info">
+                                <div class="coin coin-gold"></div>
+                                <span class="coin-count">1</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (1) - 15 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">12 VP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-board">
+                    <div class="player-info">
+                        <div class="player-name">Player with Silver Only</div>
+                        <div class="victory-points">2/5 Victory Cards</div>
+                        <div class="player-coins-display">
+                            <div class="coin-info">
+                                <div class="coin coin-silver"></div>
+                                <span class="coin-count">2</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (2) - 16 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">5 VP</div>
+                                </div>
+                            </div>
+                            <div class="player-victory-card">
+                                <div class="victory-card-mini">
+                                    <div class="victory-points-display">9 VP</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-board">
+                    <div class="player-info">
+                        <div class="player-name">Player with No Coins</div>
+                        <div class="victory-points">0/5 Victory Cards</div>
+                    </div>
+                    
+                    <div class="player-victory-cards">
+                        <h4>Victory Cards (0) - 0 VP</h4>
+                        <div class="victory-cards-display">
+                            <div class="no-victory-cards">No victory cards claimed yet</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div style="margin: 40px 0; padding: 20px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+                <h3>✅ Issues Fixed:</h3>
+                <ul style="margin: 10px 0; padding-left: 20px;">
+                    <li>🪙 <strong>Coin Icons:</strong> Now properly display gold and silver coin graphics</li>
+                    <li>📍 <strong>Position:</strong> Coins moved to right side of player info area</li>
+                    <li>🧹 <strong>Clean Cards:</strong> Removed ALL icons from victory cards (including bonus spices)</li>
+                    <li>📊 <strong>VP Calculation:</strong> Now includes coin points (Gold = 3 pts, Silver = 1 pt)</li>
+                    <li>🎯 <strong>Format:</strong> Coin icon + count (no colons or extra text)</li>
+                    <li>🏆 <strong>Total VP:</strong> Cards + Coins = Complete victory point total</li>
+                </ul>
+                <p><strong>Result:</strong> Completely clean victory cards with accurate VP totals including coin values!</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

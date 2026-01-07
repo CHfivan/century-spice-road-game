@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merchant Card Effects Test</title>
+    <link rel="stylesheet" href="styles.css?v=9">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Merchant Card Effects Display Test</h1>
+        </header>
+        
+        <section>
+            <h2>Regular Market Cards (150x200px)</h2>
+            <div class="cards-container">
+                <!-- Simple gain card -->
+                <div class="card merchant-card">
+                    <div class="card-effect">
+                        <div class="spice-group single-row">
+                            <div class="spice-cube spice-yellow"></div>
+                            <div class="spice-cube spice-yellow"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Complex gain card -->
+                <div class="card merchant-card">
+                    <div class="card-effect">
+                        <div class="spice-group flexible">
+                            <div class="spice-cube spice-yellow"></div>
+                            <div class="spice-cube spice-red"></div>
+                            <div class="spice-cube spice-red"></div>
+                            <div class="spice-cube spice-green"></div>
+                            <div class="spice-cube spice-green"></div>
+                            <div class="spice-cube spice-brown"></div>
+                            <div class="spice-cube spice-brown"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simple trade card -->
+                <div class="card merchant-card">
+                    <div class="card-effect">
+                        <div class="trade-effect">
+                            <div class="trade-input">
+                                <div class="spice-group single-row">
+                                    <div class="spice-cube spice-yellow"></div>
+                                    <div class="spice-cube spice-yellow"></div>
+                                </div>
+                            </div>
+                            <div class="trade-arrow">↓</div>
+                            <div class="trade-output">
+                                <div class="spice-group single-row">
+                                    <div class="spice-cube spice-red"></div>
+                                    <div class="spice-cube spice-red"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Complex trade card -->
+                <div class="card merchant-card">
+                    <div class="card-effect">
+                        <div class="trade-effect">
+                            <div class="trade-input">
+                                <div class="spice-group stacked">
+                                    <div class="spice-row">
+                                        <div class="spice-cube spice-yellow"></div>
+                                        <div class="spice-cube spice-yellow"></div>
+                                        <div class="spice-cube spice-red"></div>
+                                    </div>
+                                    <div class="spice-row">
+                                        <div class="spice-cube spice-red"></div>
+                                        <div class="spice-cube spice-green"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="trade-arrow">↓</div>
+                            <div class="trade-output">
+                                <div class="spice-group flexible">
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upgrade card -->
+                <div class="card merchant-card">
+                    <div class="card-effect">
+                        <div class="upgrade-effect">↑2</div>
+                    </div>
+                </div>
+                
+                <!-- Combo card -->
+                <div class="card merchant-card">
+                    <div class="card-effect">
+                        <div class="combo-effect">
+                            <div class="spice-group single-row">
+                                <div class="spice-cube spice-yellow"></div>
+                                <div class="spice-cube spice-red"></div>
+                            </div>
+                            <div class="upgrade-effect">↑1</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Mini Hand Cards (80x120px) - Should fit all effects</h2>
+            <div class="hand-cards">
+                <!-- Simple gain card -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="spice-group single-row">
+                            <div class="spice-cube spice-yellow"></div>
+                            <div class="spice-cube spice-yellow"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Complex gain card -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="spice-group flexible">
+                            <div class="spice-cube spice-yellow"></div>
+                            <div class="spice-cube spice-red"></div>
+                            <div class="spice-cube spice-red"></div>
+                            <div class="spice-cube spice-green"></div>
+                            <div class="spice-cube spice-green"></div>
+                            <div class="spice-cube spice-brown"></div>
+                            <div class="spice-cube spice-brown"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Simple trade card -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="trade-effect">
+                            <div class="trade-input">
+                                <div class="spice-group single-row">
+                                    <div class="spice-cube spice-yellow"></div>
+                                    <div class="spice-cube spice-yellow"></div>
+                                </div>
+                            </div>
+                            <div class="trade-arrow">↓</div>
+                            <div class="trade-output">
+                                <div class="spice-group single-row">
+                                    <div class="spice-cube spice-red"></div>
+                                    <div class="spice-cube spice-red"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Complex trade card -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="trade-effect">
+                            <div class="trade-input">
+                                <div class="spice-group stacked">
+                                    <div class="spice-row">
+                                        <div class="spice-cube spice-yellow"></div>
+                                        <div class="spice-cube spice-yellow"></div>
+                                        <div class="spice-cube spice-red"></div>
+                                    </div>
+                                    <div class="spice-row">
+                                        <div class="spice-cube spice-red"></div>
+                                        <div class="spice-cube spice-green"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="trade-arrow">↓</div>
+                            <div class="trade-output">
+                                <div class="spice-group flexible">
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Upgrade card -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="upgrade-effect">↑2</div>
+                    </div>
+                </div>
+                
+                <!-- Combo card -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="combo-effect">
+                            <div class="spice-group single-row">
+                                <div class="spice-cube spice-yellow"></div>
+                                <div class="spice-cube spice-red"></div>
+                            </div>
+                            <div class="upgrade-effect">↑1</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Very complex trade card - stress test -->
+                <div class="card mini-card merchant-card">
+                    <div class="card-effect">
+                        <div class="trade-effect">
+                            <div class="trade-input">
+                                <div class="spice-group flexible">
+                                    <div class="spice-cube spice-yellow"></div>
+                                    <div class="spice-cube spice-yellow"></div>
+                                    <div class="spice-cube spice-yellow"></div>
+                                    <div class="spice-cube spice-red"></div>
+                                    <div class="spice-cube spice-red"></div>
+                                    <div class="spice-cube spice-green"></div>
+                                </div>
+                            </div>
+                            <div class="trade-arrow">↓</div>
+                            <div class="trade-output">
+                                <div class="spice-group flexible">
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-green"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                    <div class="spice-cube spice-brown"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Size Analysis</h2>
+            <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 10px;">
+                <h3>Desktop Sizing:</h3>
+                <ul>
+                    <li><strong>Regular cards:</strong> 150px × 200px with 24px spice cubes</li>
+                    <li><strong>Mini cards:</strong> 80px × 120px with 13px spice cubes</li>
+                    <li><strong>Size ratio:</strong> 13/24 = 54% (matches card width ratio of 80/150 = 53%)</li>
+                </ul>
+                
+                <h3>Mobile Sizing (≤768px):</h3>
+                <ul>
+                    <li><strong>Regular spice cubes:</strong> 12px</li>
+                    <li><strong>Mini card spice cubes:</strong> 8px</li>
+                    <li><strong>Size ratio:</strong> 8/12 = 67% (proportional to mobile card scaling)</li>
+                </ul>
+                
+                <h3>Extra Small Screens (≤480px):</h3>
+                <ul>
+                    <li><strong>Regular spice cubes:</strong> 18px</li>
+                    <li><strong>Mini card spice cubes:</strong> 10px</li>
+                    <li><strong>Size ratio:</strong> 10/18 = 56% (maintains proportion)</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

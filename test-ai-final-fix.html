@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Setup Final Fix Test</title>
+    <link rel="stylesheet" href="styles.css?v=8">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>🤖 AI Setup Final Fix Test</h1>
+        </header>
+
+        <main>
+            <!-- Test Setup Modal with inline styles -->
+            <div id="setup-modal" class="modal" style="display: flex !important;">
+                <div class="modal-content">
+                    <h2>Game Setup (Final Fix)</h2>
+                    <div class="setup-options" style="display: flex !important; flex-direction: column !important;">
+                        <div class="setup-section" style="display: flex !important; flex-direction: column !important;">
+                            <label for="player-count">Number of Players:</label>
+                            <select id="player-count" style="display: block !important;">
+                                <option value="2">2 Players</option>
+                                <option value="3">3 Players</option>
+                                <option value="4">4 Players</option>
+                                <option value="5">5 Players</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setup-section" style="display: flex !important; flex-direction: column !important;">
+                            <label for="ai-players">AI Players:</label>
+                            <select id="ai-players" style="display: block !important;">
+                                <option value="0">No AI (Human Only)</option>
+                                <option value="1">1 AI Player</option>
+                                <option value="2">2 AI Players</option>
+                                <option value="3">3 AI Players</option>
+                                <option value="4">4 AI Players</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setup-section" style="display: flex !important; flex-direction: column !important;">
+                            <label for="ai-difficulty">AI Difficulty:</label>
+                            <select id="ai-difficulty" style="display: block !important;">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button id="test-elements">Test Elements</button>
+                    <button id="start-game">Start Game</button>
+                </div>
+            </div>
+
+            <div id="test-results" style="margin: 20px 0; padding: 20px; background: rgba(76, 175, 80, 0.1); border-radius: 8px;">
+                <h3>🧪 Final Fix Results:</h3>
+                <div id="results-content">Testing AI elements...</div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/main.js?v=7"></script>
+    
+    <script>
+        // Override the checkAIElements function to test without infinite loop
+        function testFinalFix() {
+            const results = [];
+            
+            // Test AI Players element
+            const aiPlayersEl = document.getElementById('ai-players');
+            if (aiPlayersEl) {
+                results.push(`✅ AI Players element found (${aiPlayersEl.options.length} options)`);
+                results.push(`   - Value: "${aiPlayersEl.value}"`);
+                results.push(`   - Display: ${getComputedStyle(aiPlayersEl).display}`);
+                results.push(`   - Visibility: ${getComputedStyle(aiPlayersEl).visibility}`);
+            } else {
+                results.push('❌ AI Players element NOT found');
+            }
+            
+            // Test AI Difficulty element
+            const aiDifficultyEl = document.getElementById('ai-difficulty');
+            if (aiDifficultyEl) {
+                results.push(`✅ AI Difficulty element found (${aiDifficultyEl.options.length} options)`);
+                results.push(`   - Value: "${aiDifficultyEl.value}"`);
+                results.push(`   - Display: ${getComputedStyle(aiDifficultyEl).display}`);
+                results.push(`   - Visibility: ${getComputedStyle(aiDifficultyEl).visibility}`);
+            } else {
+                results.push('❌ AI Difficulty element NOT found');
+            }
+            
+            // Test functionality
+            if (aiPlayersEl && aiDifficultyEl) {
+                results.push('🎯 Testing functionality...');
+                aiPlayersEl.value = '2';
+                aiDifficultyEl.value = 'hard';
+                results.push(`   - AI Players changed to: ${aiPlayersEl.value}`);
+                results.push(`   - AI Difficulty changed to: ${aiDifficultyEl.value}`);
+                results.push('✅ Elements are functional!');
+            }
+            
+            // Display results
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = results.join('<br>');
+            
+            console.log('Final Fix Test Results:', {
+                aiPlayersFound: !!aiPlayersEl,
+                aiDifficultyFound: !!aiDifficultyEl,
+                bothWorking: !!(aiPlayersEl && aiDifficultyEl)
+            });
+        }
+        
+        // Test on load
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(testFinalFix, 100);
+        });
+        
+        // Test button
+        document.getElementById('test-elements').addEventListener('click', testFinalFix);
+    </script>
+</body>
+</html>

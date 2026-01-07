@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#8B4513">
+    <title>Century: Spice Road - Mobile</title>
+    <link rel="stylesheet" href="styles.css?v=9">
+    <style>
+        /* Mobile-specific overrides and enhancements */
+        
+        /* Force mobile layout always */
+        body {
+            font-size: 16px; /* Prevent zoom on iOS */
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+        
+        /* Enhanced mobile header */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 10px !important;
+            margin-bottom: 10px !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        header h1 {
+            font-size: 1.4em !important;
+            margin-bottom: 5px !important;
+        }
+        
+        #game-info {
+            flex-direction: column !important;
+            gap: 5px !important;
+            text-align: center !important;
+            font-size: 0.9em !important;
+        }
+        
+        /* Mobile-optimized game container */
+        #game-container {
+            padding: 5px !important;
+            max-width: 100% !important;
+        }
+        
+        /* Section spacing for mobile */
+        section {
+            margin-bottom: 15px !important;
+            padding: 10px !important;
+        }
+        
+        section h2 {
+            font-size: 1.1em !important;
+            margin-bottom: 8px !important;
+            text-align: center;
+        }
+        
+        /* Mobile card layout - always use mobile sizing */
+        .cards-container {
+            flex-direction: column !important;
+            padding: 0 !important;
+            gap: 8px !important;
+        }
+        
+        .card-row {
+            width: 100% !important;
+            justify-content: stretch !important;
+            gap: 4px !important;
+            flex-direction: row !important;
+            align-items: stretch !important;
+        }
+        
+        .card {
+            flex: 1 !important;
+            min-width: calc(50% - 2px) !important;
+            max-width: calc(50% - 2px) !important;
+            width: auto !important;
+            height: 100px !important;
+            font-size: 8px !important;
+            padding: 4px !important;
+            border-width: 1px !important;
+        }
+        
+        .deck {
+            width: 60px !important;
+            height: 80px !important;
+            font-size: 10px !important;
+            align-self: center !important;
+            margin-top: 8px !important;
+            padding: 4px !important;
+        }
+        
+        /* Mobile spice cubes */
+        .spice-cube {
+            width: 10px !important;
+            height: 10px !important;
+            min-width: 10px !important;
+            min-height: 10px !important;
+            margin: 1px !important;
+        }
+        
+        .mini-card .spice-cube {
+            width: 7px !important;
+            height: 7px !important;
+            min-width: 7px !important;
+            min-height: 7px !important;
+        }
+        
+        /* Mobile card headers */
+        .card-header {
+            font-size: 1.2em !important;
+            margin-bottom: 2px !important;
+        }
+        
+        /* Mobile coins */
+        .coin {
+            width: 20px !important;
+            height: 20px !important;
+            font-size: 12px !important;
+            top: 2px !important;
+            right: 2px !important;
+        }
+        
+        .coins-container .coin {
+            width: 20px !important;
+            height: 20px !important;
+        }
+        
+        /* Victory card cost for mobile */
+        .victory-card-cost-bottom {
+            padding: 2px !important;
+            min-height: 14px !important;
+        }
+        
+        .victory-card-cost-bottom .spice-cube {
+            width: 8px !important;
+            height: 8px !important;
+        }
+        
+        /* Mobile player boards */
+        .player-board {
+            padding: 8px !important;
+            margin: 8px 0 !important;
+            border-width: 2px !important;
+        }
+        
+        .player-info {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 5px !important;
+        }
+        
+        .player-name {
+            font-size: 1.1em !important;
+        }
+        
+        .victory-points {
+            font-size: 1.2em !important;
+        }
+        
+        /* Mobile spice storage */
+        .spice-storage {
+            grid-template-columns: repeat(5, 1fr) !important;
+            gap: 2px !important;
+            padding: 5px !important;
+        }
+        
+        .spice-slot {
+            min-height: 16px !important;
+            border-width: 1px !important;
+        }
+        
+        .spice-slot .spice-cube {
+            width: 8px !important;
+            height: 8px !important;
+        }
+        
+        /* Mobile hand cards */
+        .player-cards {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .hand-cards, .discard-cards {
+            gap: 3px !important;
+        }
+        
+        .mini-card {
+            width: 50px !important;
+            height: 75px !important;
+            font-size: 7px !important;
+            padding: 3px !important;
+        }
+        
+        /* Mobile action buttons */
+        .action-buttons {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+            margin-top: 10px !important;
+        }
+        
+        .action-btn {
+            padding: 12px 8px !important;
+            font-size: 0.8em !important;
+            width: auto !important;
+            min-height: 44px !important; /* Touch target */
+            border-radius: 6px !important;
+        }
+        
+        /* Mobile modals */
+        .modal-content {
+            padding: 15px !important;
+            margin: 10px !important;
+            max-width: 95% !important;
+            width: 95% !important;
+            max-height: 90vh !important;
+            overflow-y: auto !important;
+        }
+        
+        .modal-content h2, .modal-content h3 {
+            font-size: 1.2em !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .modal-buttons {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        
+        .modal-buttons button {
+            width: 100% !important;
+            padding: 12px !important;
+            font-size: 0.9em !important;
+            min-height: 44px !important;
+        }
+        
+        /* Mobile setup options */
+        .setup-options {
+            gap: 12px !important;
+        }
+        
+        .setup-section select {
+            padding: 12px !important;
+            font-size: 16px !important; /* Prevents zoom on iOS */
+            border-radius: 6px !important;
+            min-height: 44px !important;
+        }
+        
+        /* Mobile menu options */
+        .menu-option-btn {
+            padding: 15px !important;
+            font-size: 0.9em !important;
+            min-height: 50px !important;
+            border-radius: 8px !important;
+        }
+        
+        /* Mobile game message */
+        .game-message {
+            top: 5px !important;
+            max-width: 95% !important;
+            font-size: 0.8em !important;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+        }
+        
+        /* Mobile coin tracking */
+        #coin-tracking {
+            height: 80px !important;
+        }
+        
+        .coin-stack-label {
+            font-size: 0.7em !important;
+            margin-bottom: 8px !important;
+        }
+        
+        .coin-bar {
+            width: 20px !important;
+            height: 6px !important;
+        }
+        
+        #gold-coin-stack {
+            left: 25% !important;
+            top: -120px !important;
+        }
+        
+        #silver-coin-stack {
+            left: 75% !important;
+            top: -120px !important;
+        }
+        
+        /* Mobile victory cards section */
+        #victory-cards-section h2 {
+            position: static !important;
+            text-align: center !important;
+            transform: none !important;
+        }
+        
+        #victory-cards-section {
+            padding-top: 10px !important;
+        }
+        
+        /* Touch improvements */
+        .card, .action-btn, .menu-option-btn {
+            -webkit-tap-highlight-color: rgba(255, 215, 0, 0.3);
+            touch-action: manipulation;
+        }
+        
+        /* Prevent text selection on game elements */
+        .card, .spice-cube, .coin, .action-btn {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Landscape orientation adjustments */
+        @media (orientation: landscape) and (max-height: 500px) {
+            header {
+                padding: 5px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            header h1 {
+                font-size: 1.2em !important;
+                margin-bottom: 3px !important;
+            }
+            
+            section {
+                margin-bottom: 8px !important;
+                padding: 6px !important;
+            }
+            
+            .card {
+                height: 80px !important;
+            }
+            
+            .player-board {
+                padding: 6px !important;
+                margin: 5px 0 !important;
+            }
+        }
+        
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .card {
+                min-width: 100% !important;
+                max-width: 100% !important;
+                height: 80px !important;
+            }
+            
+            .card-row {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr !important;
+            }
+            
+            header h1 {
+                font-size: 1.1em !important;
+            }
+            
+            .spice-storage {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+        }
+        
+        /* PWA-like fullscreen on mobile */
+        @media (display-mode: standalone) {
+            body {
+                padding-top: env(safe-area-inset-top);
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+        
+        /* Dark mode support for mobile */
+        @media (prefers-color-scheme: dark) {
+            header {
+                background: rgba(0, 0, 0, 0.9) !important;
+                color: white;
+            }
+            
+            .modal-content {
+                background: #2d2d2d !important;
+                color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+                <div class="header-buttons">
+                    <button id="menu-btn" class="help-button" title="Game Menu">☰</button>
+                </div>
+            </div>
+            <!-- In-game message display -->
+            <div id="game-message" class="game-message hidden"></div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <!-- Coin tracking stacks positioned relative to cards -->
+                    <div id="coin-tracking">
+                        <div id="gold-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Gold</div>
+                            <div id="gold-bars" class="coin-bars">
+                                <!-- Gold bars will be populated here -->
+                            </div>
+                        </div>
+                        <div id="silver-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Silver</div>
+                            <div class="silver-bars-container">
+                                <div id="silver-bars-stack1" class="coin-bars">
+                                    <!-- First silver stack (5 bars) -->
+                                </div>
+                                <div id="silver-bars-stack2" class="coin-bars">
+                                    <!-- Second silver stack (5 bars) -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Merchant Cards Market Row -->
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row">
+                        <!-- Merchant cards will be populated here -->
+                    </div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Players Area -->
+            <section id="players-area">
+                <!-- Player boards will be populated here -->
+            </section>
+        </main>
+
+        <!-- Game Setup Modal -->
+        <div id="setup-modal" class="modal">
+            <div class="modal-content">
+                <h2>Game Setup</h2>
+                <div class="setup-options">
+                    <div class="setup-section">
+                        <label for="player-count">Number of Players:</label>
+                        <select id="player-count">
+                            <option value="2">2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                            <option value="5">5 Players</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setup-section">
+                        <label for="ai-players">AI Players:</label>
+                        <select id="ai-players">
+                            <option value="0">No AI (Human Only)</option>
+                            <option value="1">1 AI Player</option>
+                            <option value="2">2 AI Players</option>
+                            <option value="3">3 AI Players</option>
+                            <option value="4">4 AI Players</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setup-section">
+                        <label for="ai-difficulty">AI Difficulty:</label>
+                        <select id="ai-difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="start-game">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Menu Modal -->
+        <div id="game-menu-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Game Menu</h3>
+                <div class="menu-options">
+                    <button class="menu-option-btn" id="game-rules-btn">📖 Game Rules</button>
+                    <button class="menu-option-btn" id="statistics-btn">📊 Statistics</button>
+                    <button class="menu-option-btn" id="restart-game-btn">🔄 Restart Game</button>
+                    <button class="menu-option-btn" id="close-menu-btn">✖️ Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Rules Modal -->
+        <div id="game-rules-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Century: Spice Road - Rules</h3>
+                <div class="rules-content">
+                    <h4>Objective</h4>
+                    <p>Be the first to claim 5 victory cards (6 in 4-5 player games) to trigger the final round.</p>
+                    
+                    <h4>Actions (Choose 1 per turn)</h4>
+                    <ul>
+                        <li><strong>Play Card:</strong> Use a merchant card for spices/upgrades/trades</li>
+                        <li><strong>Acquire Card:</strong> Take a merchant card (costs yellow spices)</li>
+                        <li><strong>Claim Victory:</strong> Buy a victory card with required spices</li>
+                        <li><strong>Rest:</strong> Return all played cards to hand</li>
+                    </ul>
+                    
+                    <h4>Spice Types</h4>
+                    <ul>
+                        <li>🟡 Yellow → 🔴 Red → 🟢 Green → 🟤 Brown</li>
+                    </ul>
+                    
+                    <h4>Scoring</h4>
+                    <ul>
+                        <li>Victory cards: Face value</li>
+                        <li>Gold coins: 3 points</li>
+                        <li>Silver coins: 1 point</li>
+                    </ul>
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-rules-btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restart Confirmation Modal -->
+        <div id="restart-confirm-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Restart Game</h3>
+                <div class="restart-content">
+                    <p>Are you sure you want to restart?</p>
+                    <p><strong>All progress will be lost!</strong></p>
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-restart-btn" style="background: #dc3545;">Yes, Restart</button>
+                    <button id="cancel-restart-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cards.js?v=6"></script>
+    <script src="js/game.js?v=6"></script>
+    <script src="js/ai-player.js?v=6"></script>
+    <script src="js/analytics.js?v=6"></script>
+    <script src="js/ui.js?v=8"></script>
+    <script src="js/main.js?v=8"></script>
+    
+    <!-- Mobile-specific enhancements -->
+    <script>
+        // Mobile-specific JavaScript enhancements
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📱 Mobile-optimized Century: Spice Road loaded');
+            
+            // Prevent zoom on double tap
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function (event) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+            
+            // Add haptic feedback for touch interactions (if supported)
+            function addHapticFeedback(element) {
+                element.addEventListener('touchstart', function() {
+                    if (navigator.vibrate) {
+                        navigator.vibrate(10); // Short vibration
+                    }
+                });
+            }
+            
+            // Add haptic feedback to interactive elements
+            document.querySelectorAll('.card, .action-btn, .menu-option-btn').forEach(addHapticFeedback);
+            
+            // Optimize scroll performance
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.closest('.modal-content')) {
+                    // Allow scrolling in modals
+                    return;
+                }
+                // Prevent overscroll bounce
+                e.preventDefault();
+            }, { passive: false });
+            
+            // Add visual feedback for touch
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.classList.contains('card') || e.target.classList.contains('action-btn')) {
+                    e.target.style.transform = 'scale(0.95)';
+                }
+            });
+            
+            document.addEventListener('touchend', function(e) {
+                if (e.target.classList.contains('card') || e.target.classList.contains('action-btn')) {
+                    setTimeout(() => {
+                        e.target.style.transform = '';
+                    }, 100);
+                }
+            });
+            
+            // Mobile orientation change handler
+            window.addEventListener('orientationchange', function() {
+                setTimeout(() => {
+                    // Force layout recalculation
+                    document.body.style.height = window.innerHeight + 'px';
+                    setTimeout(() => {
+                        document.body.style.height = '';
+                    }, 100);
+                }, 100);
+            });
+            
+            // Improve modal handling on mobile
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.addEventListener('touchmove', function(e) {
+                    const modalContent = e.target.closest('.modal-content');
+                    if (!modalContent) {
+                        e.preventDefault(); // Prevent background scroll
+                    }
+                }, { passive: false });
+            });
+            
+            // Add swipe gesture support for cards (future enhancement)
+            let startX, startY, distX, distY;
+            
+            document.addEventListener('touchstart', function(e) {
+                if (e.target.closest('.card')) {
+                    startX = e.touches[0].pageX;
+                    startY = e.touches[0].pageY;
+                }
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (e.target.closest('.card') && startX && startY) {
+                    distX = e.touches[0].pageX - startX;
+                    distY = e.touches[0].pageY - startY;
+                    
+                    // Prevent scrolling if horizontal swipe
+                    if (Math.abs(distX) > Math.abs(distY)) {
+                        e.preventDefault();
+                    }
+                }
+            }, { passive: false });
+            
+            document.addEventListener('touchend', function(e) {
+                if (e.target.closest('.card') && startX && startY) {
+                    // Reset swipe tracking
+                    startX = startY = distX = distY = null;
+                }
+            });
+        });
+        
+        // Debug script for AI setup (mobile version)
+        window.addEventListener('load', function() {
+            console.log('🔍 Mobile page loaded, checking AI elements...');
+            
+            setTimeout(() => {
+                const aiPlayers = document.getElementById('ai-players');
+                const aiDifficulty = document.getElementById('ai-difficulty');
+                const setupModal = document.getElementById('setup-modal');
+                
+                console.log('=== MOBILE AI SETUP DEBUG ===');
+                console.log('Setup Modal:', setupModal);
+                console.log('AI Players element:', aiPlayers);
+                console.log('AI Difficulty element:', aiDifficulty);
+                
+                if (aiPlayers && aiDifficulty) {
+                    console.log('✅ Mobile AI elements found!');
+                } else {
+                    console.error('❌ Mobile AI elements missing!');
+                }
+                
+                console.log('=== END MOBILE DEBUG ===');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

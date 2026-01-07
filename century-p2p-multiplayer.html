@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Century: Spice Road - Multiplayer</title>
+    <style>
+        /* Century: Spice Road Styles - Embedded for portability */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #8B4513, #D2691E); color: #333; min-height: 100vh; }
+        
+        /* Multiplayer Setup Styles */
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); margin-top: 20px; }
+        .section { margin: 15px 0; padding: 15px; border: 2px solid #D2691E; border-radius: 10px; background: #FFF8DC; }
+        .button { background: #8B4513; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 16px; margin: 5px; min-width: 120px; }
+        .button:hover { background: #A0522D; }
+        .button:disabled { background: #ccc; cursor: not-allowed; }
+        input, select { padding: 10px; border: 2px solid #D2691E; border-radius: 5px; font-size: 16px; margin: 5px; width: 100%; max-width: 300px; box-sizing: border-box; }
+        .status { padding: 10px; border-radius: 5px; margin: 10px 0; word-wrap: break-word; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .warning { background: #fff3cd; color: #856404; }
+        .hidden { display: none; }
+        .room-code { font-size: 18px; font-weight: bold; color: #8B4513; text-align: center; padding: 15px; background: #FFE4B5; border-radius: 10px; margin: 10px 0; word-break: break-all; font-family: monospace; }
+        .players-list { margin: 15px 0; }
+        .player-item { padding: 10px; margin: 5px 0; background: white; border-radius: 5px; border-left: 4px solid #8B4513; }
+        
+        /* Game Container Styles */
+        #game-container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.9); padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); }
+        header h1 { color: #8B4513; font-size: 2.5em; margin-bottom: 10px; }
+        #game-info { display: flex; justify-content: space-between; font-size: 1.2em; font-weight: bold; }
+        .header-buttons { display: flex; gap: 10px; }
+        .help-button { background: #8B4513; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 14px; }
+        .help-button:hover { background: #A0522D; }
+        
+        /* Game Board Styles */
+        section { margin: 20px 0; }
+        section h2 { color: #8B4513; font-size: 1.5em; margin-bottom: 15px; text-align: center; }
+        .cards-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin: 20px 0; flex-wrap: wrap; }
+        .card-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .card { width: 120px; height: 160px; border: 3px solid #8B4513; border-radius: 10px; background: #FFF8DC; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; align-items: center; font-size: 11px; text-align: center; padding: 8px; box-sizing: border-box; transition: all 0.2s ease; position: relative; }
+        .card:hover { background: #FFE4B5; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .card.selected { background: rgba(255, 215, 0, 0.7); border-color: #FF8C00; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4); }
+        .card.disabled { opacity: 0.5; cursor: not-allowed; }
+        .card.disabled:hover { transform: none; box-shadow: none; }
+        .deck { width: 120px; height: 160px; border: 2px dashed #8B4513; border-radius: 10px; background: #D2691E; color: white; display: flex; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 14px; }
+        
+        /* Player Board Styles */
+        .player-board { margin: 20px 0; padding: 20px; border: 3px solid #8B4513; border-radius: 15px; background: #FFF8DC; position: relative; }
+        .player-board.current-player { background: #FFD700; border-color: #FF8C00; box-shadow: 0 0 15px rgba(255, 140, 0, 0.5); }
+        .player-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
+        .player-name { font-weight: bold; color: #8B4513; font-size: 1.2em; }
+        .player-stats { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .spices-display { display: flex; gap: 8px; align-items: center; }
+        .spice-cube { width: 16px; height: 16px; border-radius: 3px; display: inline-block; margin: 1px; }
+        .spice-cube.yellow { background: #FFD700; }
+        .spice-cube.red { background: #FF4444; }
+        .spice-cube.green { background: #44AA44; }
+        .spice-cube.brown { background: #8B4513; }
+        .spice-count { font-weight: bold; margin-left: 5px; }
+        
+        /* Cards in hand and played */
+        .player-cards { display: flex; gap: 15px; margin-top: 15px; flex-wrap: wrap; }
+        .cards-section { flex: 1; min-width: 200px; }
+        .cards-section h4 { color: #8B4513; margin-bottom: 8px; }
+        .hand-cards, .played-cards, .victory-cards-display { display: flex; gap: 5px; flex-wrap: wrap; }
+        .mini-card { width: 60px; height: 40px; border: 1px solid #8B4513; border-radius: 5px; background: #FFF8DC; font-size: 8px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 2px; }
+        .card-back { background: #D2691E; color: white; }
+        
+        /* Victory cards display */
+        .victory-cards-display .mini-card { width: 80px; height: 50px; font-size: 9px; }
+        .player-coins-display { display: flex; gap: 5px; align-items: center; }
+        .coin { width: 16px; height: 16px; border-radius: 50%; display: inline-block; }
+        .coin.gold { background: #FFD700; border: 1px solid #FFA500; }
+        .coin.silver { background: #C0C0C0; border: 1px solid #999; }
+        
+        /* Modal Styles */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal.hidden { display: none; }
+        .modal-content { background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-content h2, .modal-content h3 { color: #8B4513; margin-bottom: 20px; text-align: center; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .modal-buttons button { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        #confirm-action { background: #28a745; color: white; }
+        #confirm-action:hover { background: #218838; }
+        #confirm-action:disabled { background: #ccc; cursor: not-allowed; }
+        #cancel-action { background: #dc3545; color: white; }
+        #cancel-action:hover { background: #c82333; }
+        
+        /* Game message display */
+        .game-message { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #ff6b6b; color: white; padding: 12px 24px; border-radius: 8px; font-weight: bold; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); z-index: 1000; max-width: 500px; text-align: center; transition: opacity 0.3s ease; white-space: pre-line; line-height: 1.4; }
+        .game-message.success { background: #51cf66; }
+        .game-message.info { background: #339af0; }
+        .game-message.hidden { display: none; }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            #game-container { padding: 10px; }
+            header h1 { font-size: 1.8em; }
+            #game-info { flex-direction: column; gap: 10px; text-align: center; }
+            .card { width: 100px; height: 140px; font-size: 10px; }
+            .deck { width: 100px; height: 140px; }
+            .player-board { padding: 15px; }
+            .player-info { flex-direction: column; align-items: flex-start; }
+            .container { padding: 15px; margin: 5px; }
+            .button { width: 100%; margin: 5px 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Multiplayer Setup Screen -->
+    <div id="multiplayer-setup" class="container">
+        <h1>Century: Spice Road - Multiplayer</h1>
+        
+        <!-- Player Name Setup -->
+        <div id="name-setup" class="section">
+            <h3>Enter Your Name</h3>
+            <input type="text" id="player-name" placeholder="Your name" maxlength="20">
+            <div>
+                <button class="button" onclick="showCreateRoom()">Create Game Room</button>
+                <button class="button" onclick="showJoinRoom()">Join Game Room</button>
+            </div>
+        </div>
+
+        <!-- Create Room -->
+        <div id="create-room" class="section hidden">
+            <h3>Create Game Room</h3>
+            <input type="text" id="room-name" placeholder="Room name" maxlength="30">
+            <label>Max Players:</label>
+            <select id="max-players">
+                <option value="2">2 Players</option>
+                <option value="3">3 Players</option>
+                <option value="4">4 Players</option>
+                <option value="5">5 Players</option>
+            </select>
+            <label>AI Players:</label>
+            <select id="ai-count">
+                <option value="0">No AI</option>
+                <option value="1">1 AI</option>
+                <option value="2">2 AI</option>
+                <option value="3">3 AI</option>
+            </select>
+            <button class="button" onclick="createRoom()">Create Room</button>
+            <button class="button" onclick="showNameSetup()">Back</button>
+        </div>
+
+        <!-- Join Room -->
+        <div id="join-room" class="section hidden">
+            <h3>Join Game Room</h3>
+            <input type="text" id="room-code" placeholder="Enter 6-digit room code" maxlength="6">
+            <button class="button" onclick="joinRoom()">Join Room</button>
+            <button class="button" onclick="showNameSetup()">Back</button>
+        </div>
+
+        <!-- Room Status -->
+        <div id="room-status" class="section hidden">
+            <h3>Game Room</h3>
+            <div id="room-info">
+                <div>Room: <span id="current-room-name"></span></div>
+                <div class="room-code">Code: <span id="current-room-code"></span></div>
+                <div>Status: <span id="room-status-text"></span></div>
+            </div>
+            
+            <div class="players-list">
+                <h4>Players:</h4>
+                <div id="players-list"></div>
+            </div>
+            
+            <div id="host-controls" class="hidden">
+                <button class="button" onclick="startMultiplayerGame()">Start Game</button>
+            </div>
+            
+            <button class="button" onclick="leaveRoom()">Leave Room</button>
+        </div>
+
+        <!-- Status Messages -->
+        <div id="status-messages"></div>
+    </div>
+
+    <!-- Game Container (hidden initially) -->
+    <div id="game-container" class="hidden">
+        <header>
+            <h1>Century: Spice Road - Multiplayer</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+                <div class="header-buttons">
+                    <button id="help-btn" class="help-button" title="Press H for help">?</button>
+                </div>
+            </div>
+            <!-- In-game message display -->
+            <div id="game-message" class="game-message hidden"></div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Merchant Cards Market Row -->
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row">
+                        <!-- Merchant cards will be populated here -->
+                    </div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Players Area -->
+            <section id="players-area">
+                <!-- Player boards will be populated here -->
+            </section>
+        </main>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>

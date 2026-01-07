@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coin Positioning Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Add a red circle to visualize the target area for the title */
+        #victory-cards-section::before {
+            content: '';
+            position: absolute;
+            top: -300px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            border: 3px solid red;
+            border-radius: 50%;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        /* Highlight the boundaries of the victory cards section */
+        #victory-cards-section {
+            border: 2px dashed blue;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Show coin tracking area boundaries */
+        #coin-tracking {
+            border: 2px dashed green;
+            background: rgba(0, 255, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Coin Positioning Test</h1>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Mock victory cards -->
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>5 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-red"></div>
+                                <div class="spice-cube spice-green"></div>
+                            </div>
+                        </div>
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>7 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-green"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                        <div class="card victory-card">
+                            <div class="card-header"><strong>9 VP</strong></div>
+                            <div class="victory-card-cost-bottom">
+                                <div class="spice-cube spice-brown"></div>
+                                <div class="spice-cube spice-brown"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Coin tracking stacks positioned relative to cards -->
+                    <div id="coin-tracking">
+                        <div id="gold-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Gold Coins</div>
+                            <div id="gold-bars" class="coin-bars">
+                                <div class="coin-bar gold-bar"></div>
+                                <div class="coin-bar gold-bar"></div>
+                                <div class="coin-bar gold-bar"></div>
+                                <div class="coin-bar gold-bar"></div>
+                            </div>
+                        </div>
+                        <div id="silver-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Silver Coins</div>
+                            <div class="silver-bars-container">
+                                <div id="silver-bars-stack1" class="coin-bars">
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                </div>
+                                <div id="silver-bars-stack2" class="coin-bars">
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                    <div class="coin-bar silver-bar"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Position coin stacks when page loads
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const cardRow = document.getElementById('victory-cards-row');
+                const goldStack = document.getElementById('gold-coin-stack');
+                const silverStack = document.getElementById('silver-coin-stack');
+                
+                if (!cardRow || !goldStack || !silverStack) return;
+                
+                // Get all victory cards
+                const cards = cardRow.querySelectorAll('.card');
+                
+                if (cards.length >= 2) {
+                    // Get positions of first and second cards
+                    const firstCard = cards[0];
+                    const secondCard = cards[1];
+                    
+                    const firstCardRect = firstCard.getBoundingClientRect();
+                    const secondCardRect = secondCard.getBoundingClientRect();
+                    const cardRowRect = cardRow.getBoundingClientRect();
+                    
+                    // Calculate positions relative to card row
+                    const firstCardCenter = firstCardRect.left + firstCardRect.width / 2 - cardRowRect.left;
+                    const secondCardCenter = secondCardRect.left + secondCardRect.width / 2 - cardRowRect.left;
+                    
+                    // Position the stacks aligned with the cards (no offset to keep within boundaries)
+                    goldStack.style.left = firstCardCenter + 'px';
+                    silverStack.style.left = secondCardCenter + 'px';
+                    
+                    console.log('Coin stacks positioned:', {
+                        goldStack: firstCardCenter + 'px',
+                        silverStack: secondCardCenter + 'px'
+                    });
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>
