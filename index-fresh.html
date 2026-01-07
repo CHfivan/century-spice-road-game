@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Century: Spice Road</title>
+    <link rel="stylesheet" href="styles.css?v=9">
+</head>
+<body>
+    <div id="game-container">
+        <header>
+            <h1>Century: Spice Road</h1>
+            <div id="game-info">
+                <span id="current-player">Player 1's Turn</span>
+                <span id="turn-counter">Turn 1</span>
+                <div class="header-buttons">
+                    <button id="menu-btn" class="help-button" title="Game Menu">☰</button>
+                </div>
+            </div>
+            <!-- In-game message display -->
+            <div id="game-message" class="game-message hidden"></div>
+        </header>
+
+        <main id="game-board">
+            <!-- Victory Point Cards Row -->
+            <section id="victory-cards-section">
+                <h2>Victory Point Cards</h2>
+                <div class="cards-container">
+                    <div id="victory-cards-row" class="card-row">
+                        <!-- Victory cards will be populated here -->
+                    </div>
+                    <!-- Coin tracking stacks positioned relative to cards -->
+                    <div id="coin-tracking">
+                        <div id="gold-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Gold Coins</div>
+                            <div id="gold-bars" class="coin-bars">
+                                <!-- Gold bars will be populated here -->
+                            </div>
+                        </div>
+                        <div id="silver-coin-stack" class="coin-stack">
+                            <div class="coin-stack-label">Silver Coins</div>
+                            <div class="silver-bars-container">
+                                <div id="silver-bars-stack1" class="coin-bars">
+                                    <!-- First silver stack (5 bars) -->
+                                </div>
+                                <div id="silver-bars-stack2" class="coin-bars">
+                                    <!-- Second silver stack (4 bars) -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="victory-deck" class="deck">Victory<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Merchant Cards Market Row -->
+            <section id="merchant-cards-section">
+                <h2>Merchant Market</h2>
+                <div class="cards-container">
+                    <div id="merchant-cards-row" class="card-row">
+                        <!-- Merchant cards will be populated here -->
+                    </div>
+                    <div id="merchant-deck" class="deck">Merchant<br>Deck</div>
+                </div>
+            </section>
+
+            <!-- Players Area -->
+            <section id="players-area">
+                <!-- Player boards will be populated here -->
+            </section>
+        </main>
+
+        <!-- Game Setup Modal -->
+        <div id="setup-modal" class="modal">
+            <div class="modal-content">
+                <h2>Game Setup</h2>
+                <div class="setup-options">
+                    <div class="setup-section">
+                        <label for="player-count">Number of Players:</label>
+                        <select id="player-count">
+                            <option value="2">2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                            <option value="5">5 Players</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setup-section">
+                        <label for="ai-players">AI Players:</label>
+                        <select id="ai-players">
+                            <option value="0">No AI (Human Only)</option>
+                            <option value="1">1 AI Player</option>
+                            <option value="2">2 AI Players</option>
+                            <option value="3">3 AI Players</option>
+                            <option value="4">4 AI Players</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setup-section">
+                        <label for="ai-difficulty">AI Difficulty:</label>
+                        <select id="ai-difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <button id="start-game">Start Game</button>
+            </div>
+        </div>
+
+        <!-- Action Modal -->
+        <div id="action-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3 id="action-title">Choose Action</h3>
+                <div id="action-content">
+                    <!-- Dynamic action content -->
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-action">Confirm</button>
+                    <button id="cancel-action">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Menu Modal -->
+        <div id="game-menu-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Game Menu</h3>
+                <div class="menu-options">
+                    <button class="menu-option-btn" id="game-rules-btn">📖 Game Rules</button>
+                    <button class="menu-option-btn" id="statistics-btn">📊 Statistics</button>
+                    <button class="menu-option-btn" id="restart-game-btn">🔄 Restart Game</button>
+                    <button class="menu-option-btn" id="close-menu-btn">✖️ Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Rules Modal -->
+        <div id="game-rules-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Century: Spice Road - Game Rules</h3>
+                <div class="rules-content">
+                    <h4>Objective</h4>
+                    <p>Be the first player to claim 5 victory point cards (or 6 in a 4-5 player game) to trigger the final round.</p>
+                    
+                    <h4>Player Actions (Choose 1 per turn)</h4>
+                    <ul>
+                        <li><strong>Play Card:</strong> Play a merchant card from your hand to gain spices, upgrade spices, or trade spices</li>
+                        <li><strong>Acquire Card:</strong> Take a merchant card from the market (costs yellow spices for non-first cards)</li>
+                        <li><strong>Claim Victory:</strong> Purchase a victory point card using the required spices</li>
+                        <li><strong>Rest:</strong> Take all played cards back into your hand</li>
+                    </ul>
+                    
+                    <h4>Spice Types (from basic to valuable)</h4>
+                    <ul>
+                        <li>🟡 Yellow (Turmeric)</li>
+                        <li>🔴 Red (Saffron)</li>
+                        <li>🟢 Green (Cardamom)</li>
+                        <li>🟤 Brown (Cinnamon)</li>
+                    </ul>
+                    
+                    <h4>Victory Conditions</h4>
+                    <p>Game ends when a player claims their 5th victory card (6th in 4-5 player games). All other players get one final turn. Player with most victory points wins!</p>
+                    
+                    <h4>Scoring</h4>
+                    <ul>
+                        <li>Victory point cards: Face value</li>
+                        <li>Gold coins: 3 points each</li>
+                        <li>Silver coins: 1 point each</li>
+                    </ul>
+                </div>
+                <div class="modal-buttons">
+                    <button id="close-rules-btn">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restart Confirmation Modal -->
+        <div id="restart-confirm-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Restart Game</h3>
+                <div class="restart-content">
+                    <p>Are you sure you want to restart the game?</p>
+                    <p><strong>All progress will be lost!</strong></p>
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirm-restart-btn" style="background: #dc3545;">Yes, Restart</button>
+                    <button id="cancel-restart-btn">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/cards.js?v=6"></script>
+    <script src="js/game.js?v=6"></script>
+    <script src="js/ai-player.js?v=6"></script>
+    <script src="js/analytics.js?v=6"></script>
+    <script src="js/ui.js?v=8"></script>
+    <script src="js/main.js?v=8"></script>
+    
+    <!-- Debug script for AI setup -->
+    <script>
+        // Debug: Check AI setup elements after page load
+        window.addEventListener('load', function() {
+            console.log('🔍 Page loaded, checking AI elements...');
+            
+            setTimeout(() => {
+                const aiPlayers = document.getElementById('ai-players');
+                const aiDifficulty = document.getElementById('ai-difficulty');
+                const setupModal = document.getElementById('setup-modal');
+                
+                console.log('=== AI SETUP DEBUG ===');
+                console.log('Setup Modal:', setupModal);
+                console.log('Setup Modal classes:', setupModal ? setupModal.className : 'N/A');
+                console.log('AI Players element:', aiPlayers);
+                console.log('AI Difficulty element:', aiDifficulty);
+                
+                if (aiPlayers && aiDifficulty) {
+                    console.log('✅ AI elements found!');
+                    console.log('AI Players options:', aiPlayers.options.length);
+                    console.log('AI Difficulty options:', aiDifficulty.options.length);
+                } else {
+                    console.error('❌ AI elements missing!');
+                    
+                    // Check if they exist anywhere in the document
+                    const allSelects = document.querySelectorAll('select');
+                    console.log('All select elements found:', allSelects.length);
+                    allSelects.forEach((select, index) => {
+                        console.log(`Select ${index}:`, select.id, select);
+                    });
+                }
+                
+                console.log('=== END DEBUG ===');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
