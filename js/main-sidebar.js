@@ -43,16 +43,15 @@ function setupGameEventHandlers() {
     const setupModal = document.getElementById('setup-modal');
     const startGameBtn = document.getElementById('start-game');
     const playerCountSelect = document.getElementById('player-count');
-    const aiPlayersSelect = document.getElementById('ai-players');
     const aiDifficultySelect = document.getElementById('ai-difficulty');
 
     if (startGameBtn) {
         startGameBtn.addEventListener('click', function() {
             const playerCount = parseInt(playerCountSelect.value);
-            const aiCount = parseInt(aiPlayersSelect.value);
+            const aiCount = playerCount - 1; // Always 1 human player, rest are AI
             const aiDifficulty = aiDifficultySelect.value;
             
-            console.log(`🎮 Starting game: ${playerCount} players, ${aiCount} AI, difficulty: ${aiDifficulty}`);
+            console.log(`🎮 Starting game: ${playerCount} players (1 human + ${aiCount} AI), difficulty: ${aiDifficulty}`);
             
             startGame(playerCount, aiCount, aiDifficulty);
             hideSetupModal();

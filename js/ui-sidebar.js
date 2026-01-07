@@ -12,6 +12,17 @@ class SidebarUI extends GameUI {
         this.renderSidebarPlayers();
     }
 
+    // Override renderGame to use sidebar layout
+    renderGame() {
+        // Force clear all selections when rendering
+        this.clearSelection();
+        
+        this.renderHeader();
+        this.renderSidebarLayout();
+        
+        console.log('Sidebar game rendered for player:', this.game.getCurrentPlayer().name);
+    }
+
     // Override the original updateDisplay to use sidebar layout
     updateDisplay() {
         if (this.sidebarLayout) {
@@ -31,6 +42,54 @@ class SidebarUI extends GameUI {
         
         // Update coin tracking
         this.updateCoinTracking();
+        
+        // Update all compact player displays
+        this.updateAllCompactPlayers();
+    }
+
+    updateAllCompactPlayers() {
+        // Update all compact player displays (coins, points, card counts)
+        this.game.players.forEach((player, index) => {
+            if (index > 0) { // Skip player 1 (main board)
+                this.updateCompactPlayerDisplay(index);
+            }
+        });
+    }
+
+    updateCompactPlayerDisplay(playerIndex) {
+        const player = this.game.players[playerIndex];
+        if (!player) return;
+
+        // Update coins display
+        const compactBoard = document.querySelector(`[data-player="${playerIndex}"] .compact-coins-display`);
+        if (compactBoard) {
+            compactBoard.innerHTML = this.renderCompactCoins(player);
+        }
+        
+        // Update points display
+        const pointsDisplay = document.querySelector(`[data-player="${playerIndex}"] .compact-victory-points`);
+        if (pointsDisplay) {
+            const currentPoints = this.calculatePlayerCurrentPoints(player);
+            const hasVictoryCards = player.victoryCards && player.victoryCards.length > 0;
+            const hasCoins = player.coins && player.coins.length > 0;
+            const displayPoints = hasVictoryCards || hasCoins ? currentPoints : 0;
+            pointsDisplay.textContent = `${displayPoints} pts`;
+        }
+
+        // Update card counts
+        const handIndicator = document.querySelector(`[data-player="${playerIndex}"] .hand-indicator .card-indicator-count`);
+        const playedIndicator = document.querySelector(`[data-player="${playerIndex}"] .played-indicator .card-indicator-count`);
+        const victoryIndicator = document.querySelector(`[data-player="${playerIndex}"] .victory-indicator .card-indicator-count`);
+        
+        if (handIndicator) handIndicator.textContent = player.hand.length;
+        if (playedIndicator) playedIndicator.textContent = player.discardPile.length;
+        if (victoryIndicator) victoryIndicator.textContent = player.victoryCards.length;
+
+        // Update spice storage
+        const compactStorage = document.querySelector(`[data-player="${playerIndex}"] .compact-spice-storage`);
+        if (compactStorage) {
+            compactStorage.innerHTML = this.renderCompactSpiceStorage(player);
+        }
     }
 
     renderSidebarPlayers() {
@@ -191,15 +250,26 @@ class SidebarUI extends GameUI {
     }
 
     renderCompactCoins(player) {
-        const goldCount = player.coins.gold || 0;
-        const silverCount = player.coins.silver || 0;
+        let goldCount = 0;
+        let silverCount = 0;
+        
+        // Handle both array and object formats for coins
+        if (Array.isArray(player.coins)) {
+            // Array format: [{type: 'gold'}, {type: 'silver'}, ...]
+            goldCount = player.coins.filter(coin => coin.type === 'gold').length;
+            silverCount = player.coins.filter(coin => coin.type === 'silver').length;
+        } else if (player.coins && typeof player.coins === 'object') {
+            // Object format: {gold: 2, silver: 1}
+            goldCount = player.coins.gold || 0;
+            silverCount = player.coins.silver || 0;
+        }
         
         let html = '';
         
         if (goldCount > 0) {
             html += `
                 <div class="compact-coin-group">
-                    <div class="compact-coin gold">G</div>
+                    <div class="compact-coin gold">🪙</div>
                     <span class="compact-coin-count">${goldCount}</span>
                 </div>
             `;
@@ -208,7 +278,7 @@ class SidebarUI extends GameUI {
         if (silverCount > 0) {
             html += `
                 <div class="compact-coin-group">
-                    <div class="compact-coin silver">S</div>
+                    <div class="compact-coin silver">🥈</div>
                     <span class="compact-coin-count">${silverCount}</span>
                 </div>
             `;
@@ -229,57 +299,28 @@ class SidebarUI extends GameUI {
 
     // Update coin tracking to work with sidebar layout
     updateCoinTracking() {
-        super.updateCoinTracking();
+        // Call the main coin rendering method
+        if (this.renderCoinBars) {
+            this.renderCoinBars();
+        }
         
-        // Update compact player displays when coins change
-        this.game.players.forEach((player, index) => {
-            if (index > 0) {
-                const compactBoard = document.querySelector(`[data-player="${index}"] .compact-coins-display`);
-                if (compactBoard) {
-                    compactBoard.innerHTML = this.renderCompactCoins(player);
-                }
-                
-                // Update points display
-                const pointsDisplay = document.querySelector(`[data-player="${index}"] .compact-victory-points`);
-                if (pointsDisplay) {
-                    const player = this.game.players[index];
-                    const currentPoints = this.calculatePlayerCurrentPoints(player);
-                    const hasVictoryCards = player.victoryCards && player.victoryCards.length > 0;
-                    const hasCoins = player.coins && player.coins.length > 0;
-                    const displayPoints = hasVictoryCards || hasCoins ? currentPoints : 0;
-                    pointsDisplay.textContent = `${displayPoints} pts`;
-                }
-            }
-        });
+        // Update all compact player displays
+        this.updateAllCompactPlayers();
     }
 
     // Override spice updates for sidebar layout
     updatePlayerSpices(playerIndex) {
-        super.updatePlayerSpices(playerIndex);
-        
         // Update compact display if it's not player 1
         if (playerIndex > 0) {
-            const compactStorage = document.querySelector(`[data-player="${playerIndex}"] .compact-spice-storage`);
-            if (compactStorage) {
-                compactStorage.innerHTML = this.renderCompactSpiceStorage(this.game.players[playerIndex]);
-            }
+            this.updateCompactPlayerDisplay(playerIndex);
         }
     }
 
     // Override card count updates
     updatePlayerCards(playerIndex) {
-        super.updatePlayerCards(playerIndex);
-        
         // Update compact indicators if it's not player 1
         if (playerIndex > 0) {
-            const player = this.game.players[playerIndex];
-            const handIndicator = document.querySelector(`[data-player="${playerIndex}"] .hand-indicator .card-indicator-count`);
-            const playedIndicator = document.querySelector(`[data-player="${playerIndex}"] .played-indicator .card-indicator-count`);
-            const victoryIndicator = document.querySelector(`[data-player="${playerIndex}"] .victory-indicator .card-indicator-count`);
-            
-            if (handIndicator) handIndicator.textContent = player.hand.length;
-            if (playedIndicator) playedIndicator.textContent = player.discardPile.length;
-            if (victoryIndicator) victoryIndicator.textContent = player.victoryCards.length;
+            this.updateCompactPlayerDisplay(playerIndex);
         }
     }
 }

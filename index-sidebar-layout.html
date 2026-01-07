@@ -77,6 +77,17 @@
             box-shadow: 0 0 10px rgba(255, 107, 53, 0.3);
         }
         
+        .compact-player-board.active::before {
+            content: "➤";
+            position: absolute;
+            left: -25px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #FF6B35;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
         .compact-player-info {
             display: flex;
             justify-content: space-between;
@@ -187,7 +198,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 8px;
+            font-size: 10px;
             font-weight: bold;
             border: 1px solid #333;
         }
@@ -284,7 +295,13 @@
         
         /* Player 1 board stays in main area */
         .main-player-board {
-            /* Keep existing styles from original */
+            /* Inherits styles from main UI */
+            position: relative;
+        }
+        
+        /* Smaller VP font for Player 1's victory cards */
+        .main-player-board .victory-points-display {
+            font-size: 1.4em !important; /* 2 sizes smaller than default 1.98em */
         }
         
         /* Responsive adjustments */
@@ -447,21 +464,10 @@
                 <div class="setup-section">
                     <label for="player-count">Number of Players:</label>
                     <select id="player-count">
-                        <option value="2">2 Players</option>
-                        <option value="3">3 Players</option>
-                        <option value="4">4 Players</option>
-                        <option value="5">5 Players</option>
-                    </select>
-                </div>
-                
-                <div class="setup-section">
-                    <label for="ai-players">AI Players:</label>
-                    <select id="ai-players">
-                        <option value="0">No AI (Human Only)</option>
-                        <option value="1">1 AI Player</option>
-                        <option value="2">2 AI Players</option>
-                        <option value="3">3 AI Players</option>
-                        <option value="4">4 AI Players</option>
+                        <option value="2">2 Players (1 Human + 1 AI)</option>
+                        <option value="3">3 Players (1 Human + 2 AI)</option>
+                        <option value="4">4 Players (1 Human + 3 AI)</option>
+                        <option value="5">5 Players (1 Human + 4 AI)</option>
                     </select>
                 </div>
                 
@@ -587,11 +593,13 @@
                 if (cards && cards.length > 0) {
                     cards.forEach(card => {
                         const cardDiv = document.createElement('div');
-                        cardDiv.className = `tooltip-card ${card.type === 'victory' ? 'victory' : ''}`;
+                        // Check if it's a victory card by looking for 'points' property
+                        const isVictoryCard = card.hasOwnProperty('points');
+                        cardDiv.className = `tooltip-card ${isVictoryCard ? 'victory' : ''}`;
                         
-                        if (card.type === 'victory') {
+                        if (isVictoryCard) {
                             cardDiv.innerHTML = `
-                                <div class="victory-points-display">${card.points}</div>
+                                <div class="victory-points-display">${card.points} VP</div>
                             `;
                         } else {
                             // Render merchant card effect in miniature
@@ -613,29 +621,38 @@
                 const relativeLeft = targetRect.right - compactRect.left + 10;
                 const relativeTop = targetRect.top - compactRect.top;
                 
+                // Set initial position
                 tooltip.style.left = relativeLeft + 'px';
                 tooltip.style.top = relativeTop + 'px';
+                tooltip.classList.add('visible');
                 
-                // Adjust if tooltip goes outside compact area bounds
-                setTimeout(() => {
+                // Adjust position after tooltip is visible to prevent flickering
+                requestAnimationFrame(() => {
                     const tooltipRect = tooltip.getBoundingClientRect();
                     const areaWidth = compactArea.offsetWidth;
                     const areaHeight = compactArea.offsetHeight;
                     
+                    let finalLeft = relativeLeft;
+                    let finalTop = relativeTop;
+                    
                     // If tooltip extends beyond right edge, position it to the left of the icon
                     if (relativeLeft + tooltipRect.width > areaWidth) {
-                        const newLeft = targetRect.left - compactRect.left - tooltipRect.width - 10;
-                        tooltip.style.left = Math.max(10, newLeft) + 'px';
+                        finalLeft = targetRect.left - compactRect.left - tooltipRect.width - 10;
+                        if (finalLeft < 10) finalLeft = 10;
                     }
                     
                     // If tooltip extends beyond bottom, move it up
                     if (relativeTop + tooltipRect.height > areaHeight) {
-                        const newTop = relativeTop - tooltipRect.height - 10;
-                        tooltip.style.top = Math.max(10, newTop) + 'px';
+                        finalTop = relativeTop - tooltipRect.height - 10;
+                        if (finalTop < 10) finalTop = 10;
                     }
-                }, 10);
-                
-                tooltip.classList.add('visible');
+                    
+                    // Apply final position only if it changed
+                    if (finalLeft !== relativeLeft || finalTop !== relativeTop) {
+                        tooltip.style.left = finalLeft + 'px';
+                        tooltip.style.top = finalTop + 'px';
+                    }
+                });
             }
             
             // Hide tooltip
@@ -711,16 +728,16 @@
             console.log('🔍 Sidebar layout loaded, checking AI elements...');
             
             setTimeout(() => {
-                const aiPlayers = document.getElementById('ai-players');
                 const aiDifficulty = document.getElementById('ai-difficulty');
+                const playerCount = document.getElementById('player-count');
                 const setupModal = document.getElementById('setup-modal');
                 
                 console.log('=== SIDEBAR LAYOUT AI SETUP DEBUG ===');
                 console.log('Setup Modal:', setupModal);
-                console.log('AI Players element:', aiPlayers);
+                console.log('Player Count element:', playerCount);
                 console.log('AI Difficulty element:', aiDifficulty);
                 
-                if (aiPlayers && aiDifficulty) {
+                if (playerCount && aiDifficulty) {
                     console.log('✅ Sidebar layout AI elements found!');
                 } else {
                     console.error('❌ Sidebar layout AI elements missing!');
